@@ -1,3 +1,3 @@
-# Borzoi
+# kafka_dae_control
 
-Borzoi like running. This listens to ISISDAE's start/stop times and pushes start/stop Flatbuffer blobs to Kafka accordingly.
+This is a FastCS IOC responsible for communicating with the acquisition hardware and pushing start/stop Flatbuffer blobs to Kafka accordingly.

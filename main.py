@@ -11,7 +11,7 @@ from ibex_non_ca_helpers.compress_hex import dehex_decompress_and_dejson
 from streaming_data_types.run_start_pl72 import serialise_pl72
 from streaming_data_types.run_stop_6s4t import serialise_6s4t
 
-logger = logging.getLogger("borzoi")
+logger = logging.getLogger("KDAECTRL")
 logging.basicConfig(level=logging.INFO)
 
 
@@ -181,8 +181,8 @@ def main() -> None:
     if prefix is None or instrument_name is None:
         raise ValueError("prefix or instrument name not set - have you run config_env.bat?")
 
-    broker = os.environ.get("BORZOI_KAFKA_BROKER", "livedata.isis.cclrc.ac.uk:31092")
-    topic = os.environ.get("BORZOI_TOPIC", f"{instrument_name}_runInfo")
+    broker = os.environ.get("KDAECTRL_KAFKA_BROKER", "livedata.isis.cclrc.ac.uk:31092")
+    topic = os.environ.get("KDAECTRL_TOPIC", f"{instrument_name}_runInfo")
     logger.info("setting up producer")
     loop = asyncio.new_event_loop()
     producer = loop.run_until_complete(set_up_producer(broker))
