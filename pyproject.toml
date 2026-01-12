@@ -3,9 +3,9 @@ requires = ["setuptools", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "kafka-dae-diagnostics"  # REQUIRED, is the only field that cannot be marked as dynamic.
+name = "kafka-dae-control"  # REQUIRED, is the only field that cannot be marked as dynamic.
 dynamic = ["version"]
-description = "ISIS Kafka DAE Diagnostics"
+description = "ISIS Kafka DAE control"
 readme = "README.md"
 requires-python = ">=3.12"
 license-files = ["LICENSE"]
@@ -52,14 +52,14 @@ test = [
   "pytest-cov",
 ]
 dev = [
-  "kafka-dae-diagnostics[doc,lint,test]",
+  "kafka-dae-control[doc,lint,test]",
   "fastcs[all]",
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/isiscomputinggroup/kafka_dae_diagnostics"
-"Bug Reports" = "https://github.com/isiscomputinggroup/kafka_dae_diagnostics/issues"
-"Source" = "https://github.com/isiscomputinggroup/kafka_dae_diagnostics"
+"Homepage" = "https://github.com/isiscomputinggroup/kafka_dae_control"
+"Bug Reports" = "https://github.com/isiscomputinggroup/kafka_dae_control/issues"
+"Source" = "https://github.com/isiscomputinggroup/kafka_dae_control"
 
 [tool.pytest.ini_options]
 testpaths = "tests"
@@ -104,6 +104,6 @@ reportUntypedClassDecorator = true
 reportUntypedFunctionDecorator = true
 
 [tool.setuptools_scm]
-version_file = "src/kafka_dae_diagnostics/version.py"
+version_file = "src/kafka_dae_control/version.py"
 
 [tool.build_sphinx]

@@ -163,4 +163,4 @@ coverage_html_report/
 doc/generated/*
 _build/
 
-src/kafka_dae_diagnostics/version.py
+src/kafka_dae_control/version.py

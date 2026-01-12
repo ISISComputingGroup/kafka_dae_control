@@ -9,11 +9,11 @@
 import os
 import sys
 
-from kafka_dae_diagnostics.version import version
+from kafka_dae_control.version import version
 
 sys.path.insert(0, os.path.abspath("../src"))
 
-project = "kafka-dae-diagnostics"
+project = "kafka-dae-control"
 copyright = ""
 author = "ISIS Experiment Controls"
 release = version
@@ -61,7 +61,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 html_context = {
     "display_github": True,  # Integrate GitHub
     "github_user": "ISISComputingGroup",  # Username
-    "github_repo": "kafka_dae_diagnostics",  # Repo name
+    "github_repo": "kafka_dae_control",  # Repo name
     "github_version": "main",  # Version
     "conf_py_path": "/doc/",  # Path in the checkout to the docs root
 }

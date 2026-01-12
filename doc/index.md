@@ -1,4 +1,4 @@
-# Kafka DAE Diagnostics
+# Kafka DAE Control
 
 ```{toctree}
 :titlesonly:

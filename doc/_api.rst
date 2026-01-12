@@ -8,4 +8,4 @@ API
    :template: custom-module-template.rst
    :recursive:
 
-   kafka_dae_diagnostics
+   kafka_dae_control

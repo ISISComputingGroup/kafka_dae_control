@@ -1,4 +1,4 @@
-"""ISIS Kafka DAE Diagnostics."""
+"""ISIS Kafka DAE Control."""
 
 __all__ = ["nothing"]
 
