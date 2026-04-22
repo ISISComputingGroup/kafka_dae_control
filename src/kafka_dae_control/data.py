@@ -1,0 +1,107 @@
+"""Data class containing the state of the program."""
+
+import logging
+import socket
+from collections.abc import Callable
+from typing import TypeVar
+
+from attr import Factory
+from attrs import define, field
+
+from kafka_dae_control.run_state import RunState
+
+logger = logging.getLogger(__name__)
+
+T = TypeVar("T")
+
+
+class ObservableField[T]:
+    """A wrapper around a value which allows callbacks to be called when it's value has changed."""
+
+    def __init__(self, value: T = None) -> None:
+        """Initialise the ObservableField.
+
+        Args:
+            value: the initial value.
+
+        """
+        self.callbacks = []
+        self._value = value
+
+    def __set__(self, instance: "ObservableField", value: T) -> None:
+        """Set a new value.
+
+        This is just shorthand for calling .value = value
+
+        Args:
+            instance: the instance of the observable field.
+            value: the new value.
+
+        Returns: None
+
+        """
+        self.value = value
+
+    def attach(self, cb: Callable[[T, T], None]) -> None:
+        """Attach a callback which will be called when it's value has changed.
+
+        The signature will be `cb(new_value, old_value)`
+
+        Args:
+            cb: the callback to be called.
+
+        Returns: None
+
+        """
+        # TODO does this actually need to be changeable at runtime? can we just pass in at runtime? if so, offer way of unsubscribing
+        self.callbacks.append(cb)
+
+    @property
+    def value(self) -> T:
+        """The current value of the observable.
+
+        Returns: the current value.
+
+        """
+        return self._value
+
+    @value.setter
+    def value(self, value: T) -> None:
+        """Set a new value and call the callbacks attached.
+
+        Args:
+            value: the new value to be set.
+
+        Returns: None
+
+        """
+        old_val = self.value
+        self._value = value
+        logger.info("set value for pv to %s", value)
+        for callback in self.callbacks:
+            callback(old_val, value)
+
+
+@define
+class Data:
+    """A mutable object describing the data being served by this IOC."""
+
+    # todo add lock for hardware data?
+
+    running: ObservableField[bool] = field(
+        converter=ObservableField, default=False
+    )  # hardware is running
+    run_state: ObservableField[RunState] = field(
+        converter=ObservableField, default=RunState.SETUP
+    )  # run state of KDAECTRL - this may differ from running
+
+    title: ObservableField[str] = field(converter=ObservableField, default="")
+    users: ObservableField[str] = field(converter=ObservableField, default="")
+    job_id: ObservableField[str] = field(converter=ObservableField, default="")
+    run_number: ObservableField[int] = field(converter=ObservableField, default=0)
+    blocks: list[str] = Factory(
+        list
+    )  # not observable - we aren't catering for if blocks change mid-run
+    instrument_name: str = field(
+        default=socket.gethostname()
+    )  # not observable - this shouldn't really change ever
