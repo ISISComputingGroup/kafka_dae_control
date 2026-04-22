@@ -27,7 +27,6 @@ def serve(sock: SocketType, data: "Data", ip: str) -> None:
         # Main loop here polls the vxi control board for statuses and updates the main data class
         try:
             i = read(sock, ip, RUNNING_REGISTER.address, RUNNING_REGISTER.size)
-            print(f"Value for running on hardware: {i}")
             if i is not None:
                 data.running.value = i & RunRegister.STATUS_RUNNING != 0
         except TimeoutError:
