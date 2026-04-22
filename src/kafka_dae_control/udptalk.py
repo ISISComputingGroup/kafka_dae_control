@@ -32,7 +32,7 @@ def main() -> None:
     write_subparser = subparser.add_parser(
         "write", help="write to register", parents=[common_subparser]
     )
-    write_subparser.add_argument("data", type=int)
+    write_subparser.add_argument("data", type=lambda x: int(x, 0))
 
     args = arg_parser.parse_args()
 
