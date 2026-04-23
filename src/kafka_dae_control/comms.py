@@ -136,7 +136,12 @@ def write(sock: socket.SocketType, host: str, address: int, data: int, count: in
 
     """
     logger.debug(
-        f"({host}) wrote {count} 32-bit words to address {address} (data={data}, bin: {data:b})"
+        "(%s) wrote %s 32-bit words to address %s (data=%s, bin: %s)",
+        host,
+        count,
+        address,
+        data,
+        bin(data),
     )
     # write request is 32-bit address, 16 bit block size and 32 bit data
     message = (
@@ -184,6 +189,10 @@ def read(sock: socket.SocketType, host: str, address: int, count: int) -> int | 
     # so need to multiply by 4 here as 4*8 bytes is 32 bits.
     data = int.from_bytes(data[6 : 6 + (block_size * 4)], byteorder="big")
     logger.debug(
-        f"Response: addr = {base_addr}, block size = {block_size}, data = {data} (bin: {data:b})"
+        "Response: addr = %s, block size = %s, data = %s (bin: %s)",
+        base_addr,
+        block_size,
+        data,
+        bin(data),
     )
     return data

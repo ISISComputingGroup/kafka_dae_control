@@ -70,6 +70,7 @@ class ObservableField[T]:
 @define
 class Data:
     """A mutable object describing the data being served by this IOC."""
+
     running: ObservableField[bool] = field(
         converter=ObservableField, default=False
     )  # hardware is running

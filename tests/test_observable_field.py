@@ -1,5 +1,6 @@
 from kafka_dae_control.data import ObservableField
 
+
 def test_observable_field_initial_value_field():
     field = ObservableField(123)
 
@@ -33,4 +34,3 @@ def test_observable_field_calls_callbacks_in_attachment_order():
         ("first", 1, 2),
         ("second", 1, 2),
     ]
-
