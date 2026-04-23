@@ -104,6 +104,7 @@ def on_run_state_change(  # noqa: PLR0913, PLR0917
             control_topic=run_info_topic,
         )
         producer.produce(run_info_topic, blob)
+        logger.info("sent run start to %s", run_info_topic)
         producer.flush()
         data.run_state.value = RunState.RUNNING
     elif new_value == RunState.ENDING:
@@ -126,6 +127,7 @@ def on_run_state_change(  # noqa: PLR0913, PLR0917
             job_id=data.job_id.value, stop_time=datetime.now(ZoneInfo("Europe/London"))
         )
         producer.produce(run_info_topic, blob)
+        logger.info("sent run stop to %s", run_info_topic)
         producer.flush()
         data.run_state.value = RunState.SETUP
         data.run_number.value += 1

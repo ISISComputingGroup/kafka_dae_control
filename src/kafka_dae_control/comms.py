@@ -32,7 +32,7 @@ def write_verify(
         host: the streaming control board host IP
         address: the address to write to
         new_value: the data to write
-        count: the number of bytes to write
+        count: the number of 32 bit words to write
         verify: Optionally verify against a different provided value by ORing it
 
     Returns: None
@@ -52,7 +52,7 @@ def write_verify(
             return
 
     raise OSError(
-        f"({host}) Could not write {count} bytes to address {address} "
+        f"({host}) Could not write {count} 32 bit words to address {address} "
         f"(set data={new_value}, readback={current_val})"
     )
 
@@ -74,7 +74,7 @@ def write_and_inv_then_verify(
         host: the streaming control board host IP
         address: the address to write to
         data: the data to write
-        count: the number of bytes to write
+        count: the number of 32 bit words to write
         verify_against: Optionally verify against a different provided value by ORing it
 
     Returns: None
@@ -103,7 +103,7 @@ def write_or_then_verify(
         host: the streaming control board host IP
         address: the address to write to
         data: the data to write
-        count: the number of bytes to write
+        count: the number of 32 bit words to write
         verify_against: Optionally verify against a different provided value by ORing it
 
     Returns: None
@@ -125,7 +125,7 @@ def write(sock: socket.SocketType, host: str, address: int, data: int, count: in
         host: the streaming control board host IP
         address: the address to write to
         data: the data to write
-        count: the number of bytes to write
+        count: the number of 32 bit words to write
 
     Returns: None
 
@@ -149,12 +149,12 @@ def read(sock: socket.SocketType, host: str, address: int, count: int) -> int:
         sock: the UDP socket instance
         host: the IP address of the streaming control board
         address: the address to read
-        count: how many bytes to request when reading.
+        count: how many 32 bit words to request when reading.
 
     Returns: The received data
 
     """
-    logger.debug("(%s) read %s 32-bit words from address %s", host, count, address)
+    logger.debug("(%s) requesting read %s 32-bit words from address %s", host, count, address)
     sock.settimeout(2.0)
 
     # request format is 32 bit address + 16 bit block size
