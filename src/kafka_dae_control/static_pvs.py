@@ -58,12 +58,14 @@ class StaticPVs:
         )
 
         @self.title.put
-        def title_put(_: SharedPV, op: ServerOperation) -> None:
+        def title_put(pv: SharedPV, op: ServerOperation) -> None:
+            pv.post(op.value())
             data.title.value = op.value()
             op.done()
 
         @self.users.put
-        def users_put(_: SharedPV, op: ServerOperation) -> None:
+        def users_put(pv: SharedPV, op: ServerOperation) -> None:
+            pv.post(op.value())
             data.users.value = op.value()
             op.done()
 
