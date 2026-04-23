@@ -89,6 +89,7 @@ def write_and_inv_then_verify(
     current_val = read(sock, host, address, count)
     # AND mask it with the inverse of new data
     new_value = current_val & ~data
+    logger.debug(f"AND of current value ({new_value}) and inverse of ({data}) is {new_value}")
     # write the new value and verify
     write_verify(sock, host, address, new_value, count, verify_against)
 
@@ -118,6 +119,7 @@ def write_or_then_verify(
     current_val = read(sock, host, address, count)
     # OR mask it with the new data
     new_value = current_val | data
+    logger.debug(f"OR of current value ({new_value}) and requested ({data}) is {new_value}")
     # write the new value and verify
     write_verify(sock, host, address, new_value, count, verify_against)
 
