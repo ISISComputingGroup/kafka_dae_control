@@ -130,7 +130,10 @@ def write(sock: socket.SocketType, host: str, address: int, data: int, count: in
     Returns: None
 
     """
-    logger.debug(f"({host}) wrote {count} bytes to address {address} (data={data}, bin: {data:b})")
+    logger.debug(
+        f"({host}) wrote {count} 32-bit words to address {address} (data={data}, bin: {data:b})"
+    )
+    # write request is 32-bit address, 16 bit block size and 32 bit data
     message = (
         address.to_bytes(length=4, byteorder="big")
         + count.to_bytes(length=2, byteorder="big")
@@ -151,23 +154,29 @@ def read(sock: socket.SocketType, host: str, address: int, count: int) -> int:
     Returns: The received data
 
     """
-    logger.debug("(%s) read %s bytes from address %s", host, count, address)
+    logger.debug("(%s) read %s 32-bit words from address %s", host, count, address)
     sock.settimeout(2.0)
 
+    # request format is 32 bit address + 16 bit block size
     message = address.to_bytes(length=4, byteorder="big") + count.to_bytes(2, byteorder="big")
 
     sock.sendto(message, (host, READ_PORT))
 
     data, recv_address = sock.recvfrom(RECEIVE_BUFFER_SIZE)
 
+    # parse the 32 bit address
     base_addr = int.from_bytes(data[:4], byteorder="big")
     if base_addr != address:
         logger.warning(
             "Received address (%s) not same as requested address (%s))", recv_address, address
         )
         return None
+
+    # parse the 16 bit block size
     block_size = int.from_bytes(data[4:6], byteorder="big")
-    data = int.from_bytes(data[6 : 6 + block_size], byteorder="big")
+
+    # parse the 32 bit data. block size is in 32-bit words, so need to multiply by 4 here as 4*8 bytes is 32 bits.
+    data = int.from_bytes(data[6 : 6 + (block_size * 4)], byteorder="big")
     logger.debug(
         f"Response: addr = {base_addr}, block size = {block_size}, data = {data} (bin: {data:b})"
     )

@@ -14,5 +14,5 @@ class Register(NamedTuple):
     size: int
 
 
-RUNNING_REGISTER = Register(0x0, 4)
-COMMS_REGISTER = Register(0x10000024, 4)
+RUNNING_REGISTER = Register(0x0, 1)
+COMMS_REGISTER = Register(0x10000024, 1)
