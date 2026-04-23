@@ -85,8 +85,7 @@ def on_run_state_change(  # noqa: PLR0913, PLR0917
                 host,
                 RUNNING_REGISTER.address,
                 RunRegister.ETHERNET_OVERRIDE
-                | RunRegister.RUN_SIGNAL_VXI
-                | RunRegister.NO_FRAME_INC
+                | RunRegister.RUN_SIGNAL_ETH
                 | RunRegister.STREAM_EMPTY_FRAMES,
                 RUNNING_REGISTER.size,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
