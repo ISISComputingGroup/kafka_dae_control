@@ -117,7 +117,7 @@ def on_run_state_change(  # noqa: PLR0913, PLR0917
                 RUNNING_REGISTER.address,
                 RunRegister.ETHERNET_OVERRIDE,
                 RUNNING_REGISTER.size,
-                verify_against=lambda x: x & RunRegister.STATUS_RUNNING == 0,
+                verify=lambda x: x & RunRegister.STATUS_RUNNING == 0,
             )
         except Exception:
             # write has failed - go back to previous state

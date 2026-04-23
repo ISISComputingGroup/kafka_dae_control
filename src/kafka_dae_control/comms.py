@@ -22,7 +22,7 @@ def write_verify(  # noqa: PLR0913 PLR0917
     address: int,
     new_value: int,
     count: int,
-    verify: VerifyFunc | None = None,
+    verify: VerifyFunc,
 ) -> None:
     """Write a value then verify it by reading it back with a retry/timeout loop.
 
@@ -46,12 +46,9 @@ def write_verify(  # noqa: PLR0913 PLR0917
     for _i in range(ATTEMPTS + 1):
         current_val = read(sock, host, address, count)
         logger.debug("Current value is %s", current_val)
-        if verify is not None:
-            logger.debug("Verified: %s", verify(current_val))
-            if verify(current_val):
-                return
-        elif current_val == new_value:
+        if verify(current_val):
             return
+
         sleep(SLEEP_BETWEEN_ATTEMPTS_S)
 
     raise OSError(
@@ -66,7 +63,7 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     address: int,
     data: int,
     count: int,
-    verify_against: VerifyFunc | None = None,
+    verify: VerifyFunc,
 ) -> None:
     """Write a value by masking the current value with an AND of the inverse new data then verify.
 
@@ -78,7 +75,7 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
         address: the address to write to
         data: the data to write
         count: the number of 32 bit words to write
-        verify_against: Optionally verify against a different provided value by ORing it
+        verify: Optionally verify against a different provided value by ORing it
 
     Returns: None
 
@@ -89,7 +86,7 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     new_value = current_val & ~data
     logger.debug("AND of current value (%s) and inverse of (%s) is %s", new_value, data, new_value)
     # write the new value and verify
-    write_verify(sock, host, address, new_value, count, verify_against)
+    write_verify(sock, host, address, new_value, count, verify)
 
 
 def write_or_then_verify(  # noqa: PLR0913 PLR0917
@@ -98,7 +95,7 @@ def write_or_then_verify(  # noqa: PLR0913 PLR0917
     address: int,
     data: int,
     count: int,
-    verify_against: VerifyFunc | None = None,
+    verify: VerifyFunc,
 ) -> None:
     """Write a value by masking it against the current value with an OR of the new data then verify.
 
@@ -108,7 +105,7 @@ def write_or_then_verify(  # noqa: PLR0913 PLR0917
         address: the address to write to
         data: the data to write
         count: the number of 32 bit words to write
-        verify_against: Optionally verify against a different provided value by ORing it
+        verify: Optionally verify against a different provided value by ORing it
 
     Returns: None
 
@@ -119,7 +116,7 @@ def write_or_then_verify(  # noqa: PLR0913 PLR0917
     new_value = current_val | data
     logger.debug("OR of current value (%s) and requested (%s) is %s", new_value, data, new_value)
     # write the new value and verify
-    write_verify(sock, host, address, new_value, count, verify_against)
+    write_verify(sock, host, address, new_value, count, verify)
 
 
 def write(sock: socket.SocketType, host: str, address: int, data: int, count: int) -> None:
