@@ -4,7 +4,6 @@ import logging
 import socket
 from collections.abc import Callable
 from time import sleep
-from typing import TypeAlias
 
 from kafka_dae_control.defaults import READ_PORT, RECEIVE_BUFFER_SIZE, WRITE_PORT
 
@@ -14,7 +13,7 @@ ATTEMPTS = 5
 SLEEP_BETWEEN_ATTEMPTS_S = 0.1
 SLEEP_AFTER_WRITE_S = 0.1
 
-VerifyFunc: TypeAlias = Callable[[int], bool]
+type VerifyFunc = Callable[[int], bool]
 
 
 def write_verify(
@@ -51,9 +50,8 @@ def write_verify(
             logger.debug("Verified: %s", verify(current_val))
             if verify(current_val):
                 return
-        else:
-            if current_val == new_value:
-                return
+        elif current_val == new_value:
+            return
         sleep(SLEEP_BETWEEN_ATTEMPTS_S)
 
     raise OSError(
@@ -89,7 +87,7 @@ def write_and_inv_then_verify(
     current_val = read(sock, host, address, count)
     # AND mask it with the inverse of new data
     new_value = current_val & ~data
-    logger.debug(f"AND of current value ({new_value}) and inverse of ({data}) is {new_value}")
+    logger.debug("AND of current value (%s) and inverse of (%s) is %s", new_value, data, new_value)
     # write the new value and verify
     write_verify(sock, host, address, new_value, count, verify_against)
 
@@ -119,7 +117,7 @@ def write_or_then_verify(
     current_val = read(sock, host, address, count)
     # OR mask it with the new data
     new_value = current_val | data
-    logger.debug(f"OR of current value ({new_value}) and requested ({data}) is {new_value}")
+    logger.debug("OR of current value (%s) and requested (%s) is %s", new_value, data, new_value)
     # write the new value and verify
     write_verify(sock, host, address, new_value, count, verify_against)
 

@@ -42,12 +42,13 @@ class RunState(Enum):
 
 
 class RunRegister(IntFlag):
-    """Enum for bits in the run register"""
+    """Enum for bits in the run register."""
 
     ETHERNET_OVERRIDE = 0x01
     RUN_SIGNAL_ETH = 0x02
     RUN_SIGNAL_VXI = 0x04
     NO_FRAME_INC = 0x08
+    STREAM_EMPTY_FRAMES = 0x10
     STATUS_RUNNING = 0x20
 
 
@@ -85,7 +86,8 @@ def on_run_state_change(  # noqa: PLR0913, PLR0917
                 RUNNING_REGISTER.address,
                 RunRegister.ETHERNET_OVERRIDE
                 | RunRegister.RUN_SIGNAL_VXI
-                | RunRegister.NO_FRAME_INC,
+                | RunRegister.NO_FRAME_INC
+                | RunRegister.STREAM_EMPTY_FRAMES,
                 RUNNING_REGISTER.size,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
             )
