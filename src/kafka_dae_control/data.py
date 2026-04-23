@@ -28,20 +28,6 @@ class ObservableField[T]:
         self.callbacks = []
         self._value = value
 
-    def __set__(self, instance: "ObservableField", value: T) -> None:
-        """Set a new value.
-
-        This is just shorthand for calling .value = value
-
-        Args:
-            instance: the instance of the observable field.
-            value: the new value.
-
-        Returns: None
-
-        """
-        self.value = value
-
     def attach(self, cb: Callable[[T, T], None]) -> None:
         """Attach a callback which will be called when it's value has changed.
 
@@ -53,7 +39,6 @@ class ObservableField[T]:
         Returns: None
 
         """
-        # TODO does this actually need to be changeable at runtime? can we just pass in at runtime? if so, offer way of unsubscribing
         self.callbacks.append(cb)
 
     @property
@@ -85,9 +70,6 @@ class ObservableField[T]:
 @define
 class Data:
     """A mutable object describing the data being served by this IOC."""
-
-    # todo add lock for hardware data?
-
     running: ObservableField[bool] = field(
         converter=ObservableField, default=False
     )  # hardware is running

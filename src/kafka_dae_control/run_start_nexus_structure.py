@@ -31,7 +31,7 @@ def generate_nexus_structure(data: "Data") -> str:
                                     "type": "stream",
                                     "stream": {
                                         "topic": f"{data.instrument_name}_events",
-                                        "source": "ISISICP",
+                                        "source": "KDAECTRL",
                                         "writer_module": "ev44",
                                     },
                                 },

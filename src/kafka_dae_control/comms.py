@@ -16,7 +16,7 @@ SLEEP_AFTER_WRITE_S = 0.1
 type VerifyFunc = Callable[[int], bool]
 
 
-def write_verify(
+def write_verify(  # noqa: PLR0913 PLR0917
     sock: socket.SocketType,
     host: str,
     address: int,
@@ -60,7 +60,7 @@ def write_verify(
     )
 
 
-def write_and_inv_then_verify(
+def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     sock: socket.SocketType,
     host: str,
     address: int,
@@ -92,7 +92,7 @@ def write_and_inv_then_verify(
     write_verify(sock, host, address, new_value, count, verify_against)
 
 
-def write_or_then_verify(
+def write_or_then_verify(  # noqa: PLR0913 PLR0917
     sock: socket.SocketType,
     host: str,
     address: int,
@@ -147,7 +147,7 @@ def write(sock: socket.SocketType, host: str, address: int, data: int, count: in
     sock.sendto(message, (host, WRITE_PORT))
 
 
-def read(sock: socket.SocketType, host: str, address: int, count: int) -> int:
+def read(sock: socket.SocketType, host: str, address: int, count: int) -> int | None:
     """Read a register on the streaming control board and return its value.
 
     Args:
@@ -180,7 +180,8 @@ def read(sock: socket.SocketType, host: str, address: int, count: int) -> int:
     # parse the 16 bit block size
     block_size = int.from_bytes(data[4:6], byteorder="big")
 
-    # parse the 32 bit data. block size is in 32-bit words, so need to multiply by 4 here as 4*8 bytes is 32 bits.
+    # parse the 32 bit data. block size is in 32-bit words,
+    # so need to multiply by 4 here as 4*8 bytes is 32 bits.
     data = int.from_bytes(data[6 : 6 + (block_size * 4)], byteorder="big")
     logger.debug(
         f"Response: addr = {base_addr}, block size = {block_size}, data = {data} (bin: {data:b})"
