@@ -114,7 +114,7 @@ def on_run_state_change(  # noqa: PLR0913, PLR0917
                 sock,
                 host,
                 RUNNING_REGISTER.address,
-                0x0,
+                RunRegister.ETHERNET_OVERRIDE,
                 RUNNING_REGISTER.size,
                 verify_against=lambda x: x & RunRegister.STATUS_RUNNING == 0,
             )
