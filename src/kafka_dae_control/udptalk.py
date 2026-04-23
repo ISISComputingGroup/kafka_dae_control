@@ -4,10 +4,13 @@ This uses the same communication methods as the IOC.
 """
 
 import argparse
+import logging
 import socket
 
 from kafka_dae_control.comms import read, write
 from kafka_dae_control.defaults import READ_PORT, WRITE_PORT
+
+logger = logging.getLogger(__name__)
 
 
 def main() -> None:
@@ -35,6 +38,8 @@ def main() -> None:
     write_subparser.add_argument("data", type=lambda x: int(x, 0))
 
     args = arg_parser.parse_args()
+
+    logging.basicConfig(level=logging.DEBUG)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
