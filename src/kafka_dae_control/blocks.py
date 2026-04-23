@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 def update_blocks(
-    prefix: str, data: "Data", *, _: int, value: bytes, char_value: str, **___: int
+    prefix: str, data: "Data", *, value: bytes, char_value: str, **___: int
 ) -> None:
     """Update the list of blocks in the data class."""
     logger.debug("blocks_hexed: %s (char), %s (str)", char_value, value)
