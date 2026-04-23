@@ -77,7 +77,7 @@ class ObservableField[T]:
         """
         old_val = self.value
         self._value = value
-        logger.info("set value for pv to %s", value)
+        logger.debug("set value for pv to %s", value)
         for callback in self.callbacks:
             callback(old_val, value)
 

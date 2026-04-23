@@ -46,10 +46,15 @@ def write_verify(
     # check to make sure read value is equal to the new (masked) value
     for _i in range(ATTEMPTS + 1):
         current_val = read(sock, host, address, count)
-        if (verify is not None and not verify(current_val)) or current_val != new_value:
-            sleep(SLEEP_BETWEEN_ATTEMPTS_S)
+        logger.debug("Current value is %s", current_val)
+        if verify is not None:
+            logger.debug("Verified: %s", verify(current_val))
+            if verify(current_val):
+                return
         else:
-            return
+            if current_val == new_value:
+                return
+        sleep(SLEEP_BETWEEN_ATTEMPTS_S)
 
     raise OSError(
         f"({host}) Could not write {count} 32 bit words to address {address} "
