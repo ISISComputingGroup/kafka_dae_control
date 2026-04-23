@@ -111,7 +111,7 @@ def main() -> None:
 
     camonitor(
         f"{args.pv_prefix}CS:BLOCKSERVER:BLOCKNAMES",
-        callback=partial(update_blocks, [args.pv_prefix, data]),
+        callback=partial(update_blocks, args.pv_prefix, data),
     )
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
