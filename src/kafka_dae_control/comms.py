@@ -89,36 +89,6 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     write_verify(sock, host, address, new_value, count, verify)
 
 
-def write_or_then_verify(  # noqa: PLR0913 PLR0917
-    sock: socket.SocketType,
-    host: str,
-    address: int,
-    data: int,
-    count: int,
-    verify: VerifyFunc,
-) -> None:
-    """Write a value by masking it against the current value with an OR of the new data then verify.
-
-    Args:
-        sock: the UDP socket instance
-        host: the streaming control board host IP
-        address: the address to write to
-        data: the data to write
-        count: the number of 32 bit words to write
-        verify: Optionally verify against a different provided value by ORing it
-
-    Returns: None
-
-    """
-    # read current value
-    current_val = read(sock, host, address, count)
-    # OR mask it with the new data
-    new_value = current_val | data
-    logger.debug("OR of current value (%s) and requested (%s) is %s", new_value, data, new_value)
-    # write the new value and verify
-    write_verify(sock, host, address, new_value, count, verify)
-
-
 def write(sock: socket.SocketType, host: str, address: int, data: int, count: int) -> None:
     """Write a value.
 
