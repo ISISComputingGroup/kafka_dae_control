@@ -28,3 +28,5 @@ it will return a 32 bit address, 16 bit block size and 32 bit data
 It's worth noting that the 16 bit block size is the number of 32 bit "words" you are reading from or writing to - _not_ the number of bytes. 
 
 The format for writing is a 32 bit integer of the address to read, a 16 bit integer of the block size, and then a 32 bit integer containing the data to write. 
+
+This module provides a command-line tool (`udptalk`) which allows arbitrary reads and writes. See `udptalk --help` for options. 

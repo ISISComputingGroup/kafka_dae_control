@@ -164,14 +164,14 @@ def read(sock: socket.SocketType, host: str, address: int, count: int) -> int | 
     logger.debug("(%s) requesting read %s 32-bit words from address %s", host, count, address)
     sock.settimeout(2.0)
 
-    # request format is 32 bit address + 16 bit block size
+    # request format is 32-bit address + 16 bit block size
     message = address.to_bytes(length=4, byteorder="big") + count.to_bytes(2, byteorder="big")
 
     sock.sendto(message, (host, READ_PORT))
 
     data, recv_address = sock.recvfrom(RECEIVE_BUFFER_SIZE)
 
-    # parse the 32 bit address
+    # parse the 32-bit address
     base_addr = int.from_bytes(data[:4], byteorder="big")
     if base_addr != address:
         logger.warning(
@@ -179,10 +179,10 @@ def read(sock: socket.SocketType, host: str, address: int, count: int) -> int | 
         )
         return None
 
-    # parse the 16 bit block size
+    # parse the 16-bit block size
     block_size = int.from_bytes(data[4:6], byteorder="big")
 
-    # parse the 32 bit data. block size is in 32-bit words,
+    # parse the 32-bit data. block size is in 32-bit words,
     # so need to multiply by 4 here as 4*8 bytes is 32 bits.
     data = int.from_bytes(data[6 : 6 + (block_size * 4)], byteorder="big")
     logger.debug(

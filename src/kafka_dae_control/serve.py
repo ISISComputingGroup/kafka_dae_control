@@ -10,7 +10,7 @@ from confluent_kafka import Producer
 from p4p.server import Server
 
 from kafka_dae_control.blocks import update_blocks
-from kafka_dae_control.comms import read, write
+from kafka_dae_control.comms import read, write_verify
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import COMMS_REGISTER, RUNNING_REGISTER
@@ -57,7 +57,14 @@ def serve(config: ControlConfig) -> None:
     ip = ip_address(config.local_ip)
     ip_int = int.from_bytes(ip.packed, byteorder="big")
     print(f"IP IS {ip}, int repr is {ip_int}")
-    write(sock, config.board_ip, COMMS_REGISTER.address, ip_int, COMMS_REGISTER.size)
+    write_verify(
+        sock,
+        config.board_ip,
+        COMMS_REGISTER.address,
+        ip_int,
+        COMMS_REGISTER.size,
+        verify=lambda x: x == ip_int,
+    )
 
     with server:
         # main loop
