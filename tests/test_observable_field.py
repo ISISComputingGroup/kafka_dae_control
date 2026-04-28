@@ -11,7 +11,7 @@ def test_observable_field_attach_and_set_value_calls_callback():
     field = ObservableField("old")
     calls = []
 
-    def callback(old_value, new_value):
+    def callback(old_value: str, new_value: str) -> None:
         calls.append((old_value, new_value))
 
     field.attach(callback)

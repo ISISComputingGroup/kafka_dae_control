@@ -16,7 +16,7 @@ from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import COMMS_REGISTER, RUNNING_REGISTER
 from kafka_dae_control.hooks import setup_hooks
 from kafka_dae_control.run_state import RunRegister
-from kafka_dae_control.save_restore import load_file
+from kafka_dae_control.save_restore import load_data
 from kafka_dae_control.static_pvs import static_pv_provider
 
 # needed for p4p and pyepics to work together
@@ -39,24 +39,7 @@ def serve(config: ControlConfig) -> None:
     Returns: None
 
     """
-    loaded_data = load_file()
-
-    title = loaded_data.get("title")
-    users = loaded_data.get("users")
-    # TODO need to load in:
-    # job_id
-    # run number
-    #
-
-    if not title:
-        logger.warning("No title found in save file, defaulting to ''")
-    if not users:
-        logger.warning("No users found in save file, defaulting to ''")
-
-    data = Data(
-        title=title,
-        users=users,
-    )
+    data = Data(**load_data())
     static_provider = static_pv_provider(config.pv_prefix, data)
 
     server = Server(providers=[static_provider])

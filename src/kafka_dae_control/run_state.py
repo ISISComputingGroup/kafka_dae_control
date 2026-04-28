@@ -133,11 +133,42 @@ def on_run_state_change(  # noqa: PLR0913, PLR0917
         data.run_state.value = RunState.SETUP
         data.run_number.value += 1
     elif new_value == RunState.PAUSING:
-        # TODO write to hardware, but don't send run stop
-        pass
+        # Write to hardware, but don't send run stop
+        try:
+            # clear the ethernet override bit.
+            write_and_inv_then_verify(
+                sock,
+                host,
+                RUNNING_REGISTER.address,
+                RunRegister.ETHERNET_OVERRIDE,
+                RUNNING_REGISTER.size,
+                verify=lambda x: x & RunRegister.STATUS_RUNNING == 0,
+            )
+        except Exception:
+            # write has failed - go back to previous state
+            logger.exception("Failed to pause: ")
+            data.run_state.value = old_value
+            return
+        data.run_state.value = RunState.PAUSED
     elif new_value == RunState.RESUMING:
-        # TODO write to hardware but don't send run start
-        pass
+        # Write to hardware, but don't send run start
+        try:
+            write_verify(
+                sock,
+                host,
+                RUNNING_REGISTER.address,
+                RunRegister.ETHERNET_OVERRIDE
+                | RunRegister.RUN_SIGNAL_ETH
+                | RunRegister.STREAM_EMPTY_FRAMES,
+                RUNNING_REGISTER.size,
+                verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
+            )
+        except Exception:
+            # write has failed - go back to previous state
+            logger.exception("Failed to resume: ")
+            data.run_state.value = old_value
+            return
+        data.run_state.value = RunState.RUNNING
     else:
         logger.debug(
             "Got other run state (%s) but not acting on it. Old/current value: %s",
