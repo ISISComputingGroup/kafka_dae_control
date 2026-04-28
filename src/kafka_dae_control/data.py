@@ -31,7 +31,7 @@ class ObservableField[T]:
     def attach(self, cb: Callable[[T, T], None]) -> None:
         """Attach a callback which will be called when it's value has changed.
 
-        The signature will be `cb(new_value, old_value)`
+        The signature will be `cb(old_value, new_value)`
 
         Args:
             cb: the callback to be called.

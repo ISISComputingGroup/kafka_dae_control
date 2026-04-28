@@ -119,7 +119,7 @@ def write(sock: socket.SocketType, host: str, address: int, data: int, count: in
     sock.sendto(message, (host, WRITE_PORT))
 
 
-def read(sock: socket.SocketType, host: str, address: int, count: int) -> int | None:
+def read(sock: socket.SocketType, host: str, address: int, count: int) -> int:
     """Read a register on the streaming control board and return its value.
 
     Args:
@@ -144,10 +144,9 @@ def read(sock: socket.SocketType, host: str, address: int, count: int) -> int | 
     # parse the 32-bit address
     base_addr = int.from_bytes(data[:4], byteorder="big")
     if base_addr != address:
-        logger.warning(
+        raise OSError(
             "Received address (%s) not same as requested address (%s))", recv_address, address
         )
-        return None
 
     # parse the 16-bit block size
     block_size = int.from_bytes(data[4:6], byteorder="big")
