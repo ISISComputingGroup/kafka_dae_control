@@ -164,3 +164,4 @@ doc/generated/*
 _build/
 
 src/kafka_dae_control/version.py
+state.json

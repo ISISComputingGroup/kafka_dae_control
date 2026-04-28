@@ -58,7 +58,7 @@ def load_data() -> dict:
     if not STATE_FILE.exists():
         return asdict(PersistedData())
 
-    with STATE_FILE.open(encoding="utf-8") as f:
+    with open(STATE_FILE, encoding="utf-8") as f:
         raw = json.load(f)
 
     persisted = converter.structure(raw, PersistedData)
