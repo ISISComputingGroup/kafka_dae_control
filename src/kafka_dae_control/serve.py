@@ -1,35 +1,94 @@
 """Main loop of the running IOC."""
 
 import logging
-from _socket import SocketType
+import socket
+from functools import partial
+from ipaddress import ip_address
 from time import sleep
 
-from kafka_dae_control.comms import read
+from confluent_kafka import Producer
+from p4p.server import Server
+
+from kafka_dae_control.blocks import update_blocks
+from kafka_dae_control.comms import read, write
+from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
-from kafka_dae_control.defaults import RUNNING_REGISTER
+from kafka_dae_control.defaults import COMMS_REGISTER, RUNNING_REGISTER
+from kafka_dae_control.hooks import setup_hooks
 from kafka_dae_control.run_state import RunRegister
+from kafka_dae_control.save_restore import load_file
+from kafka_dae_control.static_pvs import static_pv_provider
+
+# needed for p4p and pyepics to work together
+try:
+    import epicscorelibs.path.pyepics  # noqa: F401
+except ImportError:
+    pass
+
+from epics import camonitor
 
 logger = logging.getLogger(__name__)
 
 
-def serve(sock: SocketType, data: "Data", ip: str) -> None:
+def serve(config: ControlConfig) -> None:
     """Read the streaming control board parameters while the IOC is running.
 
     Args:
-        sock: the socket to use for UDP comms.
-        data: the dataclass for storing the state of the program
-        ip: the IP of the streaming control board.
+        config: Configuration options.
 
     Returns: None
 
     """
-    while True:
-        # Main loop here polls the vxi control board for statuses and updates the main data class
-        try:
-            i = read(sock, ip, RUNNING_REGISTER.address, RUNNING_REGISTER.size)
-            if i is not None:
-                data.running.value = i & RunRegister.STATUS_RUNNING != 0
-        except TimeoutError:
-            logger.error("Timeout reading from hardware")
+    loaded_data = load_file()
 
-        sleep(1)
+    title = loaded_data.get("title")
+    users = loaded_data.get("users")
+    # TODO need to load in:
+    # job_id
+    # run number
+    #
+
+    if not title:
+        logger.warning("No title found in save file, defaulting to ''")
+    if not users:
+        logger.warning("No users found in save file, defaulting to ''")
+
+    data = Data(
+        title=title,
+        users=users,
+    )
+    static_provider = static_pv_provider(config.pv_prefix, data)
+
+    server = Server(providers=[static_provider])
+    producer = Producer({"bootstrap.servers": config.broker})
+
+    camonitor(
+        f"{config.pv_prefix}CS:BLOCKSERVER:BLOCKNAMES",
+        callback=partial(update_blocks, config.pv_prefix, data),
+    )
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    setup_hooks(data, producer, config.runinfo_topic, sock, config.board_ip)
+
+    # "Handshake" and tell SCB to respond to our IP address.
+    ip = ip_address(config.local_ip)
+    ip_int = int.from_bytes(ip.packed, byteorder="big")
+    print(f"IP IS {ip}, int repr is {ip_int}")
+    write(sock, config.board_ip, COMMS_REGISTER.address, ip_int, COMMS_REGISTER.size)
+
+    with server:
+        # main loop
+
+        while True:
+            # Main loop here polls the vxi control board for statuses
+            # and updates the main data class
+            try:
+                hw_running = read(
+                    sock, config.board_ip, RUNNING_REGISTER.address, RUNNING_REGISTER.size
+                )
+                if hw_running is not None:
+                    data.running.value = hw_running & RunRegister.STATUS_RUNNING != 0
+            except TimeoutError:
+                logger.error("Timeout reading from hardware")
+
+            sleep(1)

@@ -1,13 +1,13 @@
+"""Utilities for reading Control IOC configuration from TOML."""
+
 import socket
 import tomllib
 
 from pydantic import BaseModel, ValidationError
 
-from kafka_dae_control.defaults import WRITE_PORT, READ_PORT
-
 
 class ControlConfig(BaseModel):
-    """Configuration parameters for Kafka DAE control"""
+    """Configuration parameters for Kafka DAE control."""
 
     board_ip: str
     """IP address of the streaming control board"""

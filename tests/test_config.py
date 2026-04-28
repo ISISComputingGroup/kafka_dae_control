@@ -1,4 +1,4 @@
-from unittest.mock import patch, mock_open
+from unittest.mock import mock_open, patch
 
 import pytest
 
@@ -7,7 +7,7 @@ from kafka_dae_control.config import load_config
 
 def test_config_loading():
     m = mock_open(
-        read_data=b"""        
+        read_data=b"""
 board_ip = "192.168.1.250"
 pv_prefix = "TE:TESTMACHINE:KDAECTRL:"
 runinfo_topic = "somemachine_runInfo"
@@ -27,7 +27,6 @@ local_ip = "192.168.1.17"
     assert config.pv_prefix == "TE:TESTMACHINE:KDAECTRL:"
     assert config.local_ip == "192.168.1.17"
     assert config.broker == "mybroker:9092"
-
 
 
 def test_invalid_config_loading():
