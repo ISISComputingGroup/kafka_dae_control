@@ -33,11 +33,12 @@ dependencies = [
   "pyepics", # for getting parts of run-start nexus structure from blockserver
   "ibex-non-ca-helpers", # for utilities like dehex_and_decompress
   "attrs>=26.1.0",
+  "pydantic<3",
 ]
 
 [project.scripts]
 udptalk = "kafka_dae_control.udptalk:main"
-ioc = "kafka_dae_control.cli:main"
+kdaectrl = "kafka_dae_control.cli:main"
 
 [project.optional-dependencies]
 doc = [

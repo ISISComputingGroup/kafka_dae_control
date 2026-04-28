@@ -1,8 +1,22 @@
 # Local development
 
+To develop locally, set up a venv using `uv`:
+
+`uv pip install -e .[dev]`
+
 ## Running locally
 
+In the same virtual environment configured above, set these environment variables: 
+- `EPICS_PVAS_INTF_ADDR_LIST` to the IP you want to bind to for the PVA server
+- `EPICS_CA_ADDR_LIST` (and probably `EPICS_CA_AUTO_ADDR_LIST=NO`) to the instrument's CA gateway - this is used for picking up the block names
+
+```kdaectrl --confg config.toml --log-level DEBUG```
+
+An example `config.toml` is provided in the root of this repository; this will need to be modified for your machine.
+
 ## Configuring the hardware
+
+TODO - need input from DSG to get this correct really. 
 
 ## Send/read arbitrary data to the hardware
 
