@@ -57,25 +57,25 @@ class StaticPVs:
             nt=NTScalar("s", display=True, form=True), initial={"value": data.instrument_name}
         )
 
-        @self.title.put
+        @self.title.put  # pragma: no cover
         def title_put(pv: SharedPV, op: ServerOperation) -> None:
             pv.post(op.value())
             data.title.value = op.value()
             op.done()
 
-        @self.users.put
+        @self.users.put  # pragma: no cover
         def users_put(pv: SharedPV, op: ServerOperation) -> None:
             pv.post(op.value())
             data.users.value = op.value()
             op.done()
 
-        @self.begin.put
+        @self.begin.put  # pragma: no cover
         def begin_put(_: SharedPV, op: ServerOperation) -> None:
             logger.info("begin")
             data.run_state.value = RunState.BEGINNING
             op.done()
 
-        @self.end.put
+        @self.end.put  # pragma: no cover
         def end_put(_: SharedPV, op: ServerOperation) -> None:
             logger.info("end")
             data.run_state.value = RunState.ENDING

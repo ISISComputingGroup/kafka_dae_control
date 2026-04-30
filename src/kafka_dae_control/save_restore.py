@@ -54,13 +54,13 @@ def save_file(data: "Data", *_: int, state_file: Path = STATE_FILE) -> None:
         json.dump(converter.unstructure(persisted), file, indent=2)
 
 
-def load_data(state_file: Path = STATE_FILE) -> dict:
+def load_data(state_file: Path = STATE_FILE) -> Data:
     """Load persisted data from file."""
     if not state_file.exists():
-        return asdict(PersistedData(job_id="", run_number=0, title="", users=""))
+        return Data(job_id="", run_number=0, title="", users="")
 
     with state_file.open(encoding="utf-8") as f:
         raw = json.load(f)
 
     persisted = converter.structure(raw, PersistedData)
-    return asdict(persisted)
+    return Data(**asdict(persisted))

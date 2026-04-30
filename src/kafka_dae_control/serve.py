@@ -12,7 +12,6 @@ from p4p.server import Server
 from kafka_dae_control.blocks import update_blocks
 from kafka_dae_control.comms import read, write_verify
 from kafka_dae_control.config import ControlConfig
-from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import COMMS_REGISTER, RUNNING_REGISTER
 from kafka_dae_control.hooks import setup_hooks
 from kafka_dae_control.run_state import RunRegister
@@ -22,7 +21,7 @@ from kafka_dae_control.static_pvs import static_pv_provider
 # needed for p4p and pyepics to work together
 try:
     import epicscorelibs.path.pyepics  # noqa: F401
-except ImportError:
+except ImportError:  # pragma: no cover
     pass
 
 from epics import camonitor
@@ -39,7 +38,7 @@ def serve(config: ControlConfig) -> None:
     Returns: None
 
     """
-    data = Data(**load_data())
+    data = load_data()
     static_provider = static_pv_provider(config.pv_prefix, data)
 
     server = Server(providers=[static_provider])
@@ -56,7 +55,7 @@ def serve(config: ControlConfig) -> None:
     # "Handshake" and tell SCB to respond to our IP address.
     ip = ip_address(config.local_ip)
     ip_int = int.from_bytes(ip.packed, byteorder="big")
-    print(f"IP IS {ip}, int repr is {ip_int}")
+    logger.debug("IP IS %s, int repr is %s", ip, ip_int)
     write_verify(
         sock,
         config.board_ip,
@@ -76,9 +75,8 @@ def serve(config: ControlConfig) -> None:
                 hw_running = read(
                     sock, config.board_ip, RUNNING_REGISTER.address, RUNNING_REGISTER.size
                 )
-                if hw_running is not None:
-                    data.running.value = hw_running & RunRegister.STATUS_RUNNING != 0
-            except TimeoutError:
-                logger.error("Timeout reading from hardware")
+                data.running.value = hw_running & RunRegister.STATUS_RUNNING != 0
+            except (TimeoutError, OSError):
+                logger.exception("Error reading from hardware: ")
 
             sleep(1)

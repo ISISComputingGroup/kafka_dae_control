@@ -46,8 +46,7 @@ def test_save_restore_loads_data_then_can_be_used_for_constructing_dataclass():
 
     m.open.return_value.__enter__.return_value = mock_file
 
-    pd = load_data(m)
-    d = Data(**pd)
+    d = load_data(m)
 
     assert d.title.value == "atitle"
     assert d.users.value == "someusers"
@@ -59,8 +58,7 @@ def test_save_restore_file_not_found_defaults_correct():
     m = MagicMock(spec=Path)
     m.exists.return_value = False
 
-    pd = load_data(m)
-    d = Data(**pd)
+    d = load_data(m)
 
     assert d.title.value == ""
     assert d.users.value == ""

@@ -31,7 +31,7 @@ def write_verify(  # noqa: PLR0913 PLR0917
         host: the streaming control board host IP
         address: the address to write to
         new_value: the data to write
-        count: the number of 32 bit words to write
+        count: the number of 32-bit words to write
         verify: Optionally verify against a different provided value by ORing it
 
     Returns: None
@@ -43,7 +43,7 @@ def write_verify(  # noqa: PLR0913 PLR0917
 
     current_val = None
     # check to make sure read value is equal to the new (masked) value
-    for _i in range(ATTEMPTS + 1):
+    for _i in range(ATTEMPTS):
         current_val = read(sock, host, address, count)
         logger.debug("Current value is %s", current_val)
         if verify(current_val):
@@ -74,7 +74,7 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
         host: the streaming control board host IP
         address: the address to write to
         data: the data to write
-        count: the number of 32 bit words to write
+        count: the number of 32-bit words to write
         verify: Optionally verify against a different provided value by ORing it
 
     Returns: None
@@ -97,7 +97,7 @@ def write(sock: socket.SocketType, host: str, address: int, data: int, count: in
         host: the streaming control board host IP
         address: the address to write to
         data: the data to write
-        count: the number of 32 bit words to write
+        count: the number of 32-bit words to write
 
     Returns: None
 
@@ -110,7 +110,7 @@ def write(sock: socket.SocketType, host: str, address: int, data: int, count: in
         data,
         bin(data),
     )
-    # write request is 32-bit address, 16 bit block size and 32 bit data
+    # write request is 32-bit address, 16-bit block size and 32-bit data
     message = (
         address.to_bytes(length=4, byteorder="big")
         + count.to_bytes(length=2, byteorder="big")
@@ -126,7 +126,7 @@ def read(sock: socket.SocketType, host: str, address: int, count: int) -> int:
         sock: the UDP socket instance
         host: the IP address of the streaming control board
         address: the address to read
-        count: how many 32 bit words to request when reading.
+        count: how many 32-bit words to request when reading.
 
     Returns: The received data
 
@@ -139,14 +139,16 @@ def read(sock: socket.SocketType, host: str, address: int, count: int) -> int:
 
     sock.sendto(message, (host, READ_PORT))
 
-    data, recv_address = sock.recvfrom(RECEIVE_BUFFER_SIZE)
+    data, recv_host = sock.recvfrom(RECEIVE_BUFFER_SIZE)
+
+    # for AF_INET recv_host is a tuple of (host, port)
+    if host != recv_host[0]:
+        raise OSError(f"Received data from {recv_host[0]} not from {host}")
 
     # parse the 32-bit address
     base_addr = int.from_bytes(data[:4], byteorder="big")
     if base_addr != address:
-        raise OSError(
-            "Received address (%s) not same as requested address (%s))", recv_address, address
-        )
+        raise OSError(f"Received address ({base_addr}) not same as requested address ({address}))")
 
     # parse the 16-bit block size
     block_size = int.from_bytes(data[4:6], byteorder="big")
