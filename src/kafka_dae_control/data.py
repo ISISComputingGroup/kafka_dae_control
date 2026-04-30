@@ -71,20 +71,20 @@ class ObservableField[T]:
 class Data:
     """A mutable object describing the data being served by this IOC."""
 
-    running: ObservableField[bool] = field(
+    running: ObservableField[bool] = field(  # pyright: ignore [reportAssignmentType]
         converter=ObservableField, default=False
     )  # hardware is running
-    run_state: ObservableField[RunState] = field(
+    run_state: ObservableField[RunState] = field(  # pyright: ignore [reportAssignmentType]
         converter=ObservableField, default=RunState.SETUP
     )  # run state of KDAECTRL - this may differ from running
 
-    title: ObservableField[str] = field(converter=ObservableField, default="")
-    users: ObservableField[str] = field(converter=ObservableField, default="")
-    job_id: ObservableField[str] = field(converter=ObservableField, default="")
-    run_number: ObservableField[int] = field(converter=ObservableField, default=0)
-    blocks: list[str] = Factory(
+    title: ObservableField[str] = field(converter=ObservableField, default="")  # pyright: ignore [reportAssignmentType]
+    users: ObservableField[str] = field(converter=ObservableField, default="")  # pyright: ignore [reportAssignmentType]
+    job_id: ObservableField[str] = field(converter=ObservableField, default="")  # pyright: ignore [reportAssignmentType]
+    run_number: ObservableField[int] = field(converter=ObservableField, default=0)  # pyright: ignore [reportAssignmentType]
+    blocks: list[str] = Factory(  # pyright: ignore [reportAssignmentType]
         list
     )  # not observable - we aren't catering for if blocks change mid-run
-    instrument_name: str = field(
+    instrument_name: str = field(  # pyright: ignore [reportAssignmentType]
         default=socket.gethostname()
     )  # not observable - this shouldn't really change ever
