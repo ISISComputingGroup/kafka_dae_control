@@ -26,23 +26,24 @@ converter = cattrs.Converter()
 class PersistedData:
     """Persisted data and defaults to fall back to."""
 
-    job_id: str = ""
-    run_number: int = 0
-    title: str = ""
-    users: str = ""
+    job_id: str
+    run_number: int
+    title: str
+    users: str
 
 
-def save_file(data: "Data", *_: int) -> None:
+def save_file(data: "Data", *_: int, state_file: Path = STATE_FILE) -> None:
     """Save relevant dataclass fields to a file.
 
     Args:
         data: the dataclass containing the state of the program
         *args: mandatory catch-all for hook signature.
+        state_file: the file to save the state to.
 
     Returns: None
 
     """
-    with open(STATE_FILE, "w", encoding="utf-8") as file:
+    with state_file.open("w", encoding="utf-8") as file:
         persisted = PersistedData(
             job_id=data.job_id.value,
             run_number=data.run_number.value,
@@ -53,12 +54,12 @@ def save_file(data: "Data", *_: int) -> None:
         json.dump(converter.unstructure(persisted), file, indent=2)
 
 
-def load_data() -> dict:
+def load_data(state_file: Path = STATE_FILE) -> dict:
     """Load persisted data from file."""
-    if not STATE_FILE.exists():
-        return asdict(PersistedData())
+    if not state_file.exists():
+        return asdict(PersistedData(job_id="", run_number=0, title="", users=""))
 
-    with open(STATE_FILE, encoding="utf-8") as f:
+    with state_file.open(encoding="utf-8") as f:
         raw = json.load(f)
 
     persisted = converter.structure(raw, PersistedData)
