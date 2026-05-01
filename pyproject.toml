@@ -35,6 +35,7 @@ dependencies = [
   "attrs>=26.1.0",
   "pydantic<3",
   "cattrs>=26.1.0",
+  "tzdata; platform_system == 'Windows'",
 ]
 
 [project.scripts]
