@@ -3,9 +3,9 @@
 import logging
 import typing
 import uuid
-from socket import SocketType
 from datetime import datetime
 from enum import Enum, IntFlag
+from socket import SocketType
 from zoneinfo import ZoneInfo
 
 from confluent_kafka import Producer
