@@ -88,5 +88,5 @@ spelling_suggestion_limit = 3
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    "fastcs": ("https://diamondlightsource.github.io/FastCS/main/", None),
+    "p4p": ("https://epics-base.github.io/p4p/", None),
 }

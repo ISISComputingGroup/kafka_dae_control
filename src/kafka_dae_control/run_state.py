@@ -3,7 +3,7 @@
 import logging
 import typing
 import uuid
-from _socket import SocketType
+from socket import SocketType
 from datetime import datetime
 from enum import Enum, IntFlag
 from zoneinfo import ZoneInfo

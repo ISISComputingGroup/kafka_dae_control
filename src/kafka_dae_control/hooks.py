@@ -1,7 +1,7 @@
 """Setup hooks for reacting to PV updates."""
 
 import logging
-from _socket import SocketType
+from socket import SocketType
 from functools import partial
 
 from confluent_kafka import Producer
