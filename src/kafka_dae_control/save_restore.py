@@ -32,7 +32,7 @@ class PersistedData:
     users: str
 
 
-def save_file(data: "Data", *_: str, state_file: Path = STATE_FILE) -> None:
+def save_file(data: "Data", *_: int | str, state_file: Path = STATE_FILE) -> None:
     """Save relevant dataclass fields to a file.
 
     Args:

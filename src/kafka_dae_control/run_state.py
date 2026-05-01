@@ -58,8 +58,8 @@ def on_run_state_change(  # noqa: PLR0913, PLR0917
     run_info_topic: str,
     sock: SocketType,
     host: str,
-    old_value: bool,
-    new_value: bool,
+    old_value: RunState,
+    new_value: RunState,
 ) -> None:
     """React to a run state change.
 

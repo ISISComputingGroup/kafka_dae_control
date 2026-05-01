@@ -94,9 +94,9 @@ def test_read_raises_when_response_host_does_not_match_request():
 @patch("kafka_dae_control.comms.read", side_effect=[0, RunRegister.STATUS_RUNNING])
 @patch("kafka_dae_control.comms.write")
 def test_write_verify_sets_and_retries(
-    mock_write,
-    mock_read,
-    mock_sleep,
+    mock_write,  # pyright: ignore reportMissingParameterType
+    mock_read,  # pyright: ignore reportMissingParameterType
+    mock_sleep,  # pyright: ignore reportMissingParameterType
 ):
     sock = Mock()
     data = (
@@ -130,9 +130,9 @@ def test_write_verify_sets_and_retries(
 @patch("kafka_dae_control.comms.read", return_value=0)
 @patch("kafka_dae_control.comms.write")
 def test_write_verify_raises_after_retry_limit(
-    mock_write,
-    mock_read,
-    mock_sleep,
+    mock_write,  # pyright: ignore reportMissingParameterType
+    mock_read,  # pyright: ignore reportMissingParameterType
+    mock_sleep,  # pyright: ignore reportMissingParameterType
 ):
     data = (
         RunRegister.ETHERNET_OVERRIDE | RunRegister.RUN_SIGNAL_ETH | RunRegister.STREAM_EMPTY_FRAMES
@@ -161,8 +161,8 @@ def test_write_verify_raises_after_retry_limit(
     return_value=RunRegister.ETHERNET_OVERRIDE | RunRegister.STATUS_RUNNING,
 )
 def test_write_and_inv_then_verify_clears_bit(
-    mock_read,
-    mock_write_verify,
+    mock_read,  # pyright: ignore reportMissingParameterType
+    mock_write_verify,  # pyright: ignore reportMissingParameterType
 ):
     sock = Mock()
     verify = Mock()

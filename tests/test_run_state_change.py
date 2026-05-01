@@ -25,8 +25,8 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running():
             run_info_topic="run-info-topic",
             sock=sock,
             host="127.0.0.1",
-            old_value=RunState.SETUP,
-            new_value=RunState.BEGINNING,
+            old_value=RunState.SETUP,  # pyright: ignore[reportArgumentType]
+            new_value=RunState.BEGINNING,  # pyright: ignore[reportArgumentType]
         )
 
         write_verify.assert_called_once()
@@ -55,7 +55,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running():
         assert run_start.nexus_structure == nexus_structure
 
         producer.flush.assert_called_once()
-        assert data.run_state.value == RunState.RUNNING
+        assert data.run_state.value == RunState.RUNNING  # pyright: ignore[reportArgumentType]
 
 
 def test_beginning_restores_old_state_when_hardware_write_fails():
@@ -73,11 +73,11 @@ def test_beginning_restores_old_state_when_hardware_write_fails():
             run_info_topic="run-info-topic",
             sock=Mock(),
             host="127.0.0.1",
-            old_value=RunState.SETUP,
-            new_value=RunState.BEGINNING,
+            old_value=RunState.SETUP,  # pyright: ignore[reportArgumentType]
+            new_value=RunState.BEGINNING,  # pyright: ignore[reportArgumentType]
         )
 
-        assert data.run_state.value == RunState.SETUP
+        assert data.run_state.value == RunState.SETUP  # pyright: ignore[reportArgumentType]
         producer.produce.assert_not_called()
         producer.flush.assert_not_called()
 
@@ -97,8 +97,8 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
             run_info_topic="run-info-topic",
             sock=Mock(),
             host="127.0.0.1",
-            old_value=RunState.RUNNING,
-            new_value=RunState.ENDING,
+            old_value=RunState.RUNNING,  # pyright: ignore[reportArgumentType]
+            new_value=RunState.ENDING,  # pyright: ignore[reportArgumentType]
         )
 
         write_and_inv_then_verify.assert_called_once()
@@ -119,7 +119,7 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
         assert run_stop.job_id == "job-id-123"
 
         producer.flush.assert_called_once()
-        assert data.run_state.value == RunState.SETUP
+        assert data.run_state.value == RunState.SETUP  # pyright: ignore[reportArgumentType]
         assert data.run_number.value == 8
 
 
@@ -139,11 +139,11 @@ def test_ending_restores_old_state_when_hardware_write_fails():
             run_info_topic="run-info-topic",
             sock=Mock(),
             host="127.0.0.1",
-            old_value=RunState.RUNNING,
-            new_value=RunState.ENDING,
+            old_value=RunState.RUNNING,  # pyright: ignore[reportArgumentType]
+            new_value=RunState.ENDING,  # pyright: ignore[reportArgumentType]
         )
 
-        assert data.run_state.value == RunState.RUNNING
+        assert data.run_state.value == RunState.RUNNING  # pyright: ignore[reportArgumentType]
         assert data.run_number.value == 7
         producer.produce.assert_not_called()
         producer.flush.assert_not_called()
@@ -162,12 +162,12 @@ def test_pausing_stops_hardware_without_sending_kafka_message():
             run_info_topic="run-info-topic",
             sock=Mock(),
             host="127.0.0.1",
-            old_value=RunState.RUNNING,
-            new_value=RunState.PAUSING,
+            old_value=RunState.RUNNING,  # pyright: ignore[reportArgumentType]
+            new_value=RunState.PAUSING,  # pyright: ignore[reportArgumentType]
         )
 
         write_and_inv_then_verify.assert_called_once()
-        assert data.run_state.value == RunState.PAUSED
+        assert data.run_state.value == RunState.PAUSED  # pyright: ignore[reportArgumentType]
         producer.produce.assert_not_called()
         producer.flush.assert_not_called()
 
@@ -183,12 +183,12 @@ def test_resuming_starts_hardware_without_sending_kafka_message():
             run_info_topic="run-info-topic",
             sock=Mock(),
             host="127.0.0.1",
-            old_value=RunState.PAUSED,
-            new_value=RunState.RESUMING,
+            old_value=RunState.PAUSED,  # pyright: ignore[reportArgumentType]
+            new_value=RunState.RESUMING,  # pyright: ignore[reportArgumentType]
         )
 
         write_verify.assert_called_once()
-        assert data.run_state.value == RunState.RUNNING
+        assert data.run_state.value == RunState.RUNNING  # pyright: ignore[reportArgumentType]
         producer.produce.assert_not_called()
         producer.flush.assert_not_called()
 
@@ -208,8 +208,8 @@ def test_other_run_state_does_not_write_or_send_kafka_message():
             run_info_topic="run-info-topic",
             sock=Mock(),
             host="127.0.0.1",
-            old_value=RunState.SETUP,
-            new_value=RunState.RUNNING,
+            old_value=RunState.SETUP,  # pyright: ignore[reportArgumentType]
+            new_value=RunState.RUNNING,  # pyright: ignore[reportArgumentType]
         )
 
         write_verify.assert_not_called()
@@ -231,11 +231,11 @@ def test_pausing_when_hardware_error_occurs_raises_and_leaves_runstate():
             sock=Mock(),
             run_info_topic="run-info-topic",
             host="127.0.0.1",
-            old_value=RunState.RUNNING,
-            new_value=RunState.PAUSING,
+            old_value=RunState.RUNNING,  # pyright: ignore[reportArgumentType]
+            new_value=RunState.PAUSING,  # pyright: ignore[reportArgumentType]
         )
 
-    assert d.run_state.value == RunState.RUNNING
+    assert d.run_state.value == RunState.RUNNING  # pyright: ignore[reportArgumentType]
     producer.produce.assert_not_called()
 
 
@@ -250,9 +250,9 @@ def test_resuming_when_hardware_error_occurs_raises_and_leaves_runstate():
             sock=Mock(),
             run_info_topic="run-info-topic",
             host="127.0.0.1",
-            old_value=RunState.PAUSED,
-            new_value=RunState.RESUMING,
+            old_value=RunState.PAUSED,  # pyright: ignore[reportArgumentType]
+            new_value=RunState.RESUMING,  # pyright: ignore[reportArgumentType]
         )
 
-    assert d.run_state.value == RunState.PAUSED
+    assert d.run_state.value == RunState.PAUSED  # pyright: ignore[reportArgumentType]
     producer.produce.assert_not_called()

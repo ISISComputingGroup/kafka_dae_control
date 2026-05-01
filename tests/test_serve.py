@@ -20,7 +20,7 @@ board_ip = "192.168.1.102"
 @patch("kafka_dae_control.serve.load_data", return_value=Data())
 @patch("kafka_dae_control.serve.socket")
 @patch("kafka_dae_control.serve.write_verify")
-def test_handshake_happens(mock_write_verify, *_):
+def test_handshake_happens(mock_write_verify, *_):  # pyright: ignore reportMissingParameterType
 
     with pytest.raises(Exception):  # deliberately make sleep raise then catch it here
         serve(
@@ -41,7 +41,7 @@ def test_handshake_happens(mock_write_verify, *_):
 @patch("kafka_dae_control.serve.write_verify")
 @patch("kafka_dae_control.serve.read", return_value=RunRegister.STATUS_RUNNING)
 @patch("kafka_dae_control.serve.load_data", return_value=Data())
-def test_read_updates_running_status(load_data, *_):
+def test_read_updates_running_status(load_data, *_):  # pyright: ignore reportMissingParameterType
     with pytest.raises(Exception):  # deliberately make sleep raise then catch it here
         serve(
             ControlConfig(
@@ -58,7 +58,7 @@ def test_read_updates_running_status(load_data, *_):
 @patch("kafka_dae_control.serve.write_verify")
 @patch("kafka_dae_control.serve.read", return_value=0x0)
 @patch("kafka_dae_control.serve.load_data", return_value=Data())
-def test_read_updates_running_status(load_data, *_):
+def test_read_updates_running_status(load_data, *_):  # pyright: ignore reportMissingParameterType
     with pytest.raises(Exception):  # deliberately make sleep raise then catch it here
         serve(
             ControlConfig(
@@ -75,7 +75,7 @@ def test_read_updates_running_status(load_data, *_):
 @patch("kafka_dae_control.serve.socket")
 @patch("kafka_dae_control.serve.write_verify")
 @patch("kafka_dae_control.serve.read", side_effect=OSError("test"))
-def test_read_which_throws_logs(mock_read, _, __, ___, ____, _____, ______, caplog):
+def test_read_which_throws_logs(mock_read, _, __, ___, ____, _____, ______, caplog):  # pyright: ignore reportMissingParameterType
     with pytest.raises(Exception):  # deliberately make sleep raise then catch it here
         serve(
             ControlConfig(
