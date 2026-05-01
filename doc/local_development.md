@@ -10,23 +10,29 @@ In the same virtual environment configured above, set these environment variable
 - `EPICS_PVAS_INTF_ADDR_LIST` to the IP you want to bind to for the PVA server
 - `EPICS_CA_ADDR_LIST` (and probably `EPICS_CA_AUTO_ADDR_LIST=NO`) to the instrument's CA gateway - this is used for picking up the block names
 
-```kdaectrl --confg config.toml --log-level DEBUG```
+```kdaectrl --config config.toml --log-level DEBUG```
 
 An example `config.toml` is provided in the root of this repository; this will need to be modified for your machine.
 
 ## Configuring the hardware
 
-TODO - need input from DSG to get this correct really. 
+We have a testbed streaming control board set up to work with `NDXEMMA-B`. This board is flashed using some software called `Vivado lab edition` which is currently being run on `NDW2621`. 
 
-## Send/read arbitrary data to the hardware
+Sometimes the board falls over and needs to be reprogrammed. To reprogram the board, select "Program device...":
+
+![](images/programdevice.png)
+
+And then select the correct firmware to be written. Alternatively, ask the detector group!
+
+## Sending/reading data to/from the hardware
 
 The streaming control board accepts reads and writes. 
 
-The format for reading is a 32 bit integer of the address to read, then a 16 bit integer of the block size. 
-it will return a 32 bit address, 16 bit block size and 32 bit data
+The format for reading is a 32-bit integer of the address to read, then a 16-bit integer of the block size. 
+it will return a 32-bit address, 16 bit block size and 32-bit data.
 
 It's worth noting that the 16 bit block size is the number of 32 bit "words" you are reading from or writing to - _not_ the number of bytes. 
 
-The format for writing is a 32 bit integer of the address to read, a 16 bit integer of the block size, and then a 32 bit integer containing the data to write. 
+The format for writing is a 32-bit integer of the address to read, a 16-bit integer of the block size, and then a 32-bit integer containing the data to write. 
 
-This module provides a command-line tool (`udptalk`) which allows arbitrary reads and writes. See `udptalk --help` for options. 
+This module provides a command-line tool ({py:mod}`udptalk <kafka_dae_control.udptalk>`) which allows arbitrary reads and writes. See `udptalk --help` for options. 
