@@ -12,7 +12,6 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           python-version: "3.12"
-          enable-cache: false
       - name: install requirements
         run: uv sync --extra doc
       - name: Sphinx build
