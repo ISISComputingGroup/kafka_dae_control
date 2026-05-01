@@ -31,7 +31,7 @@ nitpick_ignore_regex = [
     ("py:class", r"^_socket.socket"),
     ("py:class", r"^cimpl.Producer"),
     ("py:class", r"^kafka_dae_control.VerifyFunc"),
-    ("py:class", r"^pydantic.main.BaseModel")
+    ("py:class", r"^pydantic.main.BaseModel"),
 ]
 
 myst_enable_extensions = ["dollarmath", "strikethrough", "colon_fence", "attrs_block"]
