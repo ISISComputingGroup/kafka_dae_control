@@ -30,7 +30,7 @@ nitpick_ignore_regex = [
     ("py:class", r"^T"),
     ("py:class", r"^_socket.socket"),
     ("py:class", r"^cimpl.Producer"),
-    ("py:class", r"^kafka_dae_control.VerifyFunc"),
+    ("py:class", r"^kafka_dae_control.comms.VerifyFunc"),
     ("py:class", r"^pydantic.main.BaseModel"),
 ]
 
