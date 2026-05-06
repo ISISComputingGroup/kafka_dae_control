@@ -16,7 +16,7 @@ An example `config.toml` is provided in the root of this repository; this will n
 
 ## Configuring the hardware
 
-We have a testbed streaming control board set up to work with `NDXEMMA-B`. This board is flashed using some software called `Vivado lab edition` which is currently being run on `NDW2621`. 
+We have a test-bed streaming control board set up to work with `NDXEMMA-B`. This board is flashed using some software called `Vivado lab edition` which is currently being run on `NDW2621`. 
 
 Sometimes the board falls over and needs to be reprogrammed. To reprogram the board, select "Program device...":
 
