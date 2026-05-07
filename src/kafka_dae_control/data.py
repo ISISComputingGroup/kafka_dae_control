@@ -94,7 +94,7 @@ class Data:
     run_number: ObservableField[int] = field(converter=ObservableField, default=0)  # pyright: ignore [reportAssignmentType]
 
     """List of blocks to be inserted in the run start nexus structure.
-     These are prefixed with the instrument and blockserver prefixes"""
+     These are prefixed with the instrument and block server prefixes"""
     blocks: list[str] = Factory(  # pyright: ignore [reportAssignmentType]
         list
     )  # not observable - we aren't catering for if blocks change mid-run
