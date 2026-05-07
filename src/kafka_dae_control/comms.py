@@ -43,7 +43,7 @@ def write_verify(  # noqa: PLR0913 PLR0917
 
     current_val = None
     # check to make sure read value is equal to the new (masked) value
-    for _i in range(ATTEMPTS):
+    for _ in range(ATTEMPTS):
         current_val = read(sock, host, address, count)
         logger.debug("Current value is %s", current_val)
         if verify(current_val):
