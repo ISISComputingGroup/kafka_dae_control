@@ -41,7 +41,7 @@ class StaticPVs:
         self.begin = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.end = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.run_number = SharedPV(
-            nt=NTScalar("s", display=True, form=True), initial={"value": data.run_number.value}
+            nt=NTScalar("s", display=True, form=True), initial={"value": str(data.run_number.value)}
         )
         self.i_run_number = SharedPV(
             nt=NTScalar(display=True, form=True), initial={"value": data.run_number.value}
