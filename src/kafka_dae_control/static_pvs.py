@@ -2,7 +2,7 @@
 
 import logging
 
-from p4p._p4p import ServerOperation
+from p4p.server import ServerOperation
 from p4p.nt import NTEnum, NTScalar
 from p4p.server import StaticProvider
 from p4p.server.thread import SharedPV
