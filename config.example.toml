@@ -11,6 +11,9 @@ runinfo_topic = "EMMA-B_runInfo"
 # Local IP to send to the streaming board so it responds thereafter
 local_ip = "192.168.1.17"
 
+# file to save state to
+state_file = "state.json"
+
 [kafka_producer]
 "bootstrap.servers" = "livedata.isis.cclrc.ac.uk:31092"
 "enable.idempotence" = "true"

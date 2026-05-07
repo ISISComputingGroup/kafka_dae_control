@@ -1,4 +1,5 @@
 import ipaddress
+from pathlib import Path
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -16,6 +17,8 @@ runinfo_topic = "somemachine_runInfo"
 
 local_ip = "192.168.1.17"
 
+state_file = "./state1.json"
+
 [kafka_producer]
 "bootstrap.servers" = "mybroker:9092"
 
@@ -30,6 +33,7 @@ local_ip = "192.168.1.17"
     assert config.pv_prefix == "TE:TESTMACHINE:KDAECTRL:"
     assert config.local_ip == ipaddress.IPv4Address("192.168.1.17")
     assert config.kafka_producer.get("bootstrap.servers") == "mybroker:9092"
+    assert config.state_file == Path("./state1.json")
 
 
 def test_invalid_config_loading():

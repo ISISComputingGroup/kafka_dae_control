@@ -38,7 +38,7 @@ def serve(config: ControlConfig) -> None:
     Returns: None
 
     """
-    data = load_data()
+    data = load_data(config.state_file)
     static_provider = static_pv_provider(config.pv_prefix, data)
 
     server = Server(providers=[static_provider])
@@ -50,7 +50,7 @@ def serve(config: ControlConfig) -> None:
     )
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    setup_hooks(data, producer, config.runinfo_topic, sock, config.board_ip)
+    setup_hooks(data, producer, config, sock)
 
     # "Handshake" and tell SCB to respond to our IP address.
     ip = ip_address(config.local_ip)

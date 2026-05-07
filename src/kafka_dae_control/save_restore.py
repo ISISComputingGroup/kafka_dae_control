@@ -18,7 +18,6 @@ JOB_ID_KEY = "job_id"
 logger = logging.getLogger(__name__)
 
 
-STATE_FILE = Path("state.json")
 converter = cattrs.Converter()
 
 
@@ -32,7 +31,7 @@ class PersistedData:
     users: str
 
 
-def save_file(data: "Data", *_: int | str, state_file: Path = STATE_FILE) -> None:
+def save_file(data: "Data", *_: int | str, state_file: Path) -> None:
     """Save relevant dataclass fields to a file.
 
     Args:
@@ -54,7 +53,7 @@ def save_file(data: "Data", *_: int | str, state_file: Path = STATE_FILE) -> Non
         json.dump(converter.unstructure(persisted), file, indent=2)
 
 
-def load_data(state_file: Path = STATE_FILE) -> Data:
+def load_data(state_file: Path) -> Data:
     """Load persisted data from file."""
     if not state_file.exists():
         return Data(job_id="", run_number=0, title="", users="")

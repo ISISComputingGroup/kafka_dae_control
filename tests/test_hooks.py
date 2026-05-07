@@ -2,6 +2,7 @@ import ipaddress
 from functools import partial
 from unittest.mock import Mock, patch
 
+from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.hooks import setup_hooks
 from kafka_dae_control.run_state import on_run_state_change
@@ -13,9 +14,14 @@ def test_setup_hooks_sets_up_hooks():
         setup_hooks(
             d,
             Mock(),
-            "",
+            ControlConfig(
+                board_ip=ipaddress.IPv4Address("127.0.0.1"),
+                pv_prefix="",
+                runinfo_topic="",
+                local_ip=ipaddress.IPv4Address("127.0.0.1"),
+                kafka_producer={},
+            ),
             Mock(),
-            ipaddress.IPv4Address("127.0.0.1"),
         )
 
     assert on_run_state_change == d.run_state.callbacks[0].func

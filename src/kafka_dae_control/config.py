@@ -3,6 +3,7 @@
 import ipaddress
 import socket
 import tomllib
+from pathlib import Path
 
 from pydantic import BaseModel, ValidationError
 
@@ -27,6 +28,9 @@ class ControlConfig(BaseModel):
 
     kafka_producer: dict[str, str]
     """Kafka producer configuration"""
+
+    state_file: Path = Path("state.json")  # this is a Path as the file doesn't need to exist
+    """Path to the file to save/restore state to"""
 
 
 def load_config(config_path: str) -> ControlConfig:
