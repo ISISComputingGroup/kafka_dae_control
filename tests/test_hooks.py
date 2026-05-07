@@ -1,3 +1,4 @@
+import ipaddress
 from functools import partial
 from unittest.mock import Mock, patch
 
@@ -9,7 +10,13 @@ from kafka_dae_control.run_state import on_run_state_change
 def test_setup_hooks_sets_up_hooks():
     d = Data()
     with patch("kafka_dae_control.hooks.save_file") as save_file:
-        setup_hooks(d, Mock(), "", Mock(), "")
+        setup_hooks(
+            d,
+            Mock(),
+            "",
+            Mock(),
+            ipaddress.IPv4Address("127.0.0.1"),
+        )
 
     assert on_run_state_change == d.run_state.callbacks[0].func
 
