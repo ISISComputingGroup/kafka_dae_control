@@ -1,3 +1,4 @@
+import ipaddress
 import re
 from unittest.mock import Mock, call, patch
 
@@ -21,7 +22,7 @@ from kafka_dae_control.defaults import (
 )
 from kafka_dae_control.run_state import RunRegister
 
-HOST = "192.168.1.100"
+HOST = ipaddress.IPv4Address("192.168.1.100")
 
 
 def _read_response(address: int, block_size: int, data: int) -> bytes:
@@ -42,7 +43,7 @@ def test_write_sets_register():
 
     sock.sendto.assert_called_once_with(
         b"\x00\x00\x00\x00\x00\x01\x00\x00\x00\x13",
-        (HOST, WRITE_PORT),
+        (str(HOST), WRITE_PORT),
     )
 
 
@@ -61,7 +62,7 @@ def test_read_returns_result():
 
     assert result == RunRegister.STATUS_RUNNING
     sock.settimeout.assert_called_once_with(2.0)
-    sock.sendto.assert_called_once_with(b"\x00\x00\x00\x00\x00\x01", (HOST, READ_PORT))
+    sock.sendto.assert_called_once_with(b"\x00\x00\x00\x00\x00\x01", (str(HOST), READ_PORT))
     sock.recvfrom.assert_called_once_with(RECEIVE_BUFFER_SIZE)
 
 

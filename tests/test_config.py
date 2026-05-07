@@ -1,3 +1,4 @@
+import ipaddress
 from unittest.mock import mock_open, patch
 
 import pytest
@@ -13,8 +14,10 @@ pv_prefix = "TE:TESTMACHINE:KDAECTRL:"
 runinfo_topic = "somemachine_runInfo"
 # a comment
 
-broker = "mybroker:9092"
 local_ip = "192.168.1.17"
+
+[kafka_producer]
+"bootstrap.servers" = "mybroker:9092"
 
 """
     )
@@ -22,11 +25,11 @@ local_ip = "192.168.1.17"
     with patch("kafka_dae_control.config.open", m):
         config = load_config("")
 
-    assert config.board_ip == "192.168.1.250"
+    assert config.board_ip == ipaddress.IPv4Address("192.168.1.250")
     assert config.runinfo_topic == "somemachine_runInfo"
     assert config.pv_prefix == "TE:TESTMACHINE:KDAECTRL:"
-    assert config.local_ip == "192.168.1.17"
-    assert config.broker == "mybroker:9092"
+    assert config.local_ip == ipaddress.IPv4Address("192.168.1.17")
+    assert config.kafka_producer.get("bootstrap.servers") == "mybroker:9092"
 
 
 def test_invalid_config_loading():

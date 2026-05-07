@@ -1,5 +1,6 @@
 """Utilities for communicating to a UDP device such as a streaming control board."""
 
+import ipaddress
 import logging
 import socket
 from collections.abc import Callable
@@ -18,7 +19,7 @@ type VerifyFunc = Callable[[int], bool]
 
 def write_verify(  # noqa: PLR0913 PLR0917
     sock: socket.SocketType,
-    host: str,
+    host: ipaddress.IPv4Address,
     address: int,
     new_value: int,
     count: int,
@@ -59,7 +60,7 @@ def write_verify(  # noqa: PLR0913 PLR0917
 
 def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     sock: socket.SocketType,
-    host: str,
+    host: ipaddress.IPv4Address,
     address: int,
     data: int,
     count: int,
@@ -89,7 +90,9 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     write_verify(sock, host, address, new_value, count, verify)
 
 
-def write(sock: socket.SocketType, host: str, address: int, data: int, count: int) -> None:
+def write(
+    sock: socket.SocketType, host: ipaddress.IPv4Address, address: int, data: int, count: int
+) -> None:
     """Write a value.
 
     Args:
@@ -116,10 +119,10 @@ def write(sock: socket.SocketType, host: str, address: int, data: int, count: in
         + count.to_bytes(length=2, byteorder="big")
         + data.to_bytes(length=4, byteorder="big")
     )
-    sock.sendto(message, (host, WRITE_PORT))
+    sock.sendto(message, (str(host), WRITE_PORT))
 
 
-def read(sock: socket.SocketType, host: str, address: int, count: int) -> int:
+def read(sock: socket.SocketType, host: ipaddress.IPv4Address, address: int, count: int) -> int:
     """Read a register on the streaming control board and return its value.
 
     Args:
@@ -137,7 +140,7 @@ def read(sock: socket.SocketType, host: str, address: int, count: int) -> int:
     # request format is 32-bit address + 16 bit block size
     message = address.to_bytes(length=4, byteorder="big") + count.to_bytes(2, byteorder="big")
 
-    sock.sendto(message, (host, READ_PORT))
+    sock.sendto(message, (str(host), READ_PORT))
 
     data, recv_host = sock.recvfrom(RECEIVE_BUFFER_SIZE)
 

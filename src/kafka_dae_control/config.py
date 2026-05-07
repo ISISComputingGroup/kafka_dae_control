@@ -1,5 +1,6 @@
 """Utilities for reading Control IOC configuration from TOML."""
 
+import ipaddress
 import socket
 import tomllib
 
@@ -9,20 +10,23 @@ from pydantic import BaseModel, ValidationError
 class ControlConfig(BaseModel):
     """Configuration parameters for Kafka DAE control."""
 
-    board_ip: str
+    board_ip: ipaddress.IPv4Address
     """IP address of the streaming control board"""
 
     pv_prefix: str
     """PV prefix of all PVs in this IOC"""
 
-    broker: str
-    """Kafka broker to use"""
-
     runinfo_topic: str = f"{socket.gethostname()}_runInfo"
     """Run info topic to push run starts/stops to"""
 
-    local_ip: str
+    local_ip: ipaddress.IPv4Address
     """Local IP to set the control board IP register to"""
+
+    poll_interval_s: float = 1.0
+    """How often to poll the streaming control board"""
+
+    kafka_producer: dict[str, str]
+    """Kafka producer configuration"""
 
 
 def load_config(config_path: str) -> ControlConfig:

@@ -1,4 +1,5 @@
 # ruff: noqa
+import ipaddress
 from unittest.mock import patch
 
 import pytest
@@ -9,8 +10,8 @@ from kafka_dae_control.defaults import COMMS_REGISTER
 from kafka_dae_control.run_state import RunRegister
 from kafka_dae_control.serve import serve
 
-local_ip = "192.168.1.101"
-board_ip = "192.168.1.102"
+local_ip = ipaddress.IPv4Address("192.168.1.101")
+board_ip = ipaddress.IPv4Address("192.168.1.102")
 
 
 @patch("kafka_dae_control.serve.camonitor")
@@ -25,7 +26,11 @@ def test_handshake_happens(mock_write_verify, *_):  # pyright: ignore reportMiss
     with pytest.raises(Exception):  # deliberately make sleep raise then catch it here
         serve(
             ControlConfig(
-                board_ip=board_ip, pv_prefix="", broker="", runinfo_topic="", local_ip=local_ip
+                board_ip=board_ip,
+                pv_prefix="",
+                runinfo_topic="",
+                local_ip=local_ip,
+                kafka_producer={},
             )
         )
     assert mock_write_verify.call_args.args[1] == board_ip
@@ -45,7 +50,11 @@ def test_read_updates_running_status(load_data, *_):  # pyright: ignore reportMi
     with pytest.raises(Exception):  # deliberately make sleep raise then catch it here
         serve(
             ControlConfig(
-                board_ip=board_ip, pv_prefix="", broker="", runinfo_topic="", local_ip=local_ip
+                board_ip=board_ip,
+                pv_prefix="",
+                runinfo_topic="",
+                local_ip=local_ip,
+                kafka_producer={},
             )
         )
     assert load_data.return_value.running.value
@@ -62,7 +71,11 @@ def test_read_updates_running_status(load_data, *_):  # pyright: ignore reportMi
     with pytest.raises(Exception):  # deliberately make sleep raise then catch it here
         serve(
             ControlConfig(
-                board_ip=board_ip, pv_prefix="", broker="", runinfo_topic="", local_ip=local_ip
+                board_ip=board_ip,
+                pv_prefix="",
+                runinfo_topic="",
+                local_ip=local_ip,
+                kafka_producer={},
             )
         )
     assert not load_data.return_value.running.value
@@ -79,7 +92,11 @@ def test_read_which_throws_logs(mock_read, _, __, ___, ____, _____, ______, capl
     with pytest.raises(Exception):  # deliberately make sleep raise then catch it here
         serve(
             ControlConfig(
-                board_ip=board_ip, pv_prefix="", broker="", runinfo_topic="", local_ip=local_ip
+                board_ip=board_ip,
+                pv_prefix="",
+                runinfo_topic="",
+                local_ip=local_ip,
+                kafka_producer={},
             )
         )
 

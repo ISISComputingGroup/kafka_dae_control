@@ -71,20 +71,35 @@ class ObservableField[T]:
 class Data:
     """A mutable object describing the data being served by this IOC."""
 
+    """Whether the hardware is running or not"""
     running: ObservableField[bool] = field(  # pyright: ignore [reportAssignmentType]
         converter=ObservableField, default=False
-    )  # hardware is running
+    )
+
+    """The run state of KDAECTRL - this may differ from running"""
     run_state: ObservableField[RunState] = field(  # pyright: ignore [reportAssignmentType]
         converter=ObservableField, default=RunState.SETUP
-    )  # run state of KDAECTRL - this may differ from running
+    )
 
+    """Run title"""
     title: ObservableField[str] = field(converter=ObservableField, default="")  # pyright: ignore [reportAssignmentType]
+
+    """Run users"""
     users: ObservableField[str] = field(converter=ObservableField, default="")  # pyright: ignore [reportAssignmentType]
+
+    """Run's job_id, used to tie starts and stops together"""
     job_id: ObservableField[str] = field(converter=ObservableField, default="")  # pyright: ignore [reportAssignmentType]
+
+    """Run number"""
     run_number: ObservableField[int] = field(converter=ObservableField, default=0)  # pyright: ignore [reportAssignmentType]
+
+    """List of blocks to be inserted in the run start nexus structure.
+     These are prefixed with the instrument and blockserver prefixes"""
     blocks: list[str] = Factory(  # pyright: ignore [reportAssignmentType]
         list
     )  # not observable - we aren't catering for if blocks change mid-run
+
+    """The name of the instrument"""
     instrument_name: str = field(  # pyright: ignore [reportAssignmentType]
         default=socket.gethostname()
     )  # not observable - this shouldn't really change ever

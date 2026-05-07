@@ -1,5 +1,6 @@
 """DAE run state enum and state machine."""
 
+import ipaddress
 import logging
 import typing
 import uuid
@@ -24,21 +25,21 @@ logger = logging.getLogger(__name__)
 class RunState(Enum):
     """Enum for all DAE runstate states."""
 
-    PROCESSING = 0  # not used
-    SETUP = 1
-    RUNNING = 2
-    PAUSED = 3
-    WAITING = 4  # not used
-    VETOING = 5  # not used
-    ENDING = 6
-    SAVING = 7  # not used
-    RESUMING = 8
-    PAUSING = 9
-    BEGINNING = 10
-    ABORTING = 11  # not used
-    UPDATING = 12  # not used
-    STORING = 13  # not used
-    CHANGING = 14  # not used
+    PROCESSING = 0  # not currently used but could be to indicate hardware comms failure
+    SETUP = 1  # Not running
+    RUNNING = 2  # Hardware running and streaming events
+    PAUSED = 3  # Hardware event streaming stopped, but run not stopped
+    WAITING = 4  # Not used as KDAECTRL has no information on vetoing
+    VETOING = 5  # Not used as KDAECTRL has no information on vetoing
+    ENDING = 6  # Run is ending, but hardware not yet stopped
+    SAVING = 7  # Not used as files are written incrementally in the streaming pipeline
+    RESUMING = 8  # Run is resuming, but hardware not yet started
+    PAUSING = 9  # Run is pausing, but hardware not yet stopped
+    BEGINNING = 10  # Run is beginning, but hardware not yet started
+    ABORTING = 11  # Not used as streaming pipeline has no abort functionality yet
+    UPDATING = 12  # Not used as DAE2/3 specific
+    STORING = 13  # Not used as DAE2/3 specific
+    CHANGING = 14  # Not used as DAE2/3 specific
 
 
 class RunRegister(IntFlag):
@@ -57,7 +58,7 @@ def on_run_state_change(  # noqa: PLR0913, PLR0917
     producer: Producer,
     run_info_topic: str,
     sock: SocketType,
-    host: str,
+    host: ipaddress.IPv4Address,
     old_value: RunState,
     new_value: RunState,
 ) -> None:
@@ -97,7 +98,7 @@ def on_run_state_change(  # noqa: PLR0913, PLR0917
             return
         blob = serialise_pl72(
             job_id=data.job_id.value,
-            filename=f"{data.instrument_name}{data.run_number}.nxs",
+            filename=f"{data.instrument_name}{data.run_number.value}.nxs",
             start_time=datetime.now(ZoneInfo("Europe/London")),
             run_name=str(data.run_number.value),
             nexus_structure=generate_nexus_structure(data),

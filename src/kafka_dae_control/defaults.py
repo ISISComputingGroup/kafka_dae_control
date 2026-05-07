@@ -10,7 +10,9 @@ RECEIVE_BUFFER_SIZE = 1024
 class Register(NamedTuple):
     """a register with associated size."""
 
+    """Starting word address of the register"""
     address: int
+    """Size in 32-bit words"""
     size: int
 
 

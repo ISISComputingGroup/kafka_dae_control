@@ -42,7 +42,7 @@ def serve(config: ControlConfig) -> None:
     static_provider = static_pv_provider(config.pv_prefix, data)
 
     server = Server(providers=[static_provider])
-    producer = Producer({"bootstrap.servers": config.broker})
+    producer = Producer(config.kafka_producer)
 
     camonitor(
         f"{config.pv_prefix}CS:BLOCKSERVER:BLOCKNAMES",
@@ -79,4 +79,4 @@ def serve(config: ControlConfig) -> None:
             except (TimeoutError, OSError):
                 logger.exception("Error reading from hardware: ")
 
-            sleep(1)
+            sleep(config.poll_interval_s)

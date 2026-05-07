@@ -4,6 +4,7 @@ This uses the same communication methods as the IOC.
 """
 
 import argparse
+import ipaddress
 import logging
 import socket
 
@@ -24,7 +25,7 @@ def main() -> None:
 
     common_subparser = argparse.ArgumentParser(add_help=False)
 
-    common_subparser.add_argument("host", type=str)
+    common_subparser.add_argument("host", type=ipaddress.IPv4Address)
     common_subparser.add_argument("address", type=lambda x: int(x, 0))
     common_subparser.add_argument("--write-port", type=int, default=WRITE_PORT, required=False)
     common_subparser.add_argument("--read-port", type=int, default=READ_PORT, required=False)

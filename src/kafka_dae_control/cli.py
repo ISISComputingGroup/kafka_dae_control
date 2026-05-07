@@ -47,14 +47,10 @@ def main() -> None:
     )
     args = ap.parse_args()
 
-    logging.basicConfig(level=args.log_level)
-
-    config = load_config(args.config)
-
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=args.log_level,
         format="%(asctime)s %(levelname)-8s %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    serve(config)
+    serve(load_config(args.config))

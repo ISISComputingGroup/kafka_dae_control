@@ -4,12 +4,13 @@ board_ip = "192.168.1.250"
 # PV prefix of all PVs in this IOC
 pv_prefix = "IN:EMMA-B:"
 
-# Kafka broker to produce run starts/stops to.
-broker = "mybroker:9092"
-
 # Kafka topic on which to listen for runInfo messages
 # (usually <instrument>_runInfo)
 runinfo_topic = "EMMA-B_runInfo"
 
 # Local IP to send to the streaming board so it responds thereafter
 local_ip = "192.168.1.17"
+
+[kafka_producer]
+"bootstrap.servers" = "livedata.isis.cclrc.ac.uk:31092"
+"enable.idempotence" = "true"

@@ -1,3 +1,4 @@
+import ipaddress
 from unittest.mock import Mock, patch
 
 from streaming_data_types import deserialise_6s4t, deserialise_pl72
@@ -24,7 +25,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running():
             producer=producer,
             run_info_topic="run-info-topic",
             sock=sock,
-            host="127.0.0.1",
+            host=ipaddress.IPv4Address("127.0.0.1"),
             old_value=RunState.SETUP,  # pyright: ignore[reportArgumentType]
             new_value=RunState.BEGINNING,  # pyright: ignore[reportArgumentType]
         )
@@ -72,7 +73,7 @@ def test_beginning_restores_old_state_when_hardware_write_fails():
             producer=producer,
             run_info_topic="run-info-topic",
             sock=Mock(),
-            host="127.0.0.1",
+            host=ipaddress.IPv4Address("127.0.0.1"),
             old_value=RunState.SETUP,  # pyright: ignore[reportArgumentType]
             new_value=RunState.BEGINNING,  # pyright: ignore[reportArgumentType]
         )
@@ -96,7 +97,7 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
             producer=producer,
             run_info_topic="run-info-topic",
             sock=Mock(),
-            host="127.0.0.1",
+            host=ipaddress.IPv4Address("127.0.0.1"),
             old_value=RunState.RUNNING,  # pyright: ignore[reportArgumentType]
             new_value=RunState.ENDING,  # pyright: ignore[reportArgumentType]
         )
@@ -138,7 +139,7 @@ def test_ending_restores_old_state_when_hardware_write_fails():
             producer=producer,
             run_info_topic="run-info-topic",
             sock=Mock(),
-            host="127.0.0.1",
+            host=ipaddress.IPv4Address("127.0.0.1"),
             old_value=RunState.RUNNING,  # pyright: ignore[reportArgumentType]
             new_value=RunState.ENDING,  # pyright: ignore[reportArgumentType]
         )
@@ -161,7 +162,7 @@ def test_pausing_stops_hardware_without_sending_kafka_message():
             producer=producer,
             run_info_topic="run-info-topic",
             sock=Mock(),
-            host="127.0.0.1",
+            host=ipaddress.IPv4Address("127.0.0.1"),
             old_value=RunState.RUNNING,  # pyright: ignore[reportArgumentType]
             new_value=RunState.PAUSING,  # pyright: ignore[reportArgumentType]
         )
@@ -182,7 +183,7 @@ def test_resuming_starts_hardware_without_sending_kafka_message():
             producer=producer,
             run_info_topic="run-info-topic",
             sock=Mock(),
-            host="127.0.0.1",
+            host=ipaddress.IPv4Address("127.0.0.1"),
             old_value=RunState.PAUSED,  # pyright: ignore[reportArgumentType]
             new_value=RunState.RESUMING,  # pyright: ignore[reportArgumentType]
         )
@@ -207,7 +208,7 @@ def test_other_run_state_does_not_write_or_send_kafka_message():
             producer=producer,
             run_info_topic="run-info-topic",
             sock=Mock(),
-            host="127.0.0.1",
+            host=ipaddress.IPv4Address("127.0.0.1"),
             old_value=RunState.SETUP,  # pyright: ignore[reportArgumentType]
             new_value=RunState.RUNNING,  # pyright: ignore[reportArgumentType]
         )
@@ -230,7 +231,7 @@ def test_pausing_when_hardware_error_occurs_raises_and_leaves_runstate():
             producer=producer,
             sock=Mock(),
             run_info_topic="run-info-topic",
-            host="127.0.0.1",
+            host=ipaddress.IPv4Address("127.0.0.1"),
             old_value=RunState.RUNNING,  # pyright: ignore[reportArgumentType]
             new_value=RunState.PAUSING,  # pyright: ignore[reportArgumentType]
         )
@@ -249,7 +250,7 @@ def test_resuming_when_hardware_error_occurs_raises_and_leaves_runstate():
             producer=producer,
             sock=Mock(),
             run_info_topic="run-info-topic",
-            host="127.0.0.1",
+            host=ipaddress.IPv4Address("127.0.0.1"),
             old_value=RunState.PAUSED,  # pyright: ignore[reportArgumentType]
             new_value=RunState.RESUMING,  # pyright: ignore[reportArgumentType]
         )

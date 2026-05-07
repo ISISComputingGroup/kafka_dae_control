@@ -74,7 +74,7 @@ html_context = {
 html_theme = "sphinx_rtd_theme"
 html_theme_options = {
     "logo_only": False,
-    "style_nav_header_background": "#343131",
+    "style_nav_header_background": "#6eb188",
 }
 html_static_path = ["_static"]
 html_css_files = [

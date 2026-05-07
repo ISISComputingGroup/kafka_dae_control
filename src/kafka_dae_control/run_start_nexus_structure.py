@@ -46,11 +46,11 @@ def generate_nexus_structure(data: "Data") -> str:
                                     "type": "stream",
                                     "stream": {
                                         "topic": f"{data.instrument_name}_sampleEnv",
-                                        "source": x,
+                                        "source": block,
                                         "writer_module": "f144",
                                     },
                                 }
-                                for x in data.blocks
+                                for block in data.blocks
                             ],
                         },
                     ],

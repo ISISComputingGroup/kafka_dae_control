@@ -1,5 +1,6 @@
 """Setup hooks for reacting to PV updates."""
 
+import ipaddress
 import logging
 from functools import partial
 from socket import SocketType
@@ -14,7 +15,11 @@ logger = logging.getLogger(__name__)
 
 
 def setup_hooks(
-    data: "Data", producer: Producer, run_info_topic: str, sock: SocketType, host: str
+    data: "Data",
+    producer: Producer,
+    run_info_topic: str,
+    sock: SocketType,
+    host: ipaddress.IPv4Address,
 ) -> None:
     """Set up hooks used for reacting to a PV update.
 
