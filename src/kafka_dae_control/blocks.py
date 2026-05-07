@@ -9,7 +9,7 @@ from kafka_dae_control.data import Data
 logger = logging.getLogger(__name__)
 
 
-def update_blocks(prefix: str, data: "Data", *, char_value: str, **___: int) -> None:
+def update_blocks(prefix: str, data: "Data", *, char_value: str, **_: int) -> None:
     """Update the list of blocks in the data class."""
     encoded_val = char_value.encode("utf-8")
     logger.debug("blocks_hexed: %s (char), %s (bytes)", char_value, encoded_val)
