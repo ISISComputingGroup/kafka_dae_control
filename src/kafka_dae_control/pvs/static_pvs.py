@@ -1,13 +1,21 @@
 """Static PVs for KDAECTRL."""
 
 import logging
+import threading
+from queue import Queue
 
-from p4p.nt import NTEnum, NTScalar
+from p4p.nt import NTScalar
 from p4p.server import ServerOperation, StaticProvider
 from p4p.server.thread import SharedPV
 
 from kafka_dae_control.data import Data
-from kafka_dae_control.run_state import RunState
+from kafka_dae_control.worker_event import (
+    BeginEvent,
+    EndEvent,
+    TitleUpdateEvent,
+    UsersUpdateEvent,
+    WorkerEvent,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -15,42 +23,33 @@ logger = logging.getLogger(__name__)
 class StaticPVs:
     """Static PVs for KDAECTRL."""
 
-    def __init__(self, data: "Data") -> None:
+    def __init__(self, data: "Data", queue: Queue[WorkerEvent]) -> None:
         """Set up static PVs for KDAECTRL.
 
         Args:
             data: the data class containing the state of the program.
+            queue: the worker event queue.
 
         """
         self.hw_running = SharedPV(
             nt=NTScalar(display=True, form=True),
             initial={
-                "value": data.running.value,
+                "value": data.running,
             },
-        )
-        self.runstate = SharedPV(
-            nt=NTEnum(),
-            initial={
-                "choices": [state.name for state in RunState],
-                "index": data.run_state.value.value,
-            },
-        )
-        self.runstate_str = SharedPV(
-            nt=NTScalar("s", display=True, form=True), initial={"value": data.run_state.value.name}
         )
         self.begin = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.end = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.run_number = SharedPV(
-            nt=NTScalar("s", display=True, form=True), initial={"value": str(data.run_number.value)}
+            nt=NTScalar("s", display=True, form=True), initial={"value": str(data.run_number)}
         )
         self.i_run_number = SharedPV(
-            nt=NTScalar(display=True, form=True), initial={"value": data.run_number.value}
+            nt=NTScalar(display=True, form=True), initial={"value": data.run_number}
         )
         self.title = SharedPV(
-            nt=NTScalar("s", display=True, form=True), initial={"value": data.title.value}
+            nt=NTScalar("s", display=True, form=True), initial={"value": data.title}
         )
         self.users = SharedPV(
-            nt=NTScalar("s", display=True, form=True), initial={"value": data.users.value}
+            nt=NTScalar("s", display=True, form=True), initial={"value": data.users}
         )
         self.inst_name = SharedPV(
             nt=NTScalar("s", display=True, form=True), initial={"value": data.instrument_name}
@@ -59,29 +58,54 @@ class StaticPVs:
         @self.title.put  # pragma: no cover
         def title_put(pv: SharedPV, op: ServerOperation) -> None:
             pv.post(op.value())
-            data.title.value = op.value()
+            queue.put(TitleUpdateEvent(value=op.value()))
             op.done()
 
         @self.users.put  # pragma: no cover
         def users_put(pv: SharedPV, op: ServerOperation) -> None:
             pv.post(op.value())
-            data.users.value = op.value()
+            queue.put(UsersUpdateEvent(value=op.value()))
             op.done()
 
         @self.begin.put  # pragma: no cover
         def begin_put(_: SharedPV, op: ServerOperation) -> None:
             logger.info("begin")
-            data.run_state.value = RunState.BEGINNING
-            op.done()
+            ev = threading.Event()
+            queue.put(BeginEvent(done_event=ev))
+            res = ev.wait(timeout=1)
+            if res:
+                op.done()
+            else:
+                op.done(error="Failed to begin")
 
         @self.end.put  # pragma: no cover
         def end_put(_: SharedPV, op: ServerOperation) -> None:
             logger.info("end")
-            data.run_state.value = RunState.ENDING
-            op.done()
+            ev = threading.Event()
+            queue.put(EndEvent(done_event=ev))
+            res = ev.wait(timeout=1)
+            if res:
+                op.done()
+            else:
+                op.done(error="Failed to begin")
+
+    def update_all(self, data: Data) -> None:
+        """Post updates to all PVs using the data class values.
+
+        Args:
+            data: the data class containing the state of the program.
+
+        """
+        self.title.post(data.title)
+        self.users.post(data.users)
+        self.run_number.post(str(data.run_number))
+        self.i_run_number.post(data.run_number)
+        self.hw_running.post(data.running)
 
 
-def static_pv_provider(pv_prefix: str, data: "Data") -> StaticProvider:
+def static_pv_provider(
+    pv_prefix: str, data: "Data", queue: Queue[WorkerEvent]
+) -> tuple[StaticPVs, StaticProvider]:
     """Generate a static pv provider containing all the static PVs.
 
     This also sets up basic post hooks for observable dataclass items.
@@ -89,11 +113,12 @@ def static_pv_provider(pv_prefix: str, data: "Data") -> StaticProvider:
     Args:
         pv_prefix: the PV prefix.
         data: The data class containing the state of the program.
+        queue: the worker event queue.
 
     Returns: A static pv provider containing static PVs.
 
     """
-    static_pvs = StaticPVs(data)
+    static_pvs = StaticPVs(data, queue)
     static_provider = StaticProvider()
     dae_prefix = "DAE:"
     prefix = f"{pv_prefix}{dae_prefix}"
@@ -102,14 +127,6 @@ def static_pv_provider(pv_prefix: str, data: "Data") -> StaticProvider:
     static_provider.add(f"{prefix}ENDRUN", static_pvs.end)
     static_provider.add(f"{prefix}TITLE", static_pvs.title)
     static_provider.add(f"{prefix}USERS", static_pvs.users)
-    static_provider.add(f"{prefix}RUNSTATE", static_pvs.runstate)
-    static_provider.add(f"{prefix}RUNSTATE_STR", static_pvs.runstate_str)
     static_provider.add(f"{prefix}RUNNUMBER", static_pvs.run_number)
     static_provider.add(f"{prefix}IRUNNUMBER", static_pvs.i_run_number)
-    data.running.attach(lambda _, x: static_pvs.hw_running.post(x))
-    data.run_state.attach(lambda _, x: static_pvs.runstate.post(x.value))
-    data.run_state.attach(lambda _, x: static_pvs.runstate_str.post(x.name))
-    data.title.attach(lambda _, x: static_pvs.title.post(x))
-    data.run_number.attach(lambda _, x: static_pvs.run_number.post(x))
-    data.users.attach(lambda _, x: static_pvs.users.post(x))
-    return static_provider
+    return static_pvs, static_provider

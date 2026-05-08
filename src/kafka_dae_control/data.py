@@ -2,104 +2,40 @@
 
 import logging
 import socket
-from collections.abc import Callable
 from typing import TypeVar
 
-from attr import Factory
-from attrs import define, field
-
-from kafka_dae_control.run_state import RunState
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
 
-class ObservableField[T]:
-    """A wrapper around a value which allows callbacks to be called when it's value has changed."""
+class Data(BaseModel):
+    """A mutable object describing the data being served by this IOC.
 
-    def __init__(self, value: T = None) -> None:
-        """Initialise the ObservableField.
+    This object is only ever mutated by the main worker thread. It is read by
+    the main worker thread and the PV update thread.
+    """
 
-        Args:
-            value: the initial value.
-
-        """
-        self.callbacks = []
-        self._value = value
-
-    def attach(self, cb: Callable[[T, T], None]) -> None:
-        """Attach a callback which will be called when it's value has changed.
-
-        The signature will be `cb(old_value, new_value)`
-
-        Args:
-            cb: the callback to be called.
-
-        Returns: None
-
-        """
-        self.callbacks.append(cb)
-
-    @property
-    def value(self) -> T:
-        """The current value of the observable.
-
-        Returns: the current value.
-
-        """
-        return self._value
-
-    @value.setter
-    def value(self, value: T) -> None:
-        """Set a new value and call the callbacks attached.
-
-        Args:
-            value: the new value to be set.
-
-        Returns: None
-
-        """
-        old_val = self.value
-        self._value = value
-        logger.debug("set value for pv to %s", value)
-        for callback in self.callbacks:
-            callback(old_val, value)
-
-
-@define
-class Data:
-    """A mutable object describing the data being served by this IOC."""
-
+    running: bool
     """Whether the hardware is running or not"""
-    running: ObservableField[bool] = field(  # pyright: ignore [reportAssignmentType]
-        converter=ObservableField, default=False
-    )
 
-    """The run state of KDAECTRL - this may differ from running"""
-    run_state: ObservableField[RunState] = field(  # pyright: ignore [reportAssignmentType]
-        converter=ObservableField, default=RunState.SETUP
-    )
-
+    title: str = ""
     """Run title"""
-    title: ObservableField[str] = field(converter=ObservableField, default="")  # pyright: ignore [reportAssignmentType]
 
+    users: str = ""
     """Run users"""
-    users: ObservableField[str] = field(converter=ObservableField, default="")  # pyright: ignore [reportAssignmentType]
 
+    job_id: str = ""
     """Run's job_id, used to tie starts and stops together"""
-    job_id: ObservableField[str] = field(converter=ObservableField, default="")  # pyright: ignore [reportAssignmentType]
 
+    run_number: int = 0
     """Run number"""
-    run_number: ObservableField[int] = field(converter=ObservableField, default=0)  # pyright: ignore [reportAssignmentType]
 
+    blocks: list[str] = Field(default_factory=list)
     """List of blocks to be inserted in the run start nexus structure.
      These are prefixed with the instrument and block server prefixes"""
-    blocks: list[str] = Factory(  # pyright: ignore [reportAssignmentType]
-        list
-    )  # not observable - we aren't catering for if blocks change mid-run
 
+    instrument_name: str = Field(default_factory=socket.gethostname)
     """The name of the instrument"""
-    instrument_name: str = field(  # pyright: ignore [reportAssignmentType]
-        default=socket.gethostname()
-    )  # not observable - this shouldn't really change ever

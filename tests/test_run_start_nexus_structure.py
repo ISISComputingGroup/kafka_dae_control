@@ -5,7 +5,7 @@ from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 
 
 def test_run_start_nexus_structure_contains_blocks_and_events():
-    d = Data()
+    d = Data(running=False)
     d.blocks = ["a", "b"]
     d.instrument_name = "MUSHROOM"
 

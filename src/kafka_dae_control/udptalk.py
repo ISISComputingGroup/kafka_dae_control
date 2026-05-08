@@ -37,27 +37,25 @@ For example:
         "address", type=lambda x: int(x, 0), help="Register address, in int or hex format"
     )
     common_subparser.add_argument(
-        "--write-port",
-        type=int,
-        default=WRITE_PORT,
-        required=False,
-        help="Port to use when writing to device",
+        "--count", type=int, default=1, help="number of words to read/write"
     )
-    common_subparser.add_argument(
-        "--read-port",
+
+    read_subparser = subparser.add_parser(
+        "read", help="read from register", parents=[common_subparser]
+    )
+    read_subparser.add_argument(
+        "-p,--port",
         type=int,
         default=READ_PORT,
         required=False,
         help="Port to use when reading from device",
     )
-    common_subparser.add_argument(
-        "--count", type=int, default=1, help="number of words to read/write"
-    )
-
-    subparser.add_parser("read", help="read from register", parents=[common_subparser])
 
     write_subparser = subparser.add_parser(
         "write", help="write to register", parents=[common_subparser]
+    )
+    write_subparser.add_argument(
+        "-p,--port", default=WRITE_PORT, required=False, help="Port to use when writing to device"
     )
     write_subparser.add_argument(
         "data", type=lambda x: int(x, 0), help="data to write, in either int or hex format"
@@ -70,9 +68,9 @@ For example:
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     if args.command == "read":
-        read(sock, args.host, args.address, args.count)
+        read(sock, args.host, args.address, args.count, args.port)
     elif args.command == "write":
-        write(sock, args.host, args.address, args.data, args.count)
+        write(sock, args.host, args.address, args.data, args.count, args.port)
 
 
 if __name__ == "__main__":

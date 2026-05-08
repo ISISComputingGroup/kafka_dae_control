@@ -32,9 +32,7 @@ dependencies = [
   "confluent-kafka", # For kafka ops
   "pyepics", # for getting parts of run-start nexus structure from blockserver
   "ibex-non-ca-helpers", # for utilities like dehex_and_decompress
-  "attrs>=26.1.0",
   "pydantic<3",
-  "cattrs>=26.1.0",
   "tzdata; platform_system == 'Windows'",
 ]
 

@@ -1,12 +1,19 @@
-"""Utilities for communicating to a UDP device such as a streaming control board."""
+"""Utilities for communicating to a UDP device such as a streaming control board.
+
+The functions in this module assume that they have exclusive use of the passed-in socket.
+This means that the socket object should be protected by a lock, external to this module.
+"""
 
 import ipaddress
 import logging
 import socket
+import threading
 from collections.abc import Callable
+from ipaddress import ip_address
 from time import sleep
 
-from kafka_dae_control.defaults import READ_PORT, RECEIVE_BUFFER_SIZE, WRITE_PORT
+from kafka_dae_control.config import ControlConfig
+from kafka_dae_control.defaults import COMMS_REGISTER, RECEIVE_BUFFER_SIZE
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +25,8 @@ type VerifyFunc = Callable[[int], bool]
 
 
 def write_verify(  # noqa: PLR0913 PLR0917
+    config: ControlConfig,
     sock: socket.SocketType,
-    host: ipaddress.IPv4Address,
     address: int,
     new_value: int,
     count: int,
@@ -28,8 +35,8 @@ def write_verify(  # noqa: PLR0913 PLR0917
     """Write a value then verify it by reading it back with a retry/timeout loop.
 
     Args:
+        config: the program's configuration containing board ip and ports
         sock: the UDP socket instance
-        host: the streaming control board host IP
         address: the address to write to
         new_value: the data to write
         count: the number of 32-bit words to write
@@ -38,14 +45,14 @@ def write_verify(  # noqa: PLR0913 PLR0917
     Returns: None
 
     """
-    write(sock, host, address, new_value, count)
+    write(sock, config.board_ip, address, new_value, count, config.write_port)
     # sleep after writing
     sleep(SLEEP_AFTER_WRITE_S)
 
     current_val = None
     # check to make sure read value is equal to the new (masked) value
     for _ in range(ATTEMPTS):
-        current_val = read(sock, host, address, count)
+        current_val = read(sock, config.board_ip, address, count, config.read_port)
         logger.debug("Current value is %s", current_val)
         if verify(current_val):
             return
@@ -53,14 +60,14 @@ def write_verify(  # noqa: PLR0913 PLR0917
         sleep(SLEEP_BETWEEN_ATTEMPTS_S)
 
     raise OSError(
-        f"({host}) Could not write {count} 32 bit words to address {address} "
+        f"({config.board_ip}) Could not write {count} 32 bit words to address {address} "
         f"(set data={new_value}, readback={current_val})"
     )
 
 
 def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
+    config: ControlConfig,
     sock: socket.SocketType,
-    host: ipaddress.IPv4Address,
     address: int,
     data: int,
     count: int,
@@ -71,8 +78,8 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     This is essentially used to "clear" a bit.
 
     Args:
+        config: the program's configuration containing board ip and ports
         sock: the UDP socket instance
-        host: the streaming control board host IP
         address: the address to write to
         data: the data to write
         count: the number of 32-bit words to write
@@ -82,16 +89,21 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
 
     """
     # read current value
-    current_val = read(sock, host, address, count)
+    current_val = read(sock, config.board_ip, address, count, config.read_port)
     # AND mask it with the inverse of new data
     new_value = current_val & ~data
     logger.debug("AND of current value (%s) and inverse of (%s) is %s", new_value, data, new_value)
     # write the new value and verify
-    write_verify(sock, host, address, new_value, count, verify)
+    write_verify(config, sock, address, new_value, count, verify)
 
 
-def write(
-    sock: socket.SocketType, host: ipaddress.IPv4Address, address: int, data: int, count: int
+def write(  # noqa: PLR0917, PLR0913
+    sock: socket.SocketType,
+    host: ipaddress.IPv4Address,
+    address: int,
+    data: int,
+    count: int,
+    port: int,
 ) -> None:
     """Write a value.
 
@@ -101,6 +113,7 @@ def write(
         address: the address to write to
         data: the data to write
         count: the number of 32-bit words to write
+        port: port to use when writing
 
     Returns: None
 
@@ -119,10 +132,12 @@ def write(
         + count.to_bytes(length=2, byteorder="big")
         + data.to_bytes(length=4, byteorder="big")
     )
-    sock.sendto(message, (str(host), WRITE_PORT))
+    sock.sendto(message, (str(host), port))
 
 
-def read(sock: socket.SocketType, host: ipaddress.IPv4Address, address: int, count: int) -> int:
+def read(
+    sock: socket.SocketType, host: ipaddress.IPv4Address, address: int, count: int, port: int
+) -> int:
     """Read a register on the streaming control board and return its value.
 
     Args:
@@ -130,6 +145,7 @@ def read(sock: socket.SocketType, host: ipaddress.IPv4Address, address: int, cou
         host: the IP address of the streaming control board
         address: the address to read
         count: how many 32-bit words to request when reading.
+        port: port to use for reading
 
     Returns: The received data
 
@@ -140,12 +156,12 @@ def read(sock: socket.SocketType, host: ipaddress.IPv4Address, address: int, cou
     # request format is 32-bit address + 16 bit block size
     message = address.to_bytes(length=4, byteorder="big") + count.to_bytes(2, byteorder="big")
 
-    sock.sendto(message, (str(host), READ_PORT))
+    sock.sendto(message, (str(host), port))
 
     data, recv_host = sock.recvfrom(RECEIVE_BUFFER_SIZE)
 
     # for AF_INET recv_host is a tuple of (host, port)
-    if host != recv_host[0]:
+    if str(host) != str(recv_host[0]):
         raise OSError(f"Received data from {recv_host[0]} not from {host}")
 
     # parse the 32-bit address
@@ -167,3 +183,28 @@ def read(sock: socket.SocketType, host: ipaddress.IPv4Address, address: int, cou
         bin(data),
     )
     return data
+
+
+def set_board_response_ip(
+    config: ControlConfig, sock: socket.SocketType, sock_lock: threading.RLock
+) -> None:
+    """Set the board's communication register to the local IP address.
+
+    Args:
+        config: The program's configuration
+        sock: the socket instance to use
+        sock_lock: the lock to use when using the socket instance.
+
+    """
+    ip = ip_address(config.local_ip)
+    ip_int = int.from_bytes(ip.packed, byteorder="big")
+    logger.debug("IP IS %s, int repr is %s", ip, ip_int)
+    with sock_lock:
+        write_verify(
+            config,
+            sock,
+            COMMS_REGISTER.address,
+            ip_int,
+            COMMS_REGISTER.size,
+            verify=lambda x: x == ip_int,
+        )

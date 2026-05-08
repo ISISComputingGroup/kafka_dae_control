@@ -3,15 +3,15 @@ import json
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import cattrs
 import pytest
+from pydantic import ValidationError
 
 from kafka_dae_control.data import Data
 from kafka_dae_control.save_restore import load_data, save_file
 
 
 def test_save_restore_takes_data_and_saves_relevant_fields():
-    d = Data(job_id="1234", run_number=2345, title="atitle", users="someusers")
+    d = Data(job_id="1234", run_number=2345, title="atitle", users="someusers", running=False)
 
     m = MagicMock(spec=Path)
     m.exists.return_value = True
@@ -29,6 +29,7 @@ def test_save_restore_takes_data_and_saves_relevant_fields():
         "run_number": 2345,
         "title": "atitle",
         "users": "someusers",
+        "running": False,
     }
 
 
@@ -41,17 +42,19 @@ def test_save_restore_loads_data_then_can_be_used_for_constructing_dataclass():
           "job_id": "e1bf4e61-9e3d-418b-988d-b50c63056ef8",
           "run_number": 1,
           "title": "atitle",
-          "users": "someusers"
+          "users": "someusers",
+          "running": false
         }"""
 
     m.open.return_value.__enter__.return_value = mock_file
 
     d = load_data(m)
 
-    assert d.title.value == "atitle"
-    assert d.users.value == "someusers"
-    assert d.job_id.value == "e1bf4e61-9e3d-418b-988d-b50c63056ef8"
-    assert d.run_number.value == 1
+    assert d.title == "atitle"
+    assert d.users == "someusers"
+    assert d.job_id == "e1bf4e61-9e3d-418b-988d-b50c63056ef8"
+    assert d.run_number == 1
+    assert not d.running
 
 
 def test_save_restore_file_not_found_defaults_correct():
@@ -60,10 +63,10 @@ def test_save_restore_file_not_found_defaults_correct():
 
     d = load_data(m)
 
-    assert d.title.value == ""
-    assert d.users.value == ""
-    assert d.job_id.value == ""
-    assert d.run_number.value == 0
+    assert d.title == ""
+    assert d.users == ""
+    assert d.job_id == ""
+    assert d.run_number == 0
 
 
 def test_load_invalid_file_loads_defaults():
@@ -79,5 +82,5 @@ def test_load_invalid_file_loads_defaults():
 
     m.open.return_value.__enter__.return_value = mock_file
 
-    with pytest.raises(cattrs.errors.ClassValidationError):
+    with pytest.raises(ValidationError):
         load_data(m)

@@ -4,31 +4,15 @@ import json
 import logging
 from pathlib import Path
 
-import cattrs
-from attr import asdict
-from attrs import define
-
 from kafka_dae_control.data import Data
 
 TITLE_KEY = "title"
 USERS_KEY = "users"
 RUN_NUMBER_KEY = "run_number"
 JOB_ID_KEY = "job_id"
+RUNNING_KEY = "running"
 
 logger = logging.getLogger(__name__)
-
-
-converter = cattrs.Converter()
-
-
-@define
-class PersistedData:
-    """Persisted data and defaults to fall back to."""
-
-    job_id: str
-    run_number: int
-    title: str
-    users: str
 
 
 def save_file(data: "Data", *_: int | str, state_file: Path) -> None:
@@ -36,30 +20,31 @@ def save_file(data: "Data", *_: int | str, state_file: Path) -> None:
 
     Args:
         data: the dataclass containing the state of the program
-        *args: mandatory catch-all for hook signature.
         state_file: the file to save the state to.
 
     Returns: None
 
     """
     with state_file.open("w", encoding="utf-8") as file:
-        persisted = PersistedData(
-            job_id=data.job_id.value,
-            run_number=data.run_number.value,
-            title=data.title.value,
-            users=data.users.value,
+        json.dump(
+            {
+                TITLE_KEY: data.title,
+                USERS_KEY: data.users,
+                RUN_NUMBER_KEY: data.run_number,
+                JOB_ID_KEY: data.job_id,
+                RUNNING_KEY: data.running,
+            },
+            file,
+            indent=2,
         )
-
-        json.dump(converter.unstructure(persisted), file, indent=2)
 
 
 def load_data(state_file: Path) -> Data:
     """Load persisted data from file."""
     if not state_file.exists():
-        return Data(job_id="", run_number=0, title="", users="")
+        return Data(job_id="", run_number=0, title="", users="", running=False)
 
     with state_file.open(encoding="utf-8") as f:
         raw = json.load(f)
 
-    persisted = converter.structure(raw, PersistedData)
-    return Data(**asdict(persisted))
+        return Data.model_validate(raw)

@@ -7,6 +7,8 @@ from pathlib import Path
 
 from pydantic import BaseModel, ValidationError
 
+from kafka_dae_control.defaults import READ_PORT, WRITE_PORT
+
 
 class ControlConfig(BaseModel):
     """Configuration parameters for Kafka DAE control."""
@@ -31,6 +33,15 @@ class ControlConfig(BaseModel):
 
     state_file: Path = Path("state.json")  # this is a Path as the file doesn't need to exist
     """Path to the file to save/restore state to"""
+
+    pv_update_interval_s: float = 0.1
+    """How often to update the PVs"""
+
+    read_port: int = READ_PORT
+    """The read port to use for reading from the streaming control board"""
+
+    write_port: int = WRITE_PORT
+    """The write port to use for writing to the streaming control board"""
 
 
 def load_config(config_path: str) -> ControlConfig:
