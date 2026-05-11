@@ -87,7 +87,7 @@ class StaticPVs:
             if res:
                 op.done()
             else:
-                op.done(error="Failed to begin")
+                op.done(error="Failed to end")
 
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.
