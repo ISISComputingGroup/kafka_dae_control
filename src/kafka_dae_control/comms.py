@@ -119,7 +119,7 @@ def write(  # noqa: PLR0917, PLR0913
 
     """
     logger.debug(
-        "(%s) wrote %s 32-bit words to address %s (data=%s, bin: %s)",
+        "(%s) writing %s 32-bit words to address %s (data=%s, bin: %s)",
         host,
         count,
         address,
@@ -132,6 +132,7 @@ def write(  # noqa: PLR0917, PLR0913
         + count.to_bytes(length=2, byteorder="big")
         + data.to_bytes(length=4, byteorder="big")
     )
+    logger.debug("Writing: %r", message)
     sock.sendto(message, (str(host), port))
 
 
@@ -155,30 +156,39 @@ def read(
 
     # request format is 32-bit address + 16 bit block size
     message = address.to_bytes(length=4, byteorder="big") + count.to_bytes(2, byteorder="big")
+    logger.debug("Request: %r", message)
 
     sock.sendto(message, (str(host), port))
 
     data, recv_host = sock.recvfrom(RECEIVE_BUFFER_SIZE)
+    logger.debug("Received: %r", data)
 
     # for AF_INET recv_host is a tuple of (host, port)
     if str(host) != str(recv_host[0]):
         raise OSError(f"Received data from {recv_host[0]} not from {host}")
 
     # parse the 32-bit address
-    base_addr = int.from_bytes(data[:4], byteorder="big")
-    if base_addr != address:
-        raise OSError(f"Received address ({base_addr}) not same as requested address ({address}))")
+    received_address = int.from_bytes(data[:4], byteorder="big")
+    if received_address != address:
+        raise OSError(
+            f"Received address ({received_address}) not same as requested address ({address}))"
+        )
 
     # parse the 16-bit block size
-    block_size = int.from_bytes(data[4:6], byteorder="big")
+    received_block_size = int.from_bytes(data[4:6], byteorder="big")
+    if received_block_size != count:
+        raise OSError(
+            f"Received block size ({received_block_size}) not same as"
+            f" requested block size ({count})"
+        )
 
     # parse the 32-bit data. block size is in 32-bit words,
     # so need to multiply by 4 here as 4*8 bytes is 32 bits.
-    data = int.from_bytes(data[6 : 6 + (block_size * 4)], byteorder="big")
+    data = int.from_bytes(data[6 : 6 + (received_block_size * 4)], byteorder="big")
     logger.debug(
         "Response: addr = %s, block size = %s, data = %s (bin: %s)",
-        base_addr,
-        block_size,
+        received_address,
+        received_block_size,
         data,
         bin(data),
     )

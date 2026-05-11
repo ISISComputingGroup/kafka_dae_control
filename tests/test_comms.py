@@ -89,6 +89,19 @@ def test_read_raises_when_response_address_does_not_match_request():
         read(sock, HOST, RUNNING_REGISTER.address, RUNNING_REGISTER.size, READ_PORT)
 
 
+def test_read_raises_when_returned_block_size_not_same_as_requested():
+    sock = Mock()
+    sock.recvfrom.return_value = (
+        _read_response(COMMS_REGISTER.address, COMMS_REGISTER.size + 1, 0),
+        (HOST, READ_PORT),
+    )
+
+    with pytest.raises(
+        OSError, match=re.escape("Received block size (2) not same as requested block size (1)")
+    ):
+        read(sock, HOST, COMMS_REGISTER.address, COMMS_REGISTER.size, READ_PORT)
+
+
 def test_read_raises_when_response_host_does_not_match_request():
     sock = Mock()
     sock.recvfrom.return_value = (
