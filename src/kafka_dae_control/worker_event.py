@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class SetIPEvent:
-    """An event signalling to set the board's comms register to local IP."""
+    """An event signalling to set the board's communication register to local IP."""
 
 
 @dataclass
@@ -99,7 +99,7 @@ def process_worker_event(  # noqa: PLR0917, PLR0913
         worker_event: the worker event to process
         config: the program's configuration options
         data: the data class containing the program's state
-        producer: the kafka producer
+        producer: the Kafka producer
         sock: the socket instance
         sock_lock: the lock to use when using the socket instance
 

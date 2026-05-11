@@ -35,7 +35,7 @@ def write_verify(  # noqa: PLR0913 PLR0917
     """Write a value then verify it by reading it back with a retry/timeout loop.
 
     Args:
-        config: the program's configuration containing board ip and ports
+        config: the program's configuration containing board IP and ports
         sock: the UDP socket instance
         address: the address to write to
         new_value: the data to write
@@ -78,7 +78,7 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     This is essentially used to "clear" a bit.
 
     Args:
-        config: the program's configuration containing board ip and ports
+        config: the program's configuration containing board IP and ports
         sock: the UDP socket instance
         address: the address to write to
         data: the data to write

@@ -32,7 +32,7 @@ def handle_begin(  # noqa: PLR0913, PLR0917
     Args:
         config: the program's configuration.
         data: the data class containing the state of the program.
-        producer: the kafka producer.
+        producer: the Kafka producer.
         sock: the socket instance.
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete
@@ -84,7 +84,7 @@ def handle_end(  # noqa: PLR0913, PLR0917
     Args:
         config: The program's configuration.
         data: the data class containing the state of the program.
-        producer: the kafka producer.
+        producer: the Kafka producer.
         sock: the socket instance.
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete

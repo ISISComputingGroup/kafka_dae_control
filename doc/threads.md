@@ -3,7 +3,7 @@
 This program comprises multiple threads: 
 1) A worker thread blocking if there is something in queue and then processing items on queue - always responsible for updating data object. If further actions need to be taken it may add items to the end of its queue 
 2) A hardware polling thread which adds updates to worker queue
-3) A camonitor thread which monitors block names and adds updates to queue
+3) A `camonitor` thread which monitors block names and adds updates to queue
 4) the p4p thread pool on PV puts which add PV updates to queue (and that's all - any logic needs to be done in the worker thread)
 5) A thread calling PV posts that read from data class and updating PVs
 
