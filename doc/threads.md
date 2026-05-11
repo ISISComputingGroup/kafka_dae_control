@@ -1,5 +1,5 @@
 # Threads in this application
-TODO: move this to ADR/somewhere else
+
 This program comprises multiple threads: 
 1) A worker thread blocking if there is something in queue and then processing items on queue - always responsible for updating data object. If further actions need to be taken it may add items to the end of its queue 
 2) A hardware polling thread which adds updates to worker queue
