@@ -49,14 +49,19 @@ def serve(config: ControlConfig) -> None:
 
     # Start the hardware polling thread
     threading.Thread(
-        target=hardware_poll_thread, args=(config, queue, sock, sock_lock), daemon=True
+        target=hardware_poll_thread,
+        args=(config, queue, sock, sock_lock),
+        daemon=True,
+        name="HardwarePoll",
     ).start()
 
     # Start the PV posts thread
-    threading.Thread(target=update_pvs_thread, args=(static_pvs, data, config), daemon=True).start()
+    threading.Thread(
+        target=update_pvs_thread, args=(static_pvs, data, config), daemon=True, name="UpdatePVs"
+    ).start()
     producer = Producer(config.kafka_producer)
 
-    # Start the camonitor thread
+    # Start the camonitor thread. Note that the thread name is "Dummy-1"
     camonitor(
         f"{config.pv_prefix}CS:BLOCKSERVER:BLOCKNAMES",
         callback=partial(update_blocks, queue, config.pv_prefix),

@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, Mock, call, patch
 import pytest
 
 from kafka_dae_control.comms import (
-    ATTEMPTS,
     SLEEP_AFTER_WRITE_S,
-    SLEEP_BETWEEN_ATTEMPTS_S,
+    SLEEP_BETWEEN_VERIFY_ATTEMPTS_S,
+    VERIFY_ATTEMPTS,
     read,
     set_board_response_ip,
     write,
@@ -134,6 +134,7 @@ def test_write_verify_sets_and_retries(
         data,
         RUNNING_REGISTER.size,
         verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
+        write_attempts=1,
     )
 
     mock_write.assert_called_once_with(
@@ -143,7 +144,7 @@ def test_write_verify_sets_and_retries(
         call(sock, HOST, RUNNING_REGISTER.address, RUNNING_REGISTER.size, READ_PORT),
         call(sock, HOST, RUNNING_REGISTER.address, RUNNING_REGISTER.size, READ_PORT),
     ]
-    mock_sleep.assert_has_calls([call(SLEEP_AFTER_WRITE_S), call(SLEEP_BETWEEN_ATTEMPTS_S)])
+    mock_sleep.assert_has_calls([call(SLEEP_AFTER_WRITE_S), call(SLEEP_BETWEEN_VERIFY_ATTEMPTS_S)])
 
 
 @patch("kafka_dae_control.comms.sleep")
@@ -166,12 +167,13 @@ def test_write_verify_raises_after_retry_limit(
             data,
             RUNNING_REGISTER.size,
             verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
+            write_attempts=1,
         )
 
     mock_write.assert_called_once()
-    assert mock_read.call_count == ATTEMPTS
+    assert mock_read.call_count == VERIFY_ATTEMPTS
     mock_sleep.assert_has_calls(
-        [call(SLEEP_AFTER_WRITE_S)] + [call(SLEEP_BETWEEN_ATTEMPTS_S)] * ATTEMPTS
+        [call(SLEEP_AFTER_WRITE_S)] + [call(SLEEP_BETWEEN_VERIFY_ATTEMPTS_S)] * VERIFY_ATTEMPTS
     )
 
 
@@ -194,6 +196,7 @@ def test_write_and_inv_then_verify_clears_bit(
         RunRegister.ETHERNET_OVERRIDE,
         RUNNING_REGISTER.size,
         verify,
+        3,
     )
 
     mock_read.assert_called_once_with(
@@ -206,6 +209,7 @@ def test_write_and_inv_then_verify_clears_bit(
         RunRegister.STATUS_RUNNING,
         RUNNING_REGISTER.size,
         verify,
+        3,
     )
 
 
@@ -225,3 +229,52 @@ def test_set_board_response_ip_sets_ip(mock_write_verify):  # pyright: ignore re
 
     assert lock.__enter__.called
     assert mock_write_verify.call_args[0][3] == 3232235877
+
+
+@patch("kafka_dae_control.comms.sleep")
+@patch("kafka_dae_control.comms.read", return_value=0)
+@patch("kafka_dae_control.comms.write")
+def test_write_verify_retries(
+    mock_write,  # pyright: ignore reportMissingParameterType
+    mock_read,  # pyright: ignore reportMissingParameterType
+    mock_sleep,  # pyright: ignore reportMissingParameterType
+):
+    data = (
+        RunRegister.ETHERNET_OVERRIDE | RunRegister.RUN_SIGNAL_ETH | RunRegister.STREAM_EMPTY_FRAMES
+    )
+
+    with pytest.raises(OSError, match="Could not write"):
+        write_verify(
+            conf,
+            Mock(),
+            RUNNING_REGISTER.address,
+            data,
+            RUNNING_REGISTER.size,
+            verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
+            write_attempts=2,
+        )
+
+    assert mock_write.call_count == 2
+
+
+@patch("kafka_dae_control.comms.sleep")
+@patch("kafka_dae_control.comms.read", return_value=11)
+@patch("kafka_dae_control.comms.write")
+def test_inv_write_verify_retries(
+    mock_write,  # pyright: ignore reportMissingParameterType
+    mock_read,  # pyright: ignore reportMissingParameterType
+    mock_sleep,  # pyright: ignore reportMissingParameterType
+):
+
+    with pytest.raises(OSError, match="Could not write"):
+        write_and_inv_then_verify(
+            conf,
+            Mock(),
+            RUNNING_REGISTER.address,
+            RunRegister.ETHERNET_OVERRIDE,
+            RUNNING_REGISTER.size,
+            verify=lambda x: x == "this will never be the same as the register value",  # pyright: ignore[reportUnnecessaryComparison]
+            write_attempts=2,
+        )
+
+    assert mock_write.call_count == 2

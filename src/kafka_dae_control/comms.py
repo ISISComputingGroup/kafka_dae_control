@@ -17,52 +17,12 @@ from kafka_dae_control.defaults import COMMS_REGISTER, RECEIVE_BUFFER_SIZE
 
 logger = logging.getLogger(__name__)
 
-ATTEMPTS = 5
-SLEEP_BETWEEN_ATTEMPTS_S = 0.1
+WRITE_ATTEMPTS = 3
+VERIFY_ATTEMPTS = 5
+SLEEP_BETWEEN_VERIFY_ATTEMPTS_S = 0.1
 SLEEP_AFTER_WRITE_S = 0.1
 
 type VerifyFunc = Callable[[int], bool]
-
-
-def write_verify(  # noqa: PLR0913 PLR0917
-    config: ControlConfig,
-    sock: socket.SocketType,
-    address: int,
-    new_value: int,
-    count: int,
-    verify: VerifyFunc,
-) -> None:
-    """Write a value then verify it by reading it back with a retry/timeout loop.
-
-    Args:
-        config: the program's configuration containing board IP and ports
-        sock: the UDP socket instance
-        address: the address to write to
-        new_value: the data to write
-        count: the number of 32-bit words to write
-        verify: Optionally verify against a different provided value by ORing it
-
-    Returns: None
-
-    """
-    write(sock, config.board_ip, address, new_value, count, config.write_port)
-    # sleep after writing
-    sleep(SLEEP_AFTER_WRITE_S)
-
-    current_val = None
-    # check to make sure read value is equal to the new (masked) value
-    for _ in range(ATTEMPTS):
-        current_val = read(sock, config.board_ip, address, count, config.read_port)
-        logger.debug("Current value is %s", current_val)
-        if verify(current_val):
-            return
-
-        sleep(SLEEP_BETWEEN_ATTEMPTS_S)
-
-    raise OSError(
-        f"({config.board_ip}) Could not write {count} 32 bit words to address {address} "
-        f"(set data={new_value}, readback={current_val})"
-    )
 
 
 def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
@@ -72,10 +32,11 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     data: int,
     count: int,
     verify: VerifyFunc,
+    write_attempts: int = WRITE_ATTEMPTS,
 ) -> None:
     """Write a value by masking the current value with an AND of the inverse new data then verify.
 
-    This is essentially used to "clear" a bit.
+    This is essentially used to "clear" a bit and call :func:`write_verify`
 
     Args:
         config: the program's configuration containing board IP and ports
@@ -84,6 +45,7 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
         data: the data to write
         count: the number of 32-bit words to write
         verify: Optionally verify against a different provided value by ORing it
+        write_attempts: The number of times to retry writing and verifying.
 
     Returns: None
 
@@ -92,9 +54,57 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     current_val = read(sock, config.board_ip, address, count, config.read_port)
     # AND mask it with the inverse of new data
     new_value = current_val & ~data
-    logger.debug("AND of current value (%s) and inverse of (%s) is %s", new_value, data, new_value)
+    logger.debug(
+        "AND of current value (%s) and inverse of (%s) is %s", current_val, data, new_value
+    )
     # write the new value and verify
-    write_verify(config, sock, address, new_value, count, verify)
+    write_verify(config, sock, address, new_value, count, verify, write_attempts)
+
+
+def write_verify(  # noqa: PLR0913 PLR0917
+    config: ControlConfig,
+    sock: socket.SocketType,
+    address: int,
+    new_value: int,
+    count: int,
+    verify: VerifyFunc,
+    write_attempts: int = WRITE_ATTEMPTS,
+) -> None:
+    """Write a value then verify it by reading it back with a retry/timeout loop.
+
+    This function takes an "attempts" argument, which will re-write if the verification times out.
+
+    Args:
+        config: the program's configuration containing board IP and ports
+        sock: the UDP socket instance
+        address: the address to write to
+        new_value: the data to write
+        count: the number of 32-bit words to write
+        verify: Optionally verify against a different provided value by ORing it
+        write_attempts: The number of times to retry writing and verifying.
+
+    Returns: None
+
+    """
+    current_val = None
+    for _ in range(write_attempts):
+        write(sock, config.board_ip, address, new_value, count, config.write_port)
+        # sleep after writing
+        sleep(SLEEP_AFTER_WRITE_S)
+
+        # check to make sure read value is equal to the new (masked) value
+        for _ in range(VERIFY_ATTEMPTS):
+            current_val = read(sock, config.board_ip, address, count, config.read_port)
+            logger.debug("Current value is %s", current_val)
+            if verify(current_val):
+                return
+
+            sleep(SLEEP_BETWEEN_VERIFY_ATTEMPTS_S)
+
+    raise OSError(
+        f"({config.board_ip}) Could not write {count} 32 bit words to address {address} "
+        f"(set data={new_value}, readback={current_val})"
+    )
 
 
 def write(  # noqa: PLR0917, PLR0913
@@ -106,6 +116,8 @@ def write(  # noqa: PLR0917, PLR0913
     port: int,
 ) -> None:
     """Write a value.
+
+    This is a low-level function that should just attempt a single write without verifying it.
 
     Args:
         sock: the UDP socket instance
@@ -140,6 +152,8 @@ def read(
     sock: socket.SocketType, host: ipaddress.IPv4Address, address: int, count: int, port: int
 ) -> int:
     """Read a register on the streaming control board and return its value.
+
+    This is a 'low-level' function that should just attempt a single read.
 
     Args:
         sock: the UDP socket instance

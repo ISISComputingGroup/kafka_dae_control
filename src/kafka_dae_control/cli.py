@@ -49,7 +49,7 @@ def main() -> None:
 
     logging.basicConfig(
         level=args.log_level,
-        format="%(asctime)s %(levelname)-8s %(message)s",
+        format="%(asctime)s %(levelname)-8s | %(threadName)s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
