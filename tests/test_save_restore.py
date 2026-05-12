@@ -29,7 +29,6 @@ def test_save_restore_takes_data_and_saves_relevant_fields():
         "run_number": 2345,
         "title": "atitle",
         "users": "someusers",
-        "running": False,
     }
 
 
@@ -69,7 +68,7 @@ def test_save_restore_file_not_found_defaults_correct():
     assert d.run_number == 0
 
 
-def test_load_invalid_file_loads_defaults():
+def test_load_invalid_file_errors():
     m = MagicMock(spec=Path)
     m.exists.return_value = True
 
@@ -77,8 +76,8 @@ def test_load_invalid_file_loads_defaults():
     mock_file.read.return_value = """{
           "job_id": "e1bf4e61-9e3d-418b-988d-b50c63056ef8",
           "run_number": 1,
-          "title": "atitle"
-        }"""  # missing users key
+          "title": 1
+        }"""  # wrong type for title
 
     m.open.return_value.__enter__.return_value = mock_file
 

@@ -32,7 +32,6 @@ def save_file(data: "Data", *_: int | str, state_file: Path) -> None:
                 USERS_KEY: data.users,
                 RUN_NUMBER_KEY: data.run_number,
                 JOB_ID_KEY: data.job_id,
-                RUNNING_KEY: data.running,
             },
             file,
             indent=2,

@@ -18,7 +18,7 @@ class Data(BaseModel):
     the main worker thread and the PV update thread.
     """
 
-    running: bool
+    running: bool = False
     """Whether the hardware is running or not"""
 
     title: str = ""

@@ -15,6 +15,7 @@ from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import RUNNING_REGISTER, RunRegister
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
+from kafka_dae_control.save_restore import save_file
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +69,7 @@ def handle_begin(  # noqa: PLR0913, PLR0917
     producer.produce(config.runinfo_topic, blob)
     producer.flush()
     logger.info("sent run start to %s", config.runinfo_topic)
+    save_file(data, state_file=config.state_file)
     done_event.set()
 
 
@@ -110,4 +112,5 @@ def handle_end(  # noqa: PLR0913, PLR0917
     producer.flush()
     logger.info("sent run stop to %s", config.runinfo_topic)
     data.run_number += 1
+    save_file(data, state_file=config.state_file)
     done_event.set()
