@@ -41,9 +41,12 @@ def save_file(data: "Data", *_: int | str, state_file: Path) -> None:
 def load_data(state_file: Path) -> Data:
     """Load persisted data from file."""
     if not state_file.exists():
+        logger.warning("State file not found, using defaults")
         return Data(job_id="", run_number=0, title="", users="", running=False)
 
     with state_file.open(encoding="utf-8") as f:
+        logger.debug("State file found")
         raw = json.load(f)
+        logger.debug("State file json: %s", raw)
 
         return Data.model_validate(raw)

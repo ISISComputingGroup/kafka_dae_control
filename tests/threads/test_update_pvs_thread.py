@@ -1,7 +1,6 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from _pytest.logging import LogCaptureFixture
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
@@ -25,7 +24,7 @@ def test_update_pvs_thread(mock_sleep: Mock, data: Data, conf: ControlConfig):
 
 @patch("kafka_dae_control.threads.update_pvs_thread.sleep", side_effect=Exception)
 def test_update_pvs_thread_catches_exception_and_logs_it(
-    mock_sleep: Mock, data: Data, conf: ControlConfig, caplog: LogCaptureFixture
+    mock_sleep: Mock, data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
 ):
     pvs = Mock(spec=StaticPVs)
     pvs.update_all.side_effect = Exception

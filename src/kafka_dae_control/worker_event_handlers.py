@@ -53,7 +53,6 @@ def handle_begin(  # noqa: PLR0913, PLR0917
                 verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
             )
     except Exception:
-        # write has failed - go back to previous state
         logger.exception("Failed to start run: ")
         return
 
@@ -104,7 +103,6 @@ def handle_end(  # noqa: PLR0913, PLR0917
                 verify=lambda x: x & RunRegister.STATUS_RUNNING == 0,
             )
     except Exception:
-        # write has failed - go back to previous state
         logger.exception("Failed to end run: ")
         return
     blob = serialise_6s4t(job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London")))

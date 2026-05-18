@@ -2,7 +2,7 @@ import ipaddress
 from threading import RLock
 from unittest.mock import MagicMock, Mock, patch
 
-from _pytest.logging import LogCaptureFixture
+import pytest
 from streaming_data_types import deserialise_6s4t, deserialise_pl72
 
 from kafka_dae_control.config import ControlConfig
@@ -121,14 +121,18 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
         assert done_event.set.called
 
 
-def test_exception_during_begin_logs(data: Data, conf: ControlConfig, caplog: LogCaptureFixture):
+def test_exception_during_begin_logs(
+    data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
     sock_lock = MagicMock(spec=RLock())
     sock_lock.__enter__.side_effect = Exception
     handle_begin(conf, data, Mock(), Mock(), sock_lock, Mock())
     assert "Failed to start run:" in caplog.text
 
 
-def test_exception_during_end_logs(data: Data, conf: ControlConfig, caplog: LogCaptureFixture):
+def test_exception_during_end_logs(
+    data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
     sock_lock = MagicMock(spec=RLock())
     sock_lock.__enter__.side_effect = Exception
     handle_end(conf, data, Mock(), Mock(), sock_lock, Mock())

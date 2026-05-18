@@ -2,7 +2,6 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from _pytest.logging import LogCaptureFixture
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
@@ -60,14 +59,14 @@ def test_process_set_ip_calls_set_board_response_ip(
     assert mock_set_board_response_ip.called
 
 
-def test_unknown_value_logs(conf: ControlConfig, data: Data, caplog: LogCaptureFixture):
+def test_unknown_value_logs(conf: ControlConfig, data: Data, caplog: pytest.LogCaptureFixture):
     process_worker_event("blah", conf, data, Mock(), Mock(), Mock())  # pyright: ignore[reportArgumentType]
     assert "Unknown event type: blah" in caplog.text
 
 
 @patch("kafka_dae_control.worker_event.set_board_response_ip", side_effect=IOError)
 def test_exception_thrown_in_handler_logs(
-    m: Mock, conf: ControlConfig, data: Data, caplog: LogCaptureFixture
+    m: Mock, conf: ControlConfig, data: Data, caplog: pytest.LogCaptureFixture
 ):
     process_worker_event(SetIPEvent(), conf, data, Mock(), Mock(), Mock())
     assert "Unhandled exception in handler thread:" in caplog.text

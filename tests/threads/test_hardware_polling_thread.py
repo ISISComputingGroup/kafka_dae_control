@@ -3,7 +3,6 @@ from threading import RLock
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from _pytest.logging import LogCaptureFixture
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.defaults import RUNNING_REGISTER, RunRegister
@@ -37,7 +36,7 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
 @patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)
 @patch("kafka_dae_control.threads.hardware_polling_thread.read", side_effect=Exception)
 def test_read_throws_exception_logs(
-    mock_read: Mock, mock_sleep: Mock, conf: ControlConfig, caplog: LogCaptureFixture
+    mock_read: Mock, mock_sleep: Mock, conf: ControlConfig, caplog: pytest.LogCaptureFixture
 ):
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())

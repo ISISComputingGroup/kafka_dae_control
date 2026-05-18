@@ -33,7 +33,7 @@ def hardware_poll_thread(
     while True:
         try:
             with sock_lock:
-                hw_running = read(
+                running_register_readback = read(
                     sock,
                     config.board_ip,
                     RUNNING_REGISTER.address,
@@ -43,7 +43,9 @@ def hardware_poll_thread(
 
             queue.put(
                 HardwareUpdateEvent(
-                    HardwareUpdate(hw_running=hw_running & RunRegister.STATUS_RUNNING != 0)
+                    HardwareUpdate(
+                        hw_running=running_register_readback & RunRegister.STATUS_RUNNING != 0
+                    )
                 )
             )
 

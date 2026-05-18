@@ -73,9 +73,6 @@ dev = [
 testpaths = "tests"
 asyncio_mode = "auto"
 addopts = "--cov --cov-report=html -vv"
-filterwarnings = [
-    'ignore::tango.PyTangoUserWarning',
-]
 
 [tool.coverage.run]
 branch = true

@@ -4,7 +4,7 @@ board_ip = "192.168.1.250"
 # PV prefix of all PVs in this IOC
 pv_prefix = "IN:EMMA-B:"
 
-# Kafka topic on which to listen for runInfo messages
+# Kafka topic on which to produce runInfo messages
 # (usually <instrument>_runInfo)
 runinfo_topic = "EMMA-B_runInfo"
 
