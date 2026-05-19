@@ -1,5 +1,6 @@
 StreamDevice
 asyn
+endian
 entrypoint
 udptalk
 udp
