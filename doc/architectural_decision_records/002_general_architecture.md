@@ -12,7 +12,6 @@ This approach tangled logic slightly as there are several areas where state can 
 As an alternative to this there are some options: 
 1) A threaded model with an event queue, where threads add "events" to the queue and a main worker thread acts on them
 2) An asynchronous model with a queue as above
-3) 
 
 ## Decision
 

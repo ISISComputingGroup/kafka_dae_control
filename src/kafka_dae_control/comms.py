@@ -34,9 +34,14 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     verify: VerifyFunc,
     write_attempts: int = WRITE_ATTEMPTS,
 ) -> None:
-    """Write a value by masking the current value with an AND of the inverse new data then verify.
+    """Write by reading the current value then ANDing it with the inverse of the new data.
 
     This is essentially used to "clear" a bit and call :func:`write_verify`
+
+    An example could be you want to clear bit `0x1`(binary: 01). `0x3` (binary: 11) is
+    the current value, so you AND `0x3` (binary: 11)
+    with `0x2` (binary: 10) (as this is the inverse of `0x1`(binary: 01))
+    then verify that you end up with `0x2` (binary: 10)
 
     Args:
         config: the program's configuration containing board IP and ports

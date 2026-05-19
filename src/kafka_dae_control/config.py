@@ -44,7 +44,7 @@ class ControlConfig(BaseModel):
     """The write port to use for writing to the streaming control board"""
 
     flush_timeout_s: int = FLUSH_TIMEOUT_S
-    """The timeout for a flush after producing run info messsages"""
+    """The timeout for a flush after producing run info messages"""
 
 
 def load_config(config_path: str) -> ControlConfig:

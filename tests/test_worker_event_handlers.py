@@ -3,12 +3,18 @@ from threading import RLock
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from confluent_kafka import KafkaError, Message
 from streaming_data_types import deserialise_6s4t, deserialise_pl72
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import RunRegister
-from kafka_dae_control.worker_event_handlers import handle_begin, handle_end
+from kafka_dae_control.event_with_value import EventWithValue
+from kafka_dae_control.worker_event_handlers import (
+    delivery_report_run_info,
+    handle_begin,
+    handle_end,
+)
 
 
 def test_beginning_starts_hardware_sends_run_start_and_sets_running(
@@ -33,6 +39,8 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
             return_value=nexus_structure,
         ),
     ):
+        producer.flush.side_effect = done_event.set()
+
         handle_begin(
             data=data,
             config=conf,
@@ -88,6 +96,7 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
     with patch(
         "kafka_dae_control.worker_event_handlers.write_and_inv_then_verify"
     ) as write_and_inv_then_verify:
+        producer.flush.side_effect = done_event.set()
         handle_end(
             data=data,
             config=conf,
@@ -137,3 +146,18 @@ def test_exception_during_end_logs(
     sock_lock.__enter__.side_effect = Exception
     handle_end(conf, data, Mock(), Mock(), sock_lock, Mock())
     assert "Failed to end run:" in caplog.text
+
+
+def test_delivery_report_cb_sets_error_if_error():
+    done_event = EventWithValue()
+    error = KafkaError(error=KafkaError.KAFKA_STORAGE_ERROR)  # pyright: ignore[reportCallIssue]
+    delivery_report_run_info(done_event, error, Message())
+    assert "Error with kafka delivery: KAFKA_STORAGE_ERROR" in str(done_event.err)
+    assert done_event._ev.is_set()
+
+
+def test_delivery_report_cb_calls_set_if_no_error():
+    done_event = EventWithValue()
+    msg = Message(topic="mytopic123", value=b"myvalue234")
+    delivery_report_run_info(done_event, None, msg)
+    assert done_event._ev.is_set()
