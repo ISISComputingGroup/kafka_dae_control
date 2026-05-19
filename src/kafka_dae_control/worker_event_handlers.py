@@ -89,6 +89,7 @@ def handle_begin(  # noqa: PLR0913, PLR0917
         producer.produce(
             config.runinfo_topic, blob, callback=partial(delivery_report_run_info, done_event)
         )
+        producer.poll(0)
         logger.info("sent run start to %s", config.runinfo_topic)
         save_file(data, state_file=config.state_file)
     except Exception as e:
@@ -131,6 +132,7 @@ def handle_end(  # noqa: PLR0913, PLR0917
         producer.produce(
             config.runinfo_topic, blob, callback=partial(delivery_report_run_info, done_event)
         )
+        producer.poll(0)
         logger.info("sent run stop to %s", config.runinfo_topic)
         data.run_number += 1
         save_file(data, state_file=config.state_file)
