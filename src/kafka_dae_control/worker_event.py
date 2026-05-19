@@ -11,6 +11,7 @@ from confluent_kafka import Producer
 from kafka_dae_control.comms import set_board_response_ip
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
+from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.worker_event_handlers import handle_begin, handle_end
 
@@ -22,20 +23,17 @@ class SetIPEvent:
 
 
 @dataclass
-class WorkerEventWithDoneEvent(ABC):
-    """A worker event with a threading.Event to be set by the worker thread."""
-
-    done_event: threading.Event
-
-
-@dataclass
-class BeginEvent(WorkerEventWithDoneEvent):
+class BeginEvent:
     """An event signalling a begin."""
 
+    done_event: EventWithValue[None]
+
 
 @dataclass
-class EndEvent(WorkerEventWithDoneEvent):
+class EndEvent:
     """An event signalling an end."""
+
+    done_event: EventWithValue[None]
 
 
 @dataclass

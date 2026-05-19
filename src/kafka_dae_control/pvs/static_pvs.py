@@ -1,7 +1,6 @@
 """Static PVs for KDAECTRL."""
 
 import logging
-import threading
 from queue import Queue
 
 from p4p.nt import NTScalar
@@ -16,6 +15,7 @@ from kafka_dae_control.worker_event import (
     UsersUpdateEvent,
     WorkerEvent,
 )
+from kafka_dae_control.event_with_value import EventWithValue
 
 logger = logging.getLogger(__name__)
 
@@ -70,24 +70,24 @@ class StaticPVs:
         @self.begin.put  # pragma: no cover
         def begin_put(_: SharedPV, op: ServerOperation) -> None:
             logger.info("begin")
-            ev = threading.Event()
+            ev = EventWithValue()
             queue.put(BeginEvent(done_event=ev))
-            res = ev.wait(timeout=1)
-            if res:
+            try:
+                ev.wait()
                 op.done()
-            else:
-                op.done(error="Failed to begin")
+            except Exception as e:  # noqa: BLE001
+                op.done(error=f"Failed to begin: {e}")
 
         @self.end.put  # pragma: no cover
         def end_put(_: SharedPV, op: ServerOperation) -> None:
             logger.info("end")
-            ev = threading.Event()
+            ev = EventWithValue()
             queue.put(EndEvent(done_event=ev))
-            res = ev.wait(timeout=1)
-            if res:
+            try:
+                ev.wait()
                 op.done()
-            else:
-                op.done(error="Failed to end")
+            except Exception as e:  # noqa: BLE001
+                op.done(error=f"Failed to end: {e}")
 
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.
