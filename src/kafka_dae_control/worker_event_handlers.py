@@ -42,6 +42,7 @@ def delivery_report_run_info(
         logger.error(error)
         done_event.err = Exception(error)
     else:
+        logger.debug("Setting the done event")
         done_event.set()
 
 
