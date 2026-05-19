@@ -6,6 +6,7 @@ from typing import NamedTuple
 WRITE_PORT = 10002
 READ_PORT = 10000
 RECEIVE_BUFFER_SIZE = 1024
+FLUSH_TIMEOUT_S = 1
 
 
 class Register(NamedTuple):

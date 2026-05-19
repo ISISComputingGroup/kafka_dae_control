@@ -7,7 +7,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, ValidationError
 
-from kafka_dae_control.defaults import READ_PORT, WRITE_PORT
+from kafka_dae_control.defaults import FLUSH_TIMEOUT_S, READ_PORT, WRITE_PORT
 
 
 class ControlConfig(BaseModel):
@@ -42,6 +42,9 @@ class ControlConfig(BaseModel):
 
     write_port: int = WRITE_PORT
     """The write port to use for writing to the streaming control board"""
+
+    flush_timeout_s: int = FLUSH_TIMEOUT_S
+    """The timeout for a flush after producing run info messsages"""
 
 
 def load_config(config_path: str) -> ControlConfig:
