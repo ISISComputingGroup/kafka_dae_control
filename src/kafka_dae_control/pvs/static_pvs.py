@@ -8,6 +8,7 @@ from p4p.server import ServerOperation, StaticProvider
 from p4p.server.thread import SharedPV
 
 from kafka_dae_control.data import Data
+from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.worker_event import (
     BeginEvent,
     EndEvent,
@@ -15,7 +16,6 @@ from kafka_dae_control.worker_event import (
     UsersUpdateEvent,
     WorkerEvent,
 )
-from kafka_dae_control.event_with_value import EventWithValue
 
 logger = logging.getLogger(__name__)
 

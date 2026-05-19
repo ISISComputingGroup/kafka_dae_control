@@ -1,3 +1,5 @@
+"""Module containing utilities for passing events between threads with an exception or value."""
+
 import threading
 
 
