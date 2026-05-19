@@ -1,22 +1,22 @@
 name: Publish Python distribution to PyPI
 on: push
 jobs:
-  lint-and-test:
+  lint-and-test: 
     if: github.ref_type == 'tag'
     name: Run linter and tests
     uses: ./.github/workflows/Lint-and-test.yml
-  build:
+  build: 
     needs: lint-and-test
     if: github.ref_type == 'tag'
     name: build distribution
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: "3.11"
+        python-version: "3.12"
     - name: Install pypa/build
       run: >-
         python3 -m
@@ -26,60 +26,37 @@ jobs:
     - name: Build a binary wheel and a source tarball
       run: python3 -m build
     - name: Store the distribution packages
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: python-package-distributions
         path: dist/
-  publish-to-pypi:
-    name: >-
-      Publish Python distribution to PyPI
-    if: github.ref_type == 'tag'
-    needs: [lint-and-test, build]
-    runs-on: ubuntu-latest
-    environment:
-      name: release
-      url: https://pypi.org/p/lewis
-    permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
-    steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v6
-      with:
-        name: python-package-distributions
-        path: dist/
-    - name: Publish distribution to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
   github-release:
     name: >-
       Sign the Python distribution with Sigstore
       and upload them to GitHub Release
-    needs: [lint-and-test, build, publish-to-pypi]
+    needs: [lint-and-test, build]
     runs-on: ubuntu-latest
-
     permissions:
       contents: write  # IMPORTANT: mandatory for making GitHub Releases
       id-token: write  # IMPORTANT: mandatory for sigstore
-
     steps:
     - name: Download all the dists
-      uses: actions/download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: python-package-distributions
         path: dist/
     - name: Sign the dists with Sigstore
-      uses: sigstore/gh-action-sigstore-python@v3.1.0
+      uses: sigstore/gh-action-sigstore-python@v3.2.0
       with:
         inputs: >-
           ./dist/*.tar.gz
           ./dist/*.whl
     - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with: 
+        generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ github.token }}
-      run: >-
-        gh release create
-        '${{ github.ref_name }}'
-        --repo '${{ github.repository }}'
-        --notes ""
     - name: Upload artifact signatures to GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
