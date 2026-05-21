@@ -44,7 +44,8 @@ For example:
         "read", help="read from register", parents=[common_subparser]
     )
     read_subparser.add_argument(
-        "-p,--port",
+        "-p",
+        "--port",
         type=int,
         default=READ_PORT,
         required=False,
@@ -55,7 +56,11 @@ For example:
         "write", help="write to register", parents=[common_subparser]
     )
     write_subparser.add_argument(
-        "-p,--port", default=WRITE_PORT, required=False, help="Port to use when writing to device"
+        "-p",
+        "--port",
+        default=WRITE_PORT,
+        required=False,
+        help="Port to use when writing to device",
     )
     write_subparser.add_argument(
         "data", type=lambda x: int(x, 0), help="data to write, in either int or hex format"
