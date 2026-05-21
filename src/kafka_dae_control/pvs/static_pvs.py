@@ -158,4 +158,5 @@ def static_pv_provider(
     static_provider.add(f"{prefix}RUNNUMBER", static_pvs.run_number)
     static_provider.add(f"{prefix}IRUNNUMBER", static_pvs.i_run_number)
     static_provider.add(f"{prefix}FRAME_SYNC_SELECT_RBV", static_pvs.frame_sync_select_rbv)
+    static_provider.add(f"{prefix}FRAME_SYNC_SELECT_SP", static_pvs.frame_sync_select_sp)
     return static_pvs, static_provider
