@@ -182,4 +182,4 @@ def handle_frame_sync_sp_change(  # noqa: PLR0913, PLR0917
         logger.exception("Failed to set frame sync select: ")
         done_event.err = e
         return
-    data.frame_sync_select = value
+    data.frame_sync_select_sp = value
