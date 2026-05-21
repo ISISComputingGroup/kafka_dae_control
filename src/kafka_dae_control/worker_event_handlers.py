@@ -183,3 +183,4 @@ def handle_frame_sync_sp_change(  # noqa: PLR0913, PLR0917
         done_event.err = e
         return
     data.frame_sync_select_sp = value
+    done_event.set()
