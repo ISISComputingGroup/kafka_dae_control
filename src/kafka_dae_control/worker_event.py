@@ -11,6 +11,7 @@ from confluent_kafka import Producer
 from kafka_dae_control.comms import set_board_response_ip
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
+from kafka_dae_control.defaults import FrameSyncSelect
 from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.worker_event_handlers import handle_begin, handle_end
@@ -48,6 +49,7 @@ class HardwareUpdate:
     """a dataclass which contains the updated state of the hardware."""
 
     hw_running: bool
+    frame_sync_select: FrameSyncSelect
 
 
 @dataclass
@@ -107,6 +109,7 @@ def process_worker_event(  # noqa: PLR0917, PLR0913
         match worker_event:
             case HardwareUpdateEvent(value=value):
                 data.running = value.hw_running
+                data.frame_sync_select_rbv = value.frame_sync_select
             case BlocksUpdateEvent(value):
                 data.blocks = value
             case BeginEvent(done_event=done_event):

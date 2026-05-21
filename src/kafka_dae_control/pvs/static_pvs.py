@@ -3,11 +3,12 @@
 import logging
 from queue import Queue
 
-from p4p.nt import NTScalar
+from p4p.nt import NTEnum, NTScalar
 from p4p.server import ServerOperation, StaticProvider
 from p4p.server.thread import SharedPV
 
 from kafka_dae_control.data import Data
+from kafka_dae_control.defaults import FrameSyncSelect
 from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.worker_event import (
     BeginEvent,
@@ -37,6 +38,19 @@ class StaticPVs:
                 "value": data.running,
             },
         )
+        self.frame_sync_select_rbv = SharedPV(
+            nt=NTEnum(),
+            initial={
+                "choices": [x.name for x in FrameSyncSelect],
+                "index": data.frame_sync_select_rbv.value,
+            },
+        )
+        # self.frame_sync_select_sp = SharedPV(
+        #     nt=NTEnum(),
+        #     initial={
+        #         'choices': [x.name for x in FrameSyncSelect], 'index': data.frame_sync_select_sp.value
+        #     }
+        # )
         self.begin = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.end = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.run_number = SharedPV(
@@ -101,6 +115,7 @@ class StaticPVs:
         self.run_number.post(str(data.run_number))
         self.i_run_number.post(data.run_number)
         self.hw_running.post(data.running)
+        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv)
 
 
 def static_pv_provider(
@@ -129,4 +144,5 @@ def static_pv_provider(
     static_provider.add(f"{prefix}USERS", static_pvs.users)
     static_provider.add(f"{prefix}RUNNUMBER", static_pvs.run_number)
     static_provider.add(f"{prefix}IRUNNUMBER", static_pvs.i_run_number)
+    static_provider.add(f"{prefix}FRAME_SYNC_SELECT_RBV", static_pvs.frame_sync_select_rbv)
     return static_pvs, static_provider
