@@ -115,7 +115,7 @@ class StaticPVs:
         self.run_number.post(str(data.run_number))
         self.i_run_number.post(data.run_number)
         self.hw_running.post(data.running)
-        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv)
+        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.value)
 
 
 def static_pv_provider(
