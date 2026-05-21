@@ -14,7 +14,12 @@ from streaming_data_types import serialise_6s4t, serialise_pl72
 from kafka_dae_control.comms import write_and_inv_then_verify, write_verify
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
-from kafka_dae_control.defaults import RUNNING_REGISTER, RunRegister
+from kafka_dae_control.defaults import (
+    FRAME_SYNC_SEL_REGISTER,
+    RUNNING_REGISTER,
+    FrameSyncSelect,
+    RunRegister,
+)
 from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
@@ -142,3 +147,39 @@ def handle_end(  # noqa: PLR0913, PLR0917
         logger.exception("Failed to end run: ")
         done_event.err = e
         return
+
+
+def handle_frame_sync_sp_change(  # noqa: PLR0913, PLR0917
+    value: FrameSyncSelect,
+    config: ControlConfig,
+    data: Data,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithValue[None],
+) -> None:
+    """Handle a frame sync select setpoint change.
+
+    Args:
+        value: the new value to write to hardware
+        config: The program's configuration.
+        data: the data class containing the state of the program.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+        done_event: The event to call set() on when complete
+
+    """
+    try:
+        with sock_lock:
+            write_verify(
+                config,
+                sock,
+                FRAME_SYNC_SEL_REGISTER.address,
+                value.value,
+                FRAME_SYNC_SEL_REGISTER.size,
+                verify=lambda x: x == value.value,
+            )
+    except Exception as e:
+        logger.exception("Failed to set frame sync select: ")
+        done_event.err = e
+        return
+    data.frame_sync_select = value

@@ -26,6 +26,9 @@ class Data(BaseModel):
     frame_sync_select_rbv: FrameSyncSelect = FrameSyncSelect.UNKNOWN
     """The frame sync select value on the hardware"""
 
+    frame_sync_select_sp: FrameSyncSelect = FrameSyncSelect.UNKNOWN
+    """The frame sync select value setpoint"""
+
     title: str = ""
     """Run title"""
 

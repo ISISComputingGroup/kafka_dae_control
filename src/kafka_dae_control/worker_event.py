@@ -14,7 +14,11 @@ from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import FrameSyncSelect
 from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.save_restore import save_file
-from kafka_dae_control.worker_event_handlers import handle_begin, handle_end
+from kafka_dae_control.worker_event_handlers import (
+    handle_begin,
+    handle_end,
+    handle_frame_sync_sp_change,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +38,14 @@ class BeginEvent:
 class EndEvent:
     """An event signalling an end."""
 
+    done_event: EventWithValue[None]
+
+
+@dataclass
+class FrameSyncSelectChangeEvent:
+    """An event signalling a change in the frame sync select setpoint."""
+
+    value: FrameSyncSelect
     done_event: EventWithValue[None]
 
 
@@ -80,6 +92,7 @@ WorkerEvent = (
     | UsersUpdateEvent
     | HardwareUpdateEvent
     | BlocksUpdateEvent
+    | FrameSyncSelectChangeEvent
 )
 
 
@@ -116,6 +129,8 @@ def process_worker_event(  # noqa: PLR0917, PLR0913
                 handle_begin(config, data, producer, sock, sock_lock, done_event)
             case EndEvent(done_event=done_event):
                 handle_end(config, data, producer, sock, sock_lock, done_event)
+            case FrameSyncSelectChangeEvent(value=value, done_event=done_event):
+                handle_frame_sync_sp_change(value, config, data, sock, sock_lock, done_event)
             case TitleUpdateEvent(value=value):
                 data.title = value
                 save_file(data, state_file=config.state_file)

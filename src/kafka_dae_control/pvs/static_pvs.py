@@ -13,6 +13,7 @@ from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.worker_event import (
     BeginEvent,
     EndEvent,
+    FrameSyncSelectChangeEvent,
     TitleUpdateEvent,
     UsersUpdateEvent,
     WorkerEvent,
@@ -45,12 +46,13 @@ class StaticPVs:
                 "index": data.frame_sync_select_rbv.value,
             },
         )
-        # self.frame_sync_select_sp = SharedPV(
-        #     nt=NTEnum(),
-        #     initial={
-        #         'choices': [x.name for x in FrameSyncSelect], 'index': data.frame_sync_select_sp.value
-        #     }
-        # )
+        self.frame_sync_select_sp = SharedPV(
+            nt=NTEnum(),
+            initial={
+                "choices": [x.name for x in FrameSyncSelect],
+                "index": data.frame_sync_select_sp.value,
+            },
+        )
         self.begin = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.end = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.run_number = SharedPV(
@@ -102,6 +104,17 @@ class StaticPVs:
                 op.done()
             except Exception as e:  # noqa: BLE001
                 op.done(error=f"Failed to end: {e}")
+
+        @self.frame_sync_select_sp.put
+        def frame_sync_select_sp_put(pv: SharedPV, op: ServerOperation) -> None:
+            logger.info("begin")
+            ev = EventWithValue()
+            queue.put(FrameSyncSelectChangeEvent(value=FrameSyncSelect(op.value()), done_event=ev))
+            try:
+                ev.wait()
+                op.done()
+            except Exception as e:  # noqa: BLE001
+                op.done(error=f"Failed to begin: {e}")
 
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.

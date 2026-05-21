@@ -55,8 +55,8 @@ def hardware_poll_thread(
                 )
                 if frame_sync_select_raw_readback not in FrameSyncSelect:
                     logger.error(
-                        "Frame sync select not "
-                        "valid (%s), setting to unknown", frame_sync_select_raw_readback
+                        "Frame sync select not valid (%s), setting to unknown",
+                        frame_sync_select_raw_readback,
                     )
                     frame_sync_select_readback = FrameSyncSelect.UNKNOWN
                 else:
