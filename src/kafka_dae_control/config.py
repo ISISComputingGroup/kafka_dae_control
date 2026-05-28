@@ -1,7 +1,6 @@
 """Utilities for reading Control IOC configuration from TOML."""
 
 import ipaddress
-import socket
 import tomllib
 from pathlib import Path
 
@@ -19,7 +18,10 @@ class ControlConfig(BaseModel):
     pv_prefix: str
     """PV prefix of all PVs in this IOC"""
 
-    runinfo_topic: str = f"{socket.gethostname()}_runInfo"
+    instrument_name: str
+    """Name of the instrument"""
+
+    runinfo_topic: str
     """Run info topic to push run starts/stops to"""
 
     local_ip: ipaddress.IPv4Address

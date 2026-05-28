@@ -1,7 +1,6 @@
 """Data class containing the state of the program."""
 
 import logging
-import socket
 from typing import TypeVar
 
 from pydantic import BaseModel, Field
@@ -36,6 +35,3 @@ class Data(BaseModel):
     blocks: list[str] = Field(default_factory=list)
     """List of blocks to be inserted in the run start nexus structure.
      These are prefixed with the instrument and block server prefixes"""
-
-    instrument_name: str = Field(default_factory=socket.gethostname)
-    """The name of the instrument"""

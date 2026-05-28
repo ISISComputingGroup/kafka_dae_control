@@ -3,14 +3,17 @@
 import json
 import typing
 
+from kafka_dae_control.config import ControlConfig
+
 if typing.TYPE_CHECKING:
     from kafka_dae_control.data import Data
 
 
-def generate_nexus_structure(data: "Data") -> str:
+def generate_nexus_structure(config: ControlConfig, data: "Data") -> str:
     """Generate the nexus structure for a run start using the data class.
 
     Args:
+        config: The program's configuration
         data: The data class containing the state of the program
 
     Returns: a JSON-formatted string containing the nexus structure
@@ -30,7 +33,7 @@ def generate_nexus_structure(data: "Data") -> str:
                                 {
                                     "type": "stream",
                                     "stream": {
-                                        "topic": f"{data.instrument_name}_events",
+                                        "topic": f"{config.instrument_name}_events",
                                         "source": "KDAECTRL",
                                         "writer_module": "ev44",
                                     },
@@ -45,7 +48,7 @@ def generate_nexus_structure(data: "Data") -> str:
                                 {
                                     "type": "stream",
                                     "stream": {
-                                        "topic": f"{data.instrument_name}_sampleEnv",
+                                        "topic": f"{config.instrument_name}_sampleEnv",
                                         "source": block,
                                         "writer_module": "f144",
                                     },

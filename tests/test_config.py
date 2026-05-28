@@ -11,6 +11,7 @@ def test_config_loading():
     m = mock_open(
         read_data=b"""
 board_ip = "192.168.1.250"
+instrument_name = "TESTMACHINE"
 pv_prefix = "TE:TESTMACHINE:KDAECTRL:"
 runinfo_topic = "somemachine_runInfo"
 # a comment
@@ -28,6 +29,7 @@ state_file = "./state1.json"
     with patch("kafka_dae_control.config.open", m):
         config = load_config("")
 
+    assert config.instrument_name == "TESTMACHINE"
     assert config.board_ip == ipaddress.IPv4Address("192.168.1.250")
     assert config.runinfo_topic == "somemachine_runInfo"
     assert config.pv_prefix == "TE:TESTMACHINE:KDAECTRL:"

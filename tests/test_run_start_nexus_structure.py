@@ -1,15 +1,16 @@
 import json
 
+from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 
 
-def test_run_start_nexus_structure_contains_blocks_and_events():
+def test_run_start_nexus_structure_contains_blocks_and_events(conf: ControlConfig):
     d = Data(running=False)
     d.blocks = ["a", "b"]
-    d.instrument_name = "MUSHROOM"
+    conf.instrument_name = "MUSHROOM"
 
-    g = generate_nexus_structure(d)
+    g = generate_nexus_structure(conf, d)
     j = json.loads(g)
 
     assert "a" == j["children"][0]["children"][1]["children"][0]["stream"]["source"]

@@ -20,7 +20,7 @@ from kafka_dae_control.worker_event_handlers import (
 def test_beginning_starts_hardware_sends_run_start_and_sets_running(
     data: Data, conf: ControlConfig
 ):
-    data.instrument_name = "TESTINST"
+    conf.instrument_name = "TESTINST"
     data.run_number = 123
     producer = Mock()
     sock = Mock()

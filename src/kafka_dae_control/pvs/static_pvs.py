@@ -51,9 +51,6 @@ class StaticPVs:
         self.users = SharedPV(
             nt=NTScalar("s", display=True, form=True), initial={"value": data.users}
         )
-        self.inst_name = SharedPV(
-            nt=NTScalar("s", display=True, form=True), initial={"value": data.instrument_name}
-        )
 
         @self.title.put  # pragma: no cover
         def title_put(pv: SharedPV, op: ServerOperation) -> None:
