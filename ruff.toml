@@ -33,6 +33,7 @@ ignore = [
     "D213",    # Incompatible with D212
     "D203",    # Incompatible with D211
     "PLR6301", # Too noisy
+    "PLW0717", # Too noisy - need lots of try-catch to avoid program termination
 ]
 [lint.per-file-ignores]
 "tests/*" = [
