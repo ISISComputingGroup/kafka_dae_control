@@ -107,14 +107,15 @@ class StaticPVs:
 
         @self.frame_sync_select_sp.put
         def frame_sync_select_sp_put(pv: SharedPV, op: ServerOperation) -> None:
-            logger.info("begin")
+            value = op.value()
+            logger.info("put with %s to frame_sync_select_sp", value)
             ev = EventWithValue()
-            queue.put(FrameSyncSelectChangeEvent(value=FrameSyncSelect(op.value()), done_event=ev))
+            queue.put(FrameSyncSelectChangeEvent(value=FrameSyncSelect(value), done_event=ev))
             try:
                 ev.wait()
                 op.done()
             except Exception as e:  # noqa: BLE001
-                op.done(error=f"Failed to begin: {e}")
+                op.done(error=f"Failed to set frame_sync_select_sp: {e}")
 
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.
@@ -157,6 +158,6 @@ def static_pv_provider(
     static_provider.add(f"{prefix}USERS", static_pvs.users)
     static_provider.add(f"{prefix}RUNNUMBER", static_pvs.run_number)
     static_provider.add(f"{prefix}IRUNNUMBER", static_pvs.i_run_number)
-    static_provider.add(f"{prefix}FRAME_SYNC_SELECT_RBV", static_pvs.frame_sync_select_rbv)
-    static_provider.add(f"{prefix}FRAME_SYNC_SELECT_SP", static_pvs.frame_sync_select_sp)
+    static_provider.add(f"{prefix}DAETIMINGSOURCE", static_pvs.frame_sync_select_rbv)
+    static_provider.add(f"{prefix}DAETIMINGSOURCE:SP", static_pvs.frame_sync_select_sp)
     return static_pvs, static_provider
