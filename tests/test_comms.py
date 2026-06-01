@@ -32,6 +32,8 @@ conf = ControlConfig(
     local_ip=ipaddress.IPv4Address("127.0.0.1"),
     kafka_producer={},
     pv_update_interval_s=1.0,
+    instrument_name="TEST",
+    runinfo_topic="run-info-topic",
 )
 
 
@@ -220,6 +222,8 @@ def test_set_board_response_ip_sets_ip(mock_write_verify):  # pyright: ignore re
         pv_prefix="",
         local_ip=ipaddress.IPv4Address("192.168.1.101"),
         kafka_producer={},
+        instrument_name="TEST",
+        runinfo_topic="run-info-topic",
     )
     lock = MagicMock(spec=RLock())
 

@@ -17,6 +17,8 @@ def conf() -> ControlConfig:
             "192.168.1.2",
         ),
         kafka_producer={},
+        instrument_name="TEST",
+        runinfo_topic="run-info-topic",
     )
 
 
