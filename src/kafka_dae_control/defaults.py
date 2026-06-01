@@ -26,9 +26,9 @@ FRAME_SYNC_SEL_REGISTER = Register(0x4, 1)
 class FrameSyncSelect(Enum):
     """Options for the `frame_sync_sel` register."""
 
-    INTERNAL = 0
-    SMP_CHERENKOV = 1
-    ISIS_TOF = 2
+    INTERNAL_TEST_CLOCK = 0
+    SMP = 1
+    ISIS = 2
     UNKNOWN = -1
 
 

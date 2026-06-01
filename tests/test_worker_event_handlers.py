@@ -166,7 +166,7 @@ def test_delivery_report_cb_calls_set_if_no_error():
 
 @pytest.mark.parametrize(
     "frame_sync_select",
-    [FrameSyncSelect.INTERNAL, FrameSyncSelect.SMP_CHERENKOV, FrameSyncSelect.ISIS_TOF],
+    [FrameSyncSelect.INTERNAL_TEST_CLOCK, FrameSyncSelect.SMP, FrameSyncSelect.ISIS],
 )
 @patch("kafka_dae_control.worker_event_handlers.write_verify")
 def test_frame_sync_select_change_writes_to_hardware(
@@ -191,6 +191,8 @@ def test_frame_sync_select_failed_to_write_sets_err(
     done_event = EventWithValue()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
-    handle_frame_sync_sp_change(FrameSyncSelect.INTERNAL, conf, data, sock, sock_lock, done_event)
+    handle_frame_sync_sp_change(
+        FrameSyncSelect.INTERNAL_TEST_CLOCK, conf, data, sock, sock_lock, done_event
+    )
     assert done_event.err is not None
     assert done_event._ev.is_set()
