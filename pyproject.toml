@@ -52,7 +52,7 @@ doc = [
 ]
 lint = [
   "pyright",
-  "ruff",
+  "ruff==0.15.15",
 ]
 test = [
   "lewis",
