@@ -8,12 +8,13 @@ from streaming_data_types import deserialise_6s4t, deserialise_pl72
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
-from kafka_dae_control.defaults import RunRegister
+from kafka_dae_control.defaults import FRAME_SYNC_SEL_REGISTER, FrameSyncSelect, RunRegister
 from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.worker_event_handlers import (
     delivery_report_run_info,
     handle_begin,
     handle_end,
+    handle_frame_sync_sp_change,
 )
 
 
@@ -160,4 +161,38 @@ def test_delivery_report_cb_calls_set_if_no_error():
     done_event = EventWithValue()
     msg = Message(topic="mytopic123", value=b"myvalue234")
     delivery_report_run_info(done_event, None, msg)
+    assert done_event._ev.is_set()
+
+
+@pytest.mark.parametrize(
+    "frame_sync_select",
+    [FrameSyncSelect.INTERNAL_TEST_CLOCK, FrameSyncSelect.SMP, FrameSyncSelect.ISIS],
+)
+@patch("kafka_dae_control.worker_event_handlers.write_verify")
+def test_frame_sync_select_change_writes_to_hardware(
+    mock_write_verify: Mock, data: Data, conf: ControlConfig, frame_sync_select: FrameSyncSelect
+):
+    done_event = EventWithValue()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_frame_sync_sp_change(frame_sync_select, conf, data, sock, sock_lock, done_event)
+    assert mock_write_verify.call_args[0][2] == FRAME_SYNC_SEL_REGISTER.address
+    assert mock_write_verify.call_args[0][3] == frame_sync_select.value
+    assert mock_write_verify.call_args[0][4] == FRAME_SYNC_SEL_REGISTER.size
+    assert done_event._ev.is_set()
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
+def test_frame_sync_select_failed_to_write_sets_err(
+    m: Mock,
+    data: Data,
+    conf: ControlConfig,
+):
+    done_event = EventWithValue()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_frame_sync_sp_change(
+        FrameSyncSelect.INTERNAL_TEST_CLOCK, conf, data, sock, sock_lock, done_event
+    )
+    assert done_event.err is not None
     assert done_event._ev.is_set()

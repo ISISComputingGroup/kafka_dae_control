@@ -5,10 +5,12 @@ import pytest
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
+from kafka_dae_control.defaults import FrameSyncSelect
 from kafka_dae_control.worker_event import (
     BeginEvent,
     BlocksUpdateEvent,
     EndEvent,
+    FrameSyncSelectChangeEvent,
     HardwareUpdate,
     HardwareUpdateEvent,
     SetIPEvent,
@@ -75,7 +77,11 @@ def test_exception_thrown_in_handler_logs(
 def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
     data.running = False
     process_worker_event(
-        HardwareUpdateEvent(value=HardwareUpdate(hw_running=True)),
+        HardwareUpdateEvent(
+            value=HardwareUpdate(
+                hw_running=True, frame_sync_select=FrameSyncSelect.INTERNAL_TEST_CLOCK
+            )
+        ),
         conf,
         data,
         Mock(),
@@ -83,3 +89,21 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
         Mock(),
     )
     assert data.running
+    assert data.frame_sync_select_rbv == FrameSyncSelect.INTERNAL_TEST_CLOCK
+
+
+@patch("kafka_dae_control.worker_event.handle_frame_sync_sp_change")
+def test_frame_sync_select_change_calls_handle_frame_sync_sp_change(
+    mock_handle_frame_sync_sp_change: Mock,
+    conf: ControlConfig,
+    data: Data,
+):
+    process_worker_event(
+        FrameSyncSelectChangeEvent(value=FrameSyncSelect.INTERNAL_TEST_CLOCK, done_event=Mock()),
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        Mock(),
+    )
+    assert mock_handle_frame_sync_sp_change.called
