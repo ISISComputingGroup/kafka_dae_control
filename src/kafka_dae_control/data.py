@@ -5,6 +5,8 @@ from typing import TypeVar
 
 from pydantic import BaseModel, Field
 
+from kafka_dae_control.defaults import FrameSyncSelect
+
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
@@ -19,6 +21,12 @@ class Data(BaseModel):
 
     running: bool = False
     """Whether the hardware is running or not"""
+
+    frame_sync_select_rbv: FrameSyncSelect = FrameSyncSelect.UNKNOWN
+    """The frame sync select value on the hardware"""
+
+    frame_sync_select_sp: FrameSyncSelect = FrameSyncSelect.UNKNOWN
+    """The frame sync select value setpoint"""
 
     title: str = ""
     """Run title"""

@@ -1,6 +1,6 @@
 """Defaults for kafka_dae_control."""
 
-from enum import IntFlag
+from enum import Enum, IntFlag
 from typing import NamedTuple
 
 WRITE_PORT = 10002
@@ -20,6 +20,16 @@ class Register(NamedTuple):
 
 RUNNING_REGISTER = Register(0x0, 1)
 COMMS_REGISTER = Register(0x10000024, 1)
+FRAME_SYNC_SEL_REGISTER = Register(0x4, 1)
+
+
+class FrameSyncSelect(Enum):
+    """Options for the `frame_sync_sel` register."""
+
+    INTERNAL_TEST_CLOCK = 0
+    SMP = 1
+    ISIS = 2
+    UNKNOWN = -1
 
 
 class RunRegister(IntFlag):

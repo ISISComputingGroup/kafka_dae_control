@@ -13,3 +13,4 @@ Enum
 runstate
 dataclass
 pv
+setpoint

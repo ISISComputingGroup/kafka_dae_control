@@ -14,6 +14,11 @@ In the same virtual environment configured above, set these environment variable
 
 An example `config.toml` is provided in the root of this repository; this will need to be modified for your machine.
 
+{#statefile}
+### State file
+
+The program stores state (such as the last title, users, run number and so on) in a `state.json` file (configurable by the above) which will be created if not present with defaults.
+
 ## Configuring the hardware
 
 We have a test-bed streaming control board set up to work with `NDXEMMA-B`. This board is flashed using some software called `Vivado lab edition` which is currently being run on `NDW2621`. We deploy our software on `ndw1836` which can be accessed via `ssh` - this machine is on the same network as the streaming control board.
