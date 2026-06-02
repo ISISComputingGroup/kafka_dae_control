@@ -70,6 +70,11 @@ def handle_begin(  # noqa: PLR0913, PLR0917
         done_event: The event to call set() on when complete
 
     """
+    if data.running:
+        e = OSError("The hardware is already running - doing nothing")
+        logger.error(e)
+        done_event.err = e
+        return
     data.job_id = str(uuid.uuid4())
     run_name = f"{config.instrument_name}{data.run_number}"
     blob = serialise_pl72(
@@ -124,6 +129,11 @@ def handle_end(  # noqa: PLR0913, PLR0917
         done_event: The event to call set() on when complete
 
     """
+    if not data.running:
+        e = OSError("The hardware is already not running - doing nothing")
+        logger.error(e)
+        done_event.err = e
+        return
     blob = serialise_6s4t(job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London")))
     try:
         with sock_lock:
