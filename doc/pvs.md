@@ -19,9 +19,9 @@ Setting this PV to `1` triggers an event which firstly stops the hardware by set
 These PVs respectively display the status of and set the streaming control board's timing source (or `frame_sync_select` as named by its register)
 The options are:
 - `INTERNAL_TEST_CLOCK`: The streaming control board uses it's internal clock to mark the beginning of new frames, without synchronizing with any external signals. This is useful for testing when an external timing source is not present, but is not useful for scientific data collections.
-- `ISIS`: This synchronizes to an external timing pulse, usually from a chopper.
-- `SMP`: This synchronizes with the ISIS accelerator timing pulse.
-- `UNKNOWN`: The timing source is unknown - the hardware is in a strange state.
+- `ISIS`: This synchronizes with the ISIS accelerator timing pulse.
+- `SMP`: This synchronizes to an external timing pulse, usually from a chopper.
+- `UNKNOWN`: The timing source is unknown – the hardware is in a strange state.
 
 ## `HWRUNNING`
 
