@@ -14,6 +14,10 @@ In the same virtual environment configured above, set these environment variable
 
 An example `config.toml` is provided in the root of this repository; this will need to be modified for your machine.
 
+### Docker
+
+If you'd prefer to run the application in a docker container, you can use `docker build . --tag kdaectrl:latest` and then run it with `docker run -e EPICS_PVAS_INTF_ADDR_LIST=127.0.0.1 -e EPICS_CA_ADDR_LIST=127.0.0.1 -e EPICS_CA_AUTO_ADDR_LIST=NO kdaectrl:latest --config config.toml --log-level DEBUG`.
+
 ## Configuring the hardware
 
 We have a test-bed streaming control board set up to work with `NDXEMMA-B`. This board is flashed using some software called `Vivado lab edition` which is currently being run on `NDW2621`. We deploy our software on `ndw1836` which can be accessed via `ssh` - this machine is on the same network as the streaming control board.
