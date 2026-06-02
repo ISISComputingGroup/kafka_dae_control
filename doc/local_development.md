@@ -14,6 +14,10 @@ In the same virtual environment configured above, set these environment variable
 
 An example `config.toml` is provided in the root of this repository; this will need to be modified for your machine.
 
+### Docker
+
+If you'd prefer to run the application in a docker container, you can use `docker build . --tag kdaectrl:latest` and then run it with `docker run -e EPICS_PVAS_INTF_ADDR_LIST=127.0.0.1 -e EPICS_CA_ADDR_LIST=127.0.0.1 -e EPICS_CA_AUTO_ADDR_LIST=NO kdaectrl:latest --config config.toml --log-level DEBUG`.
+
 {#statefile}
 ### State file
 
