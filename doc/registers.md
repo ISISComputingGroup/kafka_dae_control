@@ -14,12 +14,12 @@ These may be differently addressed with different boards/firmware versions, so i
 This register is used for starting/stopping the hardware and monitoring whether it's running or not. 
 
 Bits (mask):
-31-6: Unused
-5 (`used_run_signal`): Readback for if the board is actually running or not. `1`: running, `0`: not running
-4 (`stream_empty_frames`)(`rw`): Toggle for streaming empty frames
-3 (`increment_frame_counter_n`)(`rw`): Toggle for incrementing the frame counter even if the run signal is not `1`. `0`: increment counter, `1`: don't increment counter
-2, 1 (`run_signal_select`)(`rw`): The run signal select bits. Options: `3`/`11`: External run allowing for short pause, `2`/`10`: Ethernet run signal synced to external run signal, `1`/`01`: Ethernet run signal, `0`/`00`: External run signal
-0 (`run_register`)(`rw`): Toggle to start and stop runs. `1`: start, `2`: stop
+- 31-6: Unused
+- 5 (`used_run_signal`): Readback for if the board is actually running or not. `1`: running, `0`: not running
+- 4 (`stream_empty_frames`)(`rw`): Toggle for streaming empty frames
+- 3 (`increment_frame_counter_n`)(`rw`): Toggle for incrementing the frame counter even if the run signal is not `1`. `0`: increment counter, `1`: don't increment counter
+- 2, 1 (`run_signal_select`)(`rw`): The run signal select bits. Options: `3`/`11`: External run allowing for short pause, `2`/`10`: Ethernet run signal synced to external run signal, `1`/`01`: Ethernet run signal, `0`/`00`: External run signal
+- 0 (`run_register`)(`rw`): Toggle to start and stop runs. `1`: start, `0`: stop
 
 ### `frame_sync_sel`
 
@@ -43,13 +43,13 @@ Value `frame_sync_delay`(`rw`): Frame Sync time delay from frame source trigger 
 ### `period_control`
 
 Bits (mask):
-31-7: Unused
-6 (`period_end_run_last_sequence`)(`rw`): Toggle to end run _after_ the last period sequence
-5, 4 (`period_mode`)(`rw`): The period mode to use. Options: `00`: Computer (`kdaectrl` controlled), `01`: Look up table (internal period card), `02`: External signal
-3: Unused
-2: Unused
-1 (`period_end_run_sequence`)(`rw`): Toggle to end run _at_ the end of the period sequence
-0: Unused
+- 31-7: Unused
+- 6 (`period_end_run_last_sequence`)(`rw`): Toggle to end run _after_ the last period sequence
+- 5, 4 (`period_mode`)(`rw`): The period mode to use. Options: `00`: Computer (`kdaectrl` controlled), `01`: Look up table (internal period card), `02`: External signal
+- 3: Unused
+- 2: Unused
+- 1 (`period_end_run_sequence`)(`rw`): Toggle to end run _at_ the end of the period sequence
+- 0: Unused
 
 ### `period_comp_current`
 
@@ -70,8 +70,8 @@ Value `run_pause_wait_time`(`rw`): The amount of time to wait when `run_register
 ### `time_correction_enable`
 
 Bits (mask):
-31-1: unused
-0 (`time_correction_enable`)(`rw`): Toggle to enable firmware that corrects the frame time due to inaccuracy of board oscillators.
+- 31-1: unused
+- 0 (`time_correction_enable`)(`rw`): Toggle to enable firmware that corrects the frame time due to inaccuracy of board oscillators.
 
 ### `time_correction_frame_length`
 
@@ -82,9 +82,9 @@ Value `time_correction_frame_length`(`rw`): The frame length for the time correc
 Register used to control whether or not the status packet uses a CRC check.
 
 Bits (mask): 
-31-2: Unused
-1 (`tx`)(`rw`): Controls if the TX path should perform status packet check
-0 (`rx`)(`rw`): Controls if the RX path should perform status packet check
+- 31-2: Unused
+- 1 (`tx`)(`rw`): Controls if the TX path should perform status packet check
+- 0 (`rx`)(`rw`): Controls if the RX path should perform status packet check
 
 ### `crc_error_count`
 
@@ -93,14 +93,14 @@ Value `crc_error_count`: The number of CRC errors detected.
 ### `crc_present`
 
 Bits (mask):
-31-1: Unused
-0 (`crc_present`): A single bit flag that shows if a CRC is present.
+- 31-1: Unused
+- 0 (`crc_present`): A single bit flag that shows if a CRC is present.
 
 ### `crc_pass`
 
 Bits (mask):
-31-1: Unused
-0 (`crc_present`): A single bit flag showing if the CRC is correct
+- 31-1: Unused
+- 0 (`crc_present`): A single bit flag showing if the CRC is correct
 
 ### `years`
 
@@ -169,8 +169,8 @@ Value: The time in microseconds since the last GPS signal was received.
 ### `sp_tx_enable`
 
 Bits (mask):
-31-1: Unused
-0 (`sp_tx_enable`)(`rw`): Toggle to enable the status packet in the UDP stream.
+- 31-1: Unused
+- 0 (`sp_tx_enable`)(`rw`): Toggle to enable the status packet in the UDP stream.
 
 ## `firmware_number` prefixed registers 
 
