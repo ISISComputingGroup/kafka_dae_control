@@ -100,7 +100,7 @@ Bits (mask):
 
 Bits (mask):
 - 31-1: Unused
-- 0 (`crc_present`): A single bit flag showing if the CRC is correct
+- 0 (`crc_pass`): A single bit flag showing if the CRC is correct
 
 ### `years`
 
