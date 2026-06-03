@@ -12,6 +12,7 @@ It serves as a state machine for the run state and pushes [run starts](https://g
 :glob:
 
 pvs
+registers
 local_development
 architectural_decision_records
 threads
