@@ -5,6 +5,7 @@ import socket
 import threading
 from abc import ABC
 from dataclasses import dataclass
+from queue import Queue
 
 from confluent_kafka import Producer
 
@@ -84,6 +85,7 @@ WorkerEvent = (
 
 
 def process_worker_event(  # noqa: PLR0917, PLR0913
+    queue: Queue[WorkerEvent],
     worker_event: WorkerEvent,
     config: ControlConfig,
     data: Data,
@@ -97,6 +99,7 @@ def process_worker_event(  # noqa: PLR0917, PLR0913
     It is responsible for filtering the type of worker event and acting on it accordingly.
 
     Args:
+        queue: the worker event queue which may be added to
         worker_event: the worker event to process
         config: the program's configuration options
         data: the data class containing the program's state
@@ -113,9 +116,9 @@ def process_worker_event(  # noqa: PLR0917, PLR0913
             case BlocksUpdateEvent(value):
                 data.blocks = value
             case BeginEvent(done_event=done_event):
-                handle_begin(config, data, producer, sock, sock_lock, done_event)
+                handle_begin(config, data, producer, sock, sock_lock, done_event, queue)
             case EndEvent(done_event=done_event):
-                handle_end(config, data, producer, sock, sock_lock, done_event)
+                handle_end(config, data, producer, sock, sock_lock, done_event, queue)
             case FrameSyncSelectChangeEvent(value=value, done_event=done_event):
                 handle_frame_sync_sp_change(value, config, data, sock, sock_lock, done_event)
             case SetIPEvent():

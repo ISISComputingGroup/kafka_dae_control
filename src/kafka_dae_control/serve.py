@@ -72,4 +72,4 @@ def serve(config: ControlConfig) -> None:
         while True:
             # This is the main worker thread.
             event = queue.get(block=True)
-            process_worker_event(event, config, data, producer, sock, sock_lock)
+            process_worker_event(queue, event, config, data, producer, sock, sock_lock)
