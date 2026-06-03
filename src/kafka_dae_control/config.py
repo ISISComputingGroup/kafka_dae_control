@@ -22,10 +22,10 @@ class ControlConfig(BaseModel):
     """Name of the instrument"""
 
     sample_env_topic: str
-    """The topic to use when putting f144 placeholders in the run start nexus structure"""
+    """The topic to use when putting `f144` placeholders in the run start nexus structure"""
 
     events_topic: str
-    """The topic to use when putting ev44 placeholders in the run start nexus structure"""
+    """The topic to use when putting `ev44` placeholders in the run start nexus structure"""
 
     runinfo_topic: str
     """Run info topic to push run starts/stops to"""
