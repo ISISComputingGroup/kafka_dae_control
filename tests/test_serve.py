@@ -47,7 +47,7 @@ def test_handshake_added_to_queue(mock_queue, mock_thread, mock_camonitor, *_): 
 @patch("kafka_dae_control.serve.camonitor")
 @patch("kafka_dae_control.serve.threading")
 @patch("kafka_dae_control.serve.Queue")
-def test_if_title_or_users_defined_camonitors_set_up(mock_queue, mock_thread, mock_camonitor, *_):
+def test_if_title_or_users_defined_camonitors_set_up(mock_queue, mock_thread, mock_camonitor, *_):  # pyright: ignore reportMissingParameterType
     # deliberately make process_worker_event() raise then catch it here to avoid while True loop
 
     with pytest.raises(Exception):
