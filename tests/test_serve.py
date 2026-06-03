@@ -32,6 +32,8 @@ def test_handshake_added_to_queue(mock_queue, mock_thread, mock_camonitor, *_): 
                 local_ip=local_ip,
                 kafka_producer={},
                 instrument_name="TEST",
+                sample_env_topic="se",
+                events_topic="ev",
             )
         )
 

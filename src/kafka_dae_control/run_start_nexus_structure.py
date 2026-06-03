@@ -33,7 +33,7 @@ def generate_nexus_structure(config: ControlConfig, data: "Data") -> str:
                                 {
                                     "type": "stream",
                                     "stream": {
-                                        "topic": f"{config.instrument_name}_events",
+                                        "topic": config.events_topic,
                                         "source": "KDAECTRL",
                                         "writer_module": "ev44",
                                     },
@@ -48,7 +48,7 @@ def generate_nexus_structure(config: ControlConfig, data: "Data") -> str:
                                 {
                                     "type": "stream",
                                     "stream": {
-                                        "topic": f"{config.instrument_name}_sampleEnv",
+                                        "topic": config.sample_env_topic,
                                         "source": block,
                                         "writer_module": "f144",
                                     },

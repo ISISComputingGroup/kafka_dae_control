@@ -20,6 +20,8 @@ local_ip = "192.168.1.17"
 
 state_file = "./state1.json"
 
+sample_env_topic = "sample-env-topic"
+events_topic = "events-topic"
 [kafka_producer]
 "bootstrap.servers" = "mybroker:9092"
 
@@ -36,6 +38,8 @@ state_file = "./state1.json"
     assert config.local_ip == ipaddress.IPv4Address("192.168.1.17")
     assert config.kafka_producer.get("bootstrap.servers") == "mybroker:9092"
     assert config.state_file == Path("./state1.json")
+    assert config.sample_env_topic == "sample-env-topic"
+    assert config.events_topic == "events-topic"
 
 
 def test_invalid_config_loading():

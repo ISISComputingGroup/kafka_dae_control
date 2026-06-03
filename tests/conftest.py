@@ -19,6 +19,8 @@ def conf() -> ControlConfig:
         kafka_producer={},
         instrument_name="TEST",
         runinfo_topic="run-info-topic",
+        sample_env_topic="sample-env-topic",
+        events_topic="events-topic",
     )
 
 

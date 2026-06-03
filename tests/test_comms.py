@@ -34,6 +34,8 @@ conf = ControlConfig(
     pv_update_interval_s=1.0,
     instrument_name="TEST",
     runinfo_topic="run-info-topic",
+    sample_env_topic="sample-env-topic",
+    events_topic="events-topic",
 )
 
 
@@ -224,6 +226,8 @@ def test_set_board_response_ip_sets_ip(mock_write_verify):  # pyright: ignore re
         kafka_producer={},
         instrument_name="TEST",
         runinfo_topic="run-info-topic",
+        sample_env_topic="sample-env-topic",
+        events_topic="events-topic",
     )
     lock = MagicMock(spec=RLock())
 
