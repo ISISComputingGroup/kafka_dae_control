@@ -14,3 +14,5 @@ runstate
 dataclass
 pv
 setpoint
+vetos
+readback

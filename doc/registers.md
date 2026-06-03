@@ -18,7 +18,7 @@ Bits (mask):
 5 (`used_run_signal`): Readback for if the board is actually running or not. `1`: running, `0`: not running
 4 (`stream_empty_frames`)(`rw`): Toggle for streaming empty frames
 3 (`increment_frame_counter_n`)(`rw`): Toggle for incrementing the frame counter even if the run signal is not `1`. `0`: increment counter, `1`: don't increment counter
-2, 1 (`run_signal_select`)(`rw`): The run signal select bits. Options: `3`: External run allowing for short pause, `2`: Ethernet run siganl synced to external run signal, `1`: Ethernet run signal, `0`: External run signal
+2, 1 (`run_signal_select`)(`rw`): The run signal select bits. Options: `3`/`11`: External run allowing for short pause, `2`/`10`: Ethernet run signal synced to external run signal, `1`/`01`: Ethernet run signal, `0`/`00`: External run signal
 0 (`run_register`)(`rw`): Toggle to start and stop runs. `1`: start, `2`: stop
 
 ### `frame_sync_sel`
@@ -180,4 +180,4 @@ These are self-describing and describe the board firmware version.
 These are internal registers used to monitor parameters on the FPGA such as temperature.
 
 ## `udp_core` prefixed registers
-These are mostly related to networking and internal device state. The only one `kdaectrl` uses currently is `udp_core_control_0_dst_ip_addr` which is a big-endian representation of the IPv4 address for the "client", which in the case of `kdaectrl` is the host running it.
+These are mostly related to networking and internal device state. The only one `kdaectrl` uses currently is `udp_core_control_0_dst_ip_addr` which is a big-endian representation of the `IPv4` address for the "client", which in the case of `kdaectrl` is the host running it.
