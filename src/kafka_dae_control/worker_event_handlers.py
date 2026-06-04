@@ -25,7 +25,7 @@ from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
-from kafka_dae_control.worker_event import WorkerEvent
+from kafka_dae_control.worker_event_types import WorkerEvent
 
 logger = logging.getLogger(__name__)
 
@@ -164,7 +164,6 @@ def handle_end(  # noqa: PLR0913, PLR0917
         save_file(data, state_file=config.state_file)
         # immediately poll hardware to avoid being able to end again before hardware is updated
         poll_hardware(config, queue, sock, sock_lock)
-
     except Exception as e:
         logger.exception("Failed to end run: ")
         done_event.err = e

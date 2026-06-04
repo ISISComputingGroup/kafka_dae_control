@@ -7,7 +7,7 @@ from queue import Queue
 from threading import RLock
 from time import sleep
 from typing import Any, Never
-    
+
 from kafka_dae_control.comms import read
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.defaults import (
@@ -16,7 +16,7 @@ from kafka_dae_control.defaults import (
     FrameSyncSelect,
     RunRegister,
 )
-from kafka_dae_control.worker_event import HardwareUpdate, HardwareUpdateEvent, WorkerEvent
+from kafka_dae_control.worker_event_types import HardwareUpdate, HardwareUpdateEvent, WorkerEvent
 
 logger = logging.getLogger(__name__)
 
