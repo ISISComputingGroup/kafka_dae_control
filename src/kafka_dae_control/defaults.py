@@ -1,6 +1,6 @@
 """Defaults for kafka_dae_control."""
 
-from enum import Enum, IntFlag
+from enum import Enum, IntFlag, StrEnum
 from typing import NamedTuple
 
 WRITE_PORT = 10002
@@ -19,7 +19,7 @@ class Register(NamedTuple):
     size: int
 
 
-class Registers(Enum):
+class Registers(StrEnum):
     """Register IDs on the streaming control board."""
 
     RUNNING_REGISTER = "run_register"

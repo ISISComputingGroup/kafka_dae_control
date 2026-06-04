@@ -21,8 +21,15 @@ board_ip = ipaddress.IPv4Address("192.168.1.102")
 @patch("kafka_dae_control.serve.threading")
 @patch("kafka_dae_control.serve.Queue")
 def test_handshake_added_to_queue(
-    mock_queue, mock_thread, mock_camonitor, _, __, ___, ____, conf: ControlConfig
-):  # pyright: ignore reportMissingParameterType
+    mock_queue,  # pyright: ignore reportMissingParameterType
+    mock_thread,  # pyright: ignore reportMissingParameterType
+    mock_camonitor,  # pyright: ignore reportMissingParameterType
+    _,  # pyright: ignore reportMissingParameterType
+    __,  # pyright: ignore reportMissingParameterType
+    ___,  # pyright: ignore reportMissingParameterType
+    ____,  # pyright: ignore reportMissingParameterType
+    conf: ControlConfig,
+):
     # deliberately make process_worker_event() raise then catch it here to avoid while True loop
     conf.pv_prefix = "IN:TEST:"
 

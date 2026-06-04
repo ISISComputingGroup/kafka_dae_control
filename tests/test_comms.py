@@ -262,7 +262,7 @@ def test_inv_write_verify_retries(
             Mock(),
             0,
             RunRegister.ETHERNET_OVERRIDE,
-            verify=lambda x: x == "this will never be the same as the register value",
+            verify=lambda x: x == "this will never be the same as the register value",  # pyright: ignore reportUnnecessaryComparison
             count=1,
             write_attempts=2,
         )
