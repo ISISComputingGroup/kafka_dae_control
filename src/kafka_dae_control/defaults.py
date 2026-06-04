@@ -18,6 +18,15 @@ class Register(NamedTuple):
     size: int
 
 
+class Registers(Enum):
+    """Register IDs on the streaming control board."""
+
+    RUNNING_REGISTER = "run_register"
+    FRAME_SYNC_SEL_REGISTER = "frame_sync_sel"
+
+    COMMS_REGISTER = "udp_core_control_0_dst_ip_addr"
+
+
 RUNNING_REGISTER = Register(0x0, 1)
 COMMS_REGISTER = Register(0x10000024, 1)
 FRAME_SYNC_SEL_REGISTER = Register(0x4, 1)
