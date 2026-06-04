@@ -16,6 +16,8 @@ pv_prefix = "TE:TESTMACHINE:KDAECTRL:"
 runinfo_topic = "somemachine_runInfo"
 # a comment
 
+board_xml = "test.xml"
+
 local_ip = "192.168.1.17"
 
 state_file = "./state1.json"

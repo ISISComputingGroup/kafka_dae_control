@@ -13,7 +13,13 @@ from ipaddress import ip_address
 from time import sleep
 
 from kafka_dae_control.config import ControlConfig
-from kafka_dae_control.defaults import COMMS_REGISTER, RECEIVE_BUFFER_SIZE
+from kafka_dae_control.defaults import (
+    READ_PORT,
+    RECEIVE_BUFFER_SIZE,
+    REGISTER_SIZE_WORDS,
+    WRITE_PORT,
+    Registers,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +36,8 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
     sock: socket.SocketType,
     address: int,
     data: int,
-    count: int,
     verify: VerifyFunc,
+    count: int = REGISTER_SIZE_WORDS,
     write_attempts: int = WRITE_ATTEMPTS,
 ) -> None:
     """Write by reading the current value then ANDing it with the inverse of the new data.
@@ -63,7 +69,7 @@ def write_and_inv_then_verify(  # noqa: PLR0913 PLR0917
         "AND of current value (%s) and inverse of (%s) is %s", current_val, data, new_value
     )
     # write the new value and verify
-    write_verify(config, sock, address, new_value, count, verify, write_attempts)
+    write_verify(config, sock, address, new_value, verify, count, write_attempts)
 
 
 def write_verify(  # noqa: PLR0913 PLR0917
@@ -71,8 +77,8 @@ def write_verify(  # noqa: PLR0913 PLR0917
     sock: socket.SocketType,
     address: int,
     new_value: int,
-    count: int,
     verify: VerifyFunc,
+    count: int = REGISTER_SIZE_WORDS,
     write_attempts: int = WRITE_ATTEMPTS,
 ) -> None:
     """Write a value then verify it by reading it back with a retry/timeout loop.
@@ -117,8 +123,8 @@ def write(  # noqa: PLR0917, PLR0913
     host: ipaddress.IPv4Address,
     address: int,
     data: int,
-    count: int,
-    port: int,
+    count: int = REGISTER_SIZE_WORDS,
+    port: int = WRITE_PORT,
 ) -> None:
     """Write a value.
 
@@ -154,7 +160,11 @@ def write(  # noqa: PLR0917, PLR0913
 
 
 def read(
-    sock: socket.SocketType, host: ipaddress.IPv4Address, address: int, count: int, port: int
+    sock: socket.SocketType,
+    host: ipaddress.IPv4Address,
+    address: int,
+    count: int = REGISTER_SIZE_WORDS,
+    port: int = READ_PORT,
 ) -> int:
     """Read a register on the streaming control board and return its value.
 
@@ -232,8 +242,7 @@ def set_board_response_ip(
         write_verify(
             config,
             sock,
-            COMMS_REGISTER.address,
+            config.register_map[Registers.COMMS_REGISTER],
             ip_int,
-            COMMS_REGISTER.size,
             verify=lambda x: x == ip_int,
         )

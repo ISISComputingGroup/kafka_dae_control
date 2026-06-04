@@ -6,8 +6,7 @@ import pytest
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.defaults import (
-    FRAME_SYNC_SEL_REGISTER,
-    RUNNING_REGISTER,
+    REGISTER_SIZE_WORDS,
     FrameSyncSelect,
     RunRegister,
 )
@@ -32,15 +31,15 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
             call(
                 sock,
                 conf.board_ip,
-                RUNNING_REGISTER.address,
-                RUNNING_REGISTER.size,
+                0,
+                REGISTER_SIZE_WORDS,
                 conf.read_port,
             ),
             call(
                 sock,
                 conf.board_ip,
-                FRAME_SYNC_SEL_REGISTER.address,
-                FRAME_SYNC_SEL_REGISTER.size,
+                4,
+                REGISTER_SIZE_WORDS,
                 conf.read_port,
             ),
         ]

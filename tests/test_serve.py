@@ -20,20 +20,14 @@ board_ip = ipaddress.IPv4Address("192.168.1.102")
 @patch("kafka_dae_control.serve.camonitor")
 @patch("kafka_dae_control.serve.threading")
 @patch("kafka_dae_control.serve.Queue")
-def test_handshake_added_to_queue(mock_queue, mock_thread, mock_camonitor, *_):  # pyright: ignore reportMissingParameterType
+def test_handshake_added_to_queue(
+    mock_queue, mock_thread, mock_camonitor, _, __, ___, ____, conf: ControlConfig
+):  # pyright: ignore reportMissingParameterType
     # deliberately make process_worker_event() raise then catch it here to avoid while True loop
+    conf.pv_prefix = "IN:TEST:"
 
     with pytest.raises(Exception):
-        serve(
-            ControlConfig(
-                board_ip=board_ip,
-                pv_prefix="IN:TEST:",
-                runinfo_topic="",
-                local_ip=local_ip,
-                kafka_producer={},
-                instrument_name="TEST",
-            )
-        )
+        serve(conf)
 
     assert isinstance(mock_queue.return_value.put.call_args[0][0], SetIPEvent)
     assert mock_thread.Thread.call_count == 2

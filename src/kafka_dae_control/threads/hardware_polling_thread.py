@@ -10,9 +10,8 @@ from typing import Never
 from kafka_dae_control.comms import read
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.defaults import (
-    FRAME_SYNC_SEL_REGISTER,
-    RUNNING_REGISTER,
     FrameSyncSelect,
+    Registers,
     RunRegister,
 )
 from kafka_dae_control.worker_event import HardwareUpdate, HardwareUpdateEvent, WorkerEvent
@@ -41,16 +40,16 @@ def hardware_poll_thread(
                 running_register_readback = read(
                     sock,
                     config.board_ip,
-                    RUNNING_REGISTER.address,
-                    RUNNING_REGISTER.size,
+                    config.register_map[Registers.RUNNING_REGISTER],
+                    1,
                     config.read_port,
                 )
 
                 frame_sync_select_raw_readback = read(
                     sock,
                     config.board_ip,
-                    FRAME_SYNC_SEL_REGISTER.address,
-                    FRAME_SYNC_SEL_REGISTER.size,
+                    config.register_map[Registers.FRAME_SYNC_SEL_REGISTER],
+                    1,
                     config.read_port,
                 )
                 if frame_sync_select_raw_readback not in FrameSyncSelect:
