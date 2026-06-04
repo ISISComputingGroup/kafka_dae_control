@@ -41,16 +41,14 @@ def hardware_poll_thread(
                     sock,
                     config.board_ip,
                     config.register_map[Registers.RUNNING_REGISTER],
-                    1,
-                    config.read_port,
+                    port=config.read_port,
                 )
 
                 frame_sync_select_raw_readback = read(
                     sock,
                     config.board_ip,
                     config.register_map[Registers.FRAME_SYNC_SEL_REGISTER],
-                    1,
-                    config.read_port,
+                    port=config.read_port,
                 )
                 if frame_sync_select_raw_readback not in FrameSyncSelect:
                     logger.error(
