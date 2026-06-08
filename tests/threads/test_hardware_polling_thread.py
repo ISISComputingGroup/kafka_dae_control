@@ -10,7 +10,7 @@ from kafka_dae_control.defaults import (
     RunRegister,
 )
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread
-from kafka_dae_control.worker_event import HardwareUpdate
+from kafka_dae_control.worker_event_types import HardwareUpdate
 
 
 @patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)
@@ -31,13 +31,13 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
                 sock,
                 conf.board_ip,
                 0,
-                port=conf.read_port,
+                conf.read_port,
             ),
             call(
                 sock,
                 conf.board_ip,
                 4,
-                port=conf.read_port,
+                conf.read_port,
             ),
         ]
     )

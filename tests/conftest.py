@@ -22,6 +22,8 @@ def conf() -> ControlConfig:
         instrument_name="TEST",
         runinfo_topic="run-info-topic",
         board_xml=Path("blah.xml"),
+        sample_env_topic="sample-env-topic",
+        events_topic="events-topic",
     )
     cc.register_map = {
         Registers.RUNNING_REGISTER: 0,

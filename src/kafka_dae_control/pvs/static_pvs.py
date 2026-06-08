@@ -10,12 +10,10 @@ from p4p.server.thread import SharedPV
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import FrameSyncSelect
 from kafka_dae_control.event_with_value import EventWithValue
-from kafka_dae_control.worker_event import (
+from kafka_dae_control.worker_event_types import (
     BeginEvent,
     EndEvent,
     FrameSyncSelectChangeEvent,
-    TitleUpdateEvent,
-    UsersUpdateEvent,
     WorkerEvent,
 )
 
@@ -61,24 +59,6 @@ class StaticPVs:
         self.i_run_number = SharedPV(
             nt=NTScalar(display=True, form=True), initial={"value": data.run_number}
         )
-        self.title = SharedPV(
-            nt=NTScalar("s", display=True, form=True), initial={"value": data.title}
-        )
-        self.users = SharedPV(
-            nt=NTScalar("s", display=True, form=True), initial={"value": data.users}
-        )
-
-        @self.title.put  # pragma: no cover
-        def title_put(pv: SharedPV, op: ServerOperation) -> None:
-            pv.post(op.value())
-            queue.put(TitleUpdateEvent(value=op.value()))
-            op.done()
-
-        @self.users.put  # pragma: no cover
-        def users_put(pv: SharedPV, op: ServerOperation) -> None:
-            pv.post(op.value())
-            queue.put(UsersUpdateEvent(value=op.value()))
-            op.done()
 
         @self.begin.put  # pragma: no cover
         def begin_put(_: SharedPV, op: ServerOperation) -> None:
@@ -121,8 +101,6 @@ class StaticPVs:
             data: the data class containing the state of the program.
 
         """
-        self.title.post(data.title)
-        self.users.post(data.users)
         self.run_number.post(str(data.run_number))
         self.i_run_number.post(data.run_number)
         self.hw_running.post(data.running)
@@ -151,8 +129,6 @@ def static_pv_provider(
     static_provider.add(f"{prefix}HWRUNNING", static_pvs.hw_running)
     static_provider.add(f"{prefix}BEGINRUNEX", static_pvs.begin)
     static_provider.add(f"{prefix}ENDRUN", static_pvs.end)
-    static_provider.add(f"{prefix}TITLE", static_pvs.title)
-    static_provider.add(f"{prefix}USERS", static_pvs.users)
     static_provider.add(f"{prefix}RUNNUMBER", static_pvs.run_number)
     static_provider.add(f"{prefix}IRUNNUMBER", static_pvs.i_run_number)
     static_provider.add(f"{prefix}DAETIMINGSOURCE", static_pvs.frame_sync_select_rbv)

@@ -5,7 +5,7 @@ from queue import Queue
 
 from ibex_non_ca_helpers.compress_hex import dehex_decompress_and_dejson
 
-from kafka_dae_control.worker_event import BlocksUpdateEvent, WorkerEvent
+from kafka_dae_control.worker_event_types import BlocksUpdateEvent, WorkerEvent
 
 logger = logging.getLogger(__name__)
 

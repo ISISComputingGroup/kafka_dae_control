@@ -10,12 +10,13 @@ from confluent_kafka import Producer
 from p4p.server import Server
 
 from kafka_dae_control.config import ControlConfig
-from kafka_dae_control.pvs.blocks import update_blocks
+from kafka_dae_control.process_worker_event import process_worker_event
+from kafka_dae_control.pvs.camonitor_callbacks import update_blocks
 from kafka_dae_control.pvs.static_pvs import static_pv_provider
 from kafka_dae_control.save_restore import load_data
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread
 from kafka_dae_control.threads.update_pvs_thread import update_pvs_thread
-from kafka_dae_control.worker_event import SetIPEvent, process_worker_event
+from kafka_dae_control.worker_event_types import SetIPEvent
 
 # needed for p4p and pyepics to work together
 try:
@@ -72,4 +73,4 @@ def serve(config: ControlConfig) -> None:
         while True:
             # This is the main worker thread.
             event = queue.get(block=True)
-            process_worker_event(event, config, data, producer, sock, sock_lock)
+            process_worker_event(queue, event, config, data, producer, sock, sock_lock)

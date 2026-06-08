@@ -7,7 +7,7 @@ import pytest
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.serve import serve
-from kafka_dae_control.worker_event import SetIPEvent
+from kafka_dae_control.worker_event_types import SetIPEvent
 
 local_ip = ipaddress.IPv4Address("192.168.1.101")
 board_ip = ipaddress.IPv4Address("192.168.1.102")

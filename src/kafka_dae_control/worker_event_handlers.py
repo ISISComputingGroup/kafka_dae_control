@@ -6,6 +6,7 @@ import threading
 import uuid
 from datetime import datetime
 from functools import partial
+from queue import Queue
 from zoneinfo import ZoneInfo
 
 from confluent_kafka import KafkaError, Message, Producer
@@ -22,6 +23,8 @@ from kafka_dae_control.defaults import (
 from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
+from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
+from kafka_dae_control.worker_event_types import WorkerEvent
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +60,7 @@ def handle_begin(  # noqa: PLR0913, PLR0917
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithValue[None],
+    queue: Queue[WorkerEvent],
 ) -> None:
     """Handle a begin command.
 
@@ -67,14 +71,21 @@ def handle_begin(  # noqa: PLR0913, PLR0917
         sock: the socket instance.
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete
+        queue: The queue to put hardware polling updates on after beginning
 
     """
+    if data.running:
+        e = OSError("The hardware is already running - doing nothing")
+        logger.error(e)
+        done_event.err = e
+        return
     data.job_id = str(uuid.uuid4())
+    run_name = f"{config.instrument_name}{data.run_number}"
     blob = serialise_pl72(
         job_id=data.job_id,
-        filename=f"{config.instrument_name}{data.run_number}.nxs",
+        filename=f"{run_name}.nxs",
         start_time=datetime.now(ZoneInfo("Europe/London")),
-        run_name=str(data.run_number),
+        run_name=run_name,
         nexus_structure=generate_nexus_structure(config, data),
         instrument_name=config.instrument_name,
         control_topic=config.runinfo_topic,
@@ -96,6 +107,8 @@ def handle_begin(  # noqa: PLR0913, PLR0917
         producer.flush(timeout=config.flush_timeout_s)
         logger.info("sent run start to %s", config.runinfo_topic)
         save_file(data, state_file=config.state_file)
+        # immediately poll hardware to avoid being able to begin again before hardware is updated
+        poll_hardware(config, queue, sock, sock_lock)
     except Exception as e:
         logger.exception("Failed to start run: ")
         done_event.err = e
@@ -109,6 +122,7 @@ def handle_end(  # noqa: PLR0913, PLR0917
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithValue[None],
+    queue: Queue[WorkerEvent],
 ) -> None:
     """Handle an end command.
 
@@ -119,8 +133,14 @@ def handle_end(  # noqa: PLR0913, PLR0917
         sock: the socket instance.
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete
+        queue: The queue to put hardware polling updates on after ending
 
     """
+    if not data.running:
+        e = OSError("The hardware is already not running - doing nothing")
+        logger.error(e)
+        done_event.err = e
+        return
     blob = serialise_6s4t(job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London")))
     try:
         with sock_lock:
@@ -139,7 +159,8 @@ def handle_end(  # noqa: PLR0913, PLR0917
         logger.info("sent run stop to %s", config.runinfo_topic)
         data.run_number += 1
         save_file(data, state_file=config.state_file)
-
+        # immediately poll hardware to avoid being able to end again before hardware is updated
+        poll_hardware(config, queue, sock, sock_lock)
     except Exception as e:
         logger.exception("Failed to end run: ")
         done_event.err = e
