@@ -10,7 +10,7 @@ from confluent_kafka import Producer
 from p4p.server import Server
 
 from kafka_dae_control.config import ControlConfig
-from kafka_dae_control.pvs.blocks import update_blocks
+from kafka_dae_control.pvs.camonitor_callbacks import update_blocks
 from kafka_dae_control.pvs.static_pvs import static_pv_provider
 from kafka_dae_control.save_restore import load_data
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread

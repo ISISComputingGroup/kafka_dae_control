@@ -1,6 +1,8 @@
 from queue import Queue
 
-from kafka_dae_control.pvs.blocks import update_blocks
+from kafka_dae_control.pvs.camonitor_callbacks import (
+    update_blocks,
+)
 
 
 def test_update_blocks_with_encoded_blocks_works_correctly():

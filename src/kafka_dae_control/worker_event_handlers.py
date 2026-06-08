@@ -71,11 +71,12 @@ def handle_begin(  # noqa: PLR0913, PLR0917
 
     """
     data.job_id = str(uuid.uuid4())
+    run_name = f"{config.instrument_name}{data.run_number}"
     blob = serialise_pl72(
         job_id=data.job_id,
-        filename=f"{config.instrument_name}{data.run_number}.nxs",
+        filename=f"{run_name}.nxs",
         start_time=datetime.now(ZoneInfo("Europe/London")),
-        run_name=str(data.run_number),
+        run_name=run_name,
         nexus_structure=generate_nexus_structure(config, data),
         instrument_name=config.instrument_name,
         control_topic=config.runinfo_topic,

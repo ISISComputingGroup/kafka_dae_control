@@ -6,8 +6,6 @@ from pathlib import Path
 
 from kafka_dae_control.data import Data
 
-TITLE_KEY = "title"
-USERS_KEY = "users"
 RUN_NUMBER_KEY = "run_number"
 JOB_ID_KEY = "job_id"
 RUNNING_KEY = "running"
@@ -28,8 +26,6 @@ def save_file(data: "Data", *_: int | str, state_file: Path) -> None:
     with state_file.open("w", encoding="utf-8") as file:
         json.dump(
             {
-                TITLE_KEY: data.title,
-                USERS_KEY: data.users,
                 RUN_NUMBER_KEY: data.run_number,
                 JOB_ID_KEY: data.job_id,
             },
@@ -42,7 +38,7 @@ def load_data(state_file: Path) -> Data:
     """Load persisted data from file."""
     if not state_file.exists():
         logger.warning("State file not found, using defaults")
-        return Data(job_id="", run_number=0, title="", users="", running=False)
+        return Data()
 
     with state_file.open(encoding="utf-8") as f:
         logger.debug("State file found")

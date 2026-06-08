@@ -14,8 +14,6 @@ from kafka_dae_control.worker_event import (
     HardwareUpdate,
     HardwareUpdateEvent,
     SetIPEvent,
-    TitleUpdateEvent,
-    UsersUpdateEvent,
     process_worker_event,
 )
 
@@ -23,13 +21,11 @@ from kafka_dae_control.worker_event import (
 @pytest.mark.parametrize(
     ("event", "value", "data_var"),
     [
-        (UsersUpdateEvent, "Tony Hawk", "users"),
-        (TitleUpdateEvent, "A title", "title"),
         (BlocksUpdateEvent, ["ABLOCK"], "blocks"),
     ],
 )
 def test_process_worker_event_with_basic_value_update(
-    event: type[UsersUpdateEvent | TitleUpdateEvent | BlocksUpdateEvent],
+    event: type[BlocksUpdateEvent],
     value: str | list[str],
     data_var: str,
     data: Data,

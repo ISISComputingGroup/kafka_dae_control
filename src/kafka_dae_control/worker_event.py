@@ -13,7 +13,6 @@ from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import FrameSyncSelect
 from kafka_dae_control.event_with_value import EventWithValue
-from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
@@ -74,22 +73,10 @@ class BlocksUpdateEvent(WorkerEventWithValue[list[str]]):
     """An event signalling a blocks update."""
 
 
-@dataclass
-class UsersUpdateEvent(WorkerEventWithValue[str]):
-    """An event signalling a users update."""
-
-
-@dataclass
-class TitleUpdateEvent(WorkerEventWithValue[str]):
-    """An event signalling a title update."""
-
-
 WorkerEvent = (
     SetIPEvent
     | BeginEvent
     | EndEvent
-    | TitleUpdateEvent
-    | UsersUpdateEvent
     | HardwareUpdateEvent
     | BlocksUpdateEvent
     | FrameSyncSelectChangeEvent
@@ -131,12 +118,6 @@ def process_worker_event(  # noqa: PLR0917, PLR0913
                 handle_end(config, data, producer, sock, sock_lock, done_event)
             case FrameSyncSelectChangeEvent(value=value, done_event=done_event):
                 handle_frame_sync_sp_change(value, config, data, sock, sock_lock, done_event)
-            case TitleUpdateEvent(value=value):
-                data.title = value
-                save_file(data, state_file=config.state_file)
-            case UsersUpdateEvent(value=value):
-                data.users = value
-                save_file(data, state_file=config.state_file)
             case SetIPEvent():
                 set_board_response_ip(config, sock, sock_lock)
             case _:

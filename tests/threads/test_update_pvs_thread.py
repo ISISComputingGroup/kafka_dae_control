@@ -11,8 +11,6 @@ from kafka_dae_control.threads.update_pvs_thread import update_pvs_thread
 @patch("kafka_dae_control.threads.update_pvs_thread.sleep", side_effect=Exception)
 def test_update_pvs_thread(mock_sleep: Mock, data: Data, conf: ControlConfig):
 
-    data.title = "a title"
-    data.users = "Theresa Green"
     data.run_number = 12345
     data.running = True
 
