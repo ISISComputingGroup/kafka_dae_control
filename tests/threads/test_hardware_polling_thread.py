@@ -12,7 +12,7 @@ from kafka_dae_control.defaults import (
     RunRegister,
 )
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread
-from kafka_dae_control.worker_event import HardwareUpdate
+from kafka_dae_control.worker_event_types import HardwareUpdate
 
 
 @patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)

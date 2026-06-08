@@ -1,4 +1,5 @@
 import ipaddress
+from queue import Queue
 from threading import RLock
 from unittest.mock import MagicMock, Mock, patch
 
@@ -23,6 +24,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
 ):
     conf.instrument_name = "TESTINST"
     data.run_number = 123
+    data.running = False
     producer = Mock()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
@@ -49,6 +51,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
             sock=sock,
             sock_lock=sock_lock,
             done_event=done_event,
+            queue=Queue(),
         )
 
         write_verify.assert_called_once()
@@ -86,6 +89,7 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
 ):
     data.job_id = "job-id-123"
     data.run_number = 7
+    data.running = True
     producer = Mock()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
@@ -105,6 +109,7 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
             sock=sock,
             sock_lock=sock_lock,
             done_event=done_event,
+            queue=Queue(),
         )
 
         write_and_inv_then_verify.assert_called_once()
@@ -134,19 +139,63 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
 def test_exception_during_begin_logs(
     data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
 ):
+    data.running = False
     sock_lock = MagicMock(spec=RLock())
     sock_lock.__enter__.side_effect = Exception
-    handle_begin(conf, data, Mock(), Mock(), sock_lock, Mock())
+    handle_begin(
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        sock_lock,
+        Mock(),
+        Queue(),
+    )
     assert "Failed to start run:" in caplog.text
 
 
 def test_exception_during_end_logs(
     data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
 ):
+    data.running = True
     sock_lock = MagicMock(spec=RLock())
     sock_lock.__enter__.side_effect = Exception
-    handle_end(conf, data, Mock(), Mock(), sock_lock, Mock())
+    handle_end(
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        sock_lock,
+        Mock(),
+        Queue(),
+    )
     assert "Failed to end run:" in caplog.text
+
+
+def test_exception_during_begin_if_already_running(
+    data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    data.running = True
+    sock_lock = MagicMock(spec=RLock())
+    handle_begin(conf, data, Mock(), Mock(), sock_lock, Mock(), Queue())
+    assert "The hardware is already running - doing nothing" in caplog.text
+
+
+def test_exception_during_end_if_not_running(
+    data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    data.running = False
+    sock_lock = MagicMock(spec=RLock())
+    handle_end(
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        sock_lock,
+        Mock(),
+        Queue(),
+    )
+    assert "The hardware is already not running - doing nothing" in caplog.text
 
 
 def test_delivery_report_cb_sets_error_if_error():

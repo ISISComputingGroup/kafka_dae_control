@@ -10,7 +10,7 @@ from p4p.server.thread import SharedPV
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import FrameSyncSelect
 from kafka_dae_control.event_with_value import EventWithValue
-from kafka_dae_control.worker_event import (
+from kafka_dae_control.worker_event_types import (
     BeginEvent,
     EndEvent,
     FrameSyncSelectChangeEvent,
