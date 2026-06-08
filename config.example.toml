@@ -17,12 +17,6 @@ local_ip = "192.168.1.17"
 # file to save state to
 state_file = "state.json"
 
-# The PV to use when monitoring for title updates
-title_pv = "TE:TESTMACHINE:TITLE"
-
-# The PV to use when monitoring for users updates
-users_pv = "TE:TESTMACHINE:_USERNAME"
-
 [kafka_producer]
 "bootstrap.servers" = "livedata.isis.cclrc.ac.uk:31092"
 "enable.idempotence" = "true"
