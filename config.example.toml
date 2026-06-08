@@ -11,6 +11,12 @@ pv_prefix = "TE:TESTMACHINE:KDAECTRL:"
 # (usually <instrument>_runInfo)
 runinfo_topic = "TESTMACHINE_runInfo"
 
+# Kafka topic to use when putting sample environment placeholders in the run start message nexus_structure
+sample_env_topic = "TESTMACHINE_sampleEnv"
+
+# Kafka topic to use when putting event placeholders in the run start message's nexus_structure
+events_topic = "TESTMACHINE_events"
+
 # Local IP to send to the streaming board so it responds thereafter
 local_ip = "192.168.1.17"
 

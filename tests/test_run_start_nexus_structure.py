@@ -6,6 +6,8 @@ from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 
 
 def test_run_start_nexus_structure_contains_blocks_and_events(conf: ControlConfig):
+    conf.sample_env_topic = "MUSHROOM_sampleEnv"
+    conf.events_topic = "MUSHROOM_events"
     d = Data(running=False)
     d.blocks = ["a", "b"]
     conf.instrument_name = "MUSHROOM"
