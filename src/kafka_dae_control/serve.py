@@ -10,7 +10,7 @@ from confluent_kafka import Producer
 from p4p.server import Server
 
 from kafka_dae_control.config import ControlConfig
-from kafka_dae_control.pvs.camonitor_callbacks import update_blocks, update_title, update_users
+from kafka_dae_control.pvs.camonitor_callbacks import update_blocks
 from kafka_dae_control.pvs.static_pvs import static_pv_provider
 from kafka_dae_control.save_restore import load_data
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread
@@ -66,11 +66,6 @@ def serve(config: ControlConfig) -> None:
         f"{config.pv_prefix}CS:BLOCKSERVER:BLOCKNAMES",
         callback=partial(update_blocks, queue, config.pv_prefix),
     )
-
-    if config.title_pv is not None:
-        camonitor(config.title_pv, callback=partial(update_title, queue))
-    if config.users_pv is not None:
-        camonitor(config.users_pv, callback=partial(update_users, queue))
 
     # Start the p4p thread pool.
     with server:

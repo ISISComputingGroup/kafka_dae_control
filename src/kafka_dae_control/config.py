@@ -48,12 +48,6 @@ class ControlConfig(BaseModel):
     flush_timeout_s: int = FLUSH_TIMEOUT_S
     """The timeout for a flush after producing run info messages"""
 
-    title_pv: str | None = None
-    """The PV to monitor for title updates"""
-
-    users_pv: str | None = None
-    """The PV to monitor for users updates"""
-
 
 def load_config(config_path: str) -> ControlConfig:
     """Validate and load a config file at the specified path."""

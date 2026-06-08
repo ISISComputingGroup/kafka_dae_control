@@ -28,12 +28,6 @@ class Data(BaseModel):
     frame_sync_select_sp: FrameSyncSelect = FrameSyncSelect.UNKNOWN
     """The frame sync select value setpoint"""
 
-    title: str = ""
-    """Run title"""
-
-    users: str = ""
-    """Run users"""
-
     job_id: str = ""
     """Run's job_id, used to tie starts and stops together"""
 

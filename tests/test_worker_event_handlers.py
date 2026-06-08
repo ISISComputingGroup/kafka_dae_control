@@ -73,7 +73,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
         assert run_start.job_id == data.job_id
         assert run_start.instrument_name == "TESTINST"
         assert run_start.control_topic == "run-info-topic"
-        assert run_start.run_name == "123"
+        assert run_start.run_name == "TESTINST123"
         assert run_start.nexus_structure == nexus_structure
 
         producer.flush.assert_called_once()
