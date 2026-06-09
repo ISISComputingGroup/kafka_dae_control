@@ -38,6 +38,10 @@ def _map_register_addresses(root: Element) -> dict[Any, Any]:
     return mapping
 
 
+class BadFirmwareXMLError(Exception):
+    """Exception for an invalid firmware XML file."""
+
+
 def _assert_keys_in_mapping(mapping: dict[str, int]) -> None:
-    for r in Registers:
-        assert r.value in mapping, f"Register {r.value} not found in mapping"
+    if registers_not_present := [r for r in Registers if r not in mapping]:
+        raise BadFirmwareXMLError(f"Invalid firmware xml - not present: {registers_not_present}")

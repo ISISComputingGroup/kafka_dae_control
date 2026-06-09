@@ -73,9 +73,11 @@ For example:
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     if args.command == "read":
-        read(sock, args.host, args.address, args.count, args.port)
+        read(sock, args.host, address=args.address, count=args.count, port=args.port)
     elif args.command == "write":
-        write(sock, args.host, args.address, args.data, args.count, args.port)
+        write(
+            sock, args.host, address=args.address, data=args.data, count=args.count, port=args.port
+        )
 
 
 if __name__ == "__main__":

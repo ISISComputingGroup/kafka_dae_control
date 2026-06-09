@@ -40,7 +40,7 @@ def test_write_sets_register():
         RunRegister.ETHERNET_OVERRIDE | RunRegister.RUN_SIGNAL_ETH | RunRegister.STREAM_EMPTY_FRAMES
     )
 
-    write(sock, HOST, 0, data, 1, WRITE_PORT)
+    write(sock, HOST, address=0, data=data, count=1, port=WRITE_PORT)
 
     sock.sendto.assert_called_once_with(
         b"\x00\x00\x00\x00\x00\x01\x00\x00\x00\x13",
@@ -59,7 +59,7 @@ def test_read_returns_result():
         (HOST, READ_PORT),
     )
 
-    result = read(sock, HOST, 0, 1, READ_PORT)
+    result = read(sock, HOST, address=0, count=1, port=READ_PORT)
 
     assert result == RunRegister.STATUS_RUNNING
     sock.settimeout.assert_called_once_with(2.0)
@@ -77,7 +77,7 @@ def test_read_raises_when_response_address_does_not_match_request():
     with pytest.raises(
         OSError, match=re.escape("Received address (268435492) not same as requested address (0)")
     ):
-        read(sock, HOST, 0, 1, READ_PORT)
+        read(sock, HOST, address=0, count=1, port=READ_PORT)
 
 
 def test_read_raises_when_returned_block_size_not_same_as_requested():
@@ -90,7 +90,7 @@ def test_read_raises_when_returned_block_size_not_same_as_requested():
     with pytest.raises(
         OSError, match=re.escape("Received block size (2) not same as requested block size (1)")
     ):
-        read(sock, HOST, 268435492, 1, READ_PORT)
+        read(sock, HOST, address=268435492, count=1, port=READ_PORT)
 
 
 def test_read_raises_when_response_host_does_not_match_request():
@@ -102,7 +102,7 @@ def test_read_raises_when_response_host_does_not_match_request():
     with pytest.raises(
         OSError, match=re.escape("Received data from 192.168.1.101 not from 192.168.1.100")
     ):
-        read(sock, HOST, 0, 1, READ_PORT)
+        read(sock, HOST, address=0, count=1, port=READ_PORT)
 
 
 @patch("kafka_dae_control.comms.sleep")
@@ -123,17 +123,17 @@ def test_write_verify_sets_and_retries(
     write_verify(
         conf,
         sock,
-        0,
-        data,
+        address=0,
+        data=data,
         verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
         count=1,
         write_attempts=1,
     )
 
-    mock_write.assert_called_once_with(sock, HOST, 0, data, 1, WRITE_PORT)
+    mock_write.assert_called_once_with(sock, HOST, address=0, data=data, count=1, port=WRITE_PORT)
     assert mock_read.call_args_list == [
-        call(sock, HOST, 0, 1, READ_PORT),
-        call(sock, HOST, 0, 1, READ_PORT),
+        call(sock, HOST, address=0, count=1, port=READ_PORT),
+        call(sock, HOST, address=0, count=1, port=READ_PORT),
     ]
     mock_sleep.assert_has_calls([call(SLEEP_AFTER_WRITE_S), call(SLEEP_BETWEEN_VERIFY_ATTEMPTS_S)])
 
@@ -155,8 +155,8 @@ def test_write_verify_raises_after_retry_limit(
         write_verify(
             conf,
             Mock(),
-            0,
-            data,
+            address=0,
+            data=data,
             verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
             count=1,
             write_attempts=1,
@@ -186,22 +186,22 @@ def test_write_and_inv_then_verify_clears_bit(
     write_and_inv_then_verify(
         conf,
         sock,
-        0,
-        RunRegister.ETHERNET_OVERRIDE,
-        verify,
-        1,
-        3,
+        address=0,
+        data=RunRegister.ETHERNET_OVERRIDE,
+        verify=verify,
+        count=1,
+        write_attempts=3,
     )
 
-    mock_read.assert_called_once_with(sock, HOST, 0, 1, READ_PORT)
+    mock_read.assert_called_once_with(sock, HOST, address=0, count=1, port=READ_PORT)
     mock_write_verify.assert_called_once_with(
         conf,
         sock,
-        0,
-        RunRegister.STATUS_RUNNING,
-        verify,
-        1,
-        3,
+        address=0,
+        data=RunRegister.STATUS_RUNNING,
+        verify=verify,
+        count=1,
+        write_attempts=3,
     )
 
 
@@ -216,7 +216,7 @@ def test_set_board_response_ip_sets_ip(mock_write_verify, conf: ControlConfig): 
     set_board_response_ip(conf, sock, lock)
 
     assert lock.__enter__.called
-    assert mock_write_verify.call_args[0][3] == 3232235877
+    assert mock_write_verify.call_args[1]["data"] == 3232235877
 
 
 @patch("kafka_dae_control.comms.sleep")
@@ -236,8 +236,8 @@ def test_write_verify_retries(
         write_verify(
             conf,
             Mock(),
-            0,
-            data,
+            address=0,
+            data=data,
             verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
             count=1,
             write_attempts=2,
@@ -260,8 +260,8 @@ def test_inv_write_verify_retries(
         write_and_inv_then_verify(
             conf,
             Mock(),
-            0,
-            RunRegister.ETHERNET_OVERRIDE,
+            address=0,
+            data=RunRegister.ETHERNET_OVERRIDE,
             verify=lambda x: x == "this will never be the same as the register value",  # pyright: ignore reportUnnecessaryComparison
             count=1,
             write_attempts=2,

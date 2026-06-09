@@ -57,15 +57,15 @@ def poll_hardware(
             running_register_readback = read(
                 sock,
                 config.board_ip,
-                config.register_map[Registers.RUNNING_REGISTER],
-                config.read_port,
+                address=config.register_map[Registers.RUNNING_REGISTER],
+                port=config.read_port,
             )
 
             frame_sync_select_raw_readback = read(
                 sock,
                 config.board_ip,
-                config.register_map[Registers.FRAME_SYNC_SEL_REGISTER],
-                config.read_port,
+                address=config.register_map[Registers.FRAME_SYNC_SEL_REGISTER],
+                port=config.read_port,
             )
             if frame_sync_select_raw_readback not in FrameSyncSelect:
                 logger.error(

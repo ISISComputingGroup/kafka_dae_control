@@ -95,8 +95,8 @@ def handle_begin(  # noqa: PLR0913, PLR0917
             write_verify(
                 config,
                 sock,
-                config.register_map[Registers.RUNNING_REGISTER],
-                RunRegister.ETHERNET_OVERRIDE
+                address=config.register_map[Registers.RUNNING_REGISTER],
+                data=RunRegister.ETHERNET_OVERRIDE
                 | RunRegister.RUN_SIGNAL_ETH
                 | RunRegister.STREAM_EMPTY_FRAMES,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
@@ -148,8 +148,8 @@ def handle_end(  # noqa: PLR0913, PLR0917
             write_and_inv_then_verify(
                 config,
                 sock,
-                config.register_map[Registers.RUNNING_REGISTER],
-                RunRegister.ETHERNET_OVERRIDE,
+                address=config.register_map[Registers.RUNNING_REGISTER],
+                data=RunRegister.ETHERNET_OVERRIDE,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING == 0,
             )
         producer.produce(
@@ -191,8 +191,8 @@ def handle_frame_sync_sp_change(  # noqa: PLR0913, PLR0917
             write_verify(
                 config,
                 sock,
-                config.register_map[Registers.FRAME_SYNC_SEL_REGISTER],
-                value.value,
+                address=config.register_map[Registers.FRAME_SYNC_SEL_REGISTER],
+                data=value.value,
                 verify=lambda x: x == value.value,
             )
     except Exception as e:

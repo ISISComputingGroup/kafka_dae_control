@@ -24,10 +24,10 @@ def test_handshake_added_to_queue(
     mock_queue,  # pyright: ignore reportMissingParameterType
     mock_thread,  # pyright: ignore reportMissingParameterType
     mock_camonitor,  # pyright: ignore reportMissingParameterType
-    _,  # pyright: ignore reportMissingParameterType
-    __,  # pyright: ignore reportMissingParameterType
-    ___,  # pyright: ignore reportMissingParameterType
-    ____,  # pyright: ignore reportMissingParameterType
+    _mock_process_worker_event,  # pyright: ignore reportMissingParameterType
+    _mock_socket,  # pyright: ignore reportMissingParameterType
+    _mock_load_data,  # pyright: ignore reportMissingParameterType
+    _mock_producer,  # pyright: ignore reportMissingParameterType
     conf: ControlConfig,
 ):
     # deliberately make process_worker_event() raise then catch it here to avoid while True loop

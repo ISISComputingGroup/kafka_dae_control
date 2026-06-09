@@ -30,14 +30,14 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
             call(
                 sock,
                 conf.board_ip,
-                0,
-                conf.read_port,
+                address=0,
+                port=conf.read_port,
             ),
             call(
                 sock,
                 conf.board_ip,
-                4,
-                conf.read_port,
+                address=4,
+                port=conf.read_port,
             ),
         ]
     )
