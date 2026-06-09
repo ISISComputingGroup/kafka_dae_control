@@ -201,3 +201,76 @@ def handle_frame_sync_sp_change(  # noqa: PLR0913, PLR0917
         return
     data.frame_sync_select_sp = value
     done_event.set()
+
+
+def set_num_periods(  # noqa: PLR0913, PLR0917
+    value: int,
+    config: ControlConfig,
+    data: Data,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithValue[None],
+) -> None:
+    """Set the number of periods on the hardware.
+
+    Args:
+        value: the new value to write to hardware
+        config: The program's configuration.
+        data: the data class containing the state of the program.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+        done_event: The event to call set() on when complete
+
+
+    """
+    try:
+        with sock_lock:
+            write_verify(
+                config,
+                sock,
+                config.register_map[Registers.PERIOD_NUMBER_LIMIT],
+                value,
+                verify=lambda x: x == value,
+            )
+    except Exception as e:
+        logger.exception("Failed to set frame sync select: ")
+        done_event.err = e
+        return
+    data.num_periods = value
+    done_event.set()
+
+
+def set_current_period(  # noqa: PLR0913, PLR0917
+    value: int,
+    config: ControlConfig,
+    data: Data,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithValue[None],
+) -> None:
+    """Set the current period number on the hardware.
+
+    Args:
+        value: the new value to write to hardware
+        config: The program's configuration.
+        data: the data class containing the state of the program.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+        done_event: The event to call set() on when complete
+
+    """
+    try:
+        with sock_lock:
+            write_verify(
+                config,
+                sock,
+                config.register_map[Registers.PERIOD_COMP_CURRENT],
+                value,
+                verify=lambda x: x == value,
+            )
+    except Exception as e:
+        logger.exception("Failed to set frame sync select: ")
+        done_event.err = e
+        return
+    data.current_period = value
+    done_event.set()

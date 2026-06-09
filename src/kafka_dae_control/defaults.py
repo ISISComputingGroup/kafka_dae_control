@@ -1,22 +1,12 @@
 """Defaults for kafka_dae_control."""
 
 from enum import Enum, IntFlag, StrEnum
-from typing import NamedTuple
 
 WRITE_PORT = 10002
 READ_PORT = 10000
 RECEIVE_BUFFER_SIZE = 1024
 FLUSH_TIMEOUT_S = 1
 REGISTER_SIZE_WORDS = 1
-
-
-class Register(NamedTuple):
-    """a register with associated size."""
-
-    """Starting word address of the register"""
-    address: int
-    """Size in 32-bit words"""
-    size: int
 
 
 class Registers(StrEnum):
@@ -26,6 +16,8 @@ class Registers(StrEnum):
     FRAME_SYNC_SEL_REGISTER = "frame_sync_sel"
 
     COMMS_REGISTER = "udp_core_control_0_dst_ip_addr"
+    PERIOD_COMP_CURRENT = "period_comp_current"
+    PERIOD_NUMBER_LIMIT = "period_number_limit"
 
 
 class FrameSyncSelect(Enum):
