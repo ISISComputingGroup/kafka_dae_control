@@ -76,11 +76,27 @@ def poll_hardware(
             else:
                 frame_sync_select_readback = FrameSyncSelect(frame_sync_select_raw_readback)
 
+            period_comp_current_readback = read(
+                sock,
+                config.board_ip,
+                config.register_map[Registers.PERIOD_COMP_CURRENT],
+                config.read_port,
+            )
+
+            period_number_limit_readback = read(
+                sock,
+                config.board_ip,
+                config.register_map[Registers.PERIOD_NUMBER_LIMIT],
+                config.read_port,
+            )
+
         queue.put(
             HardwareUpdateEvent(
                 HardwareUpdate(
                     hw_running=running_register_readback & RunRegister.STATUS_RUNNING != 0,
                     frame_sync_select=FrameSyncSelect(frame_sync_select_readback),
+                    period_comp_current=period_comp_current_readback,
+                    period_number_limit=period_number_limit_readback,
                 )
             )
         )

@@ -49,6 +49,8 @@ class HardwareUpdate:
 
     hw_running: bool
     frame_sync_select: FrameSyncSelect
+    period_comp_current: int
+    period_number_limit: int
 
 
 @dataclass
@@ -61,6 +63,20 @@ class BlocksUpdateEvent(WorkerEventWithValue[list[str]]):
     """An event signalling a blocks update."""
 
 
+@dataclass
+class CurrentPeriodSetEvent(WorkerEventWithValue[int]):
+    """An event signalling a current period set."""
+
+    done_event: EventWithValue[None]
+
+
+@dataclass
+class NumberOfPeriodsSetEvent(WorkerEventWithValue[int]):
+    """An event signalling a number of periods set."""
+
+    done_event: EventWithValue[None]
+
+
 WorkerEvent = (
     SetIPEvent
     | BeginEvent
@@ -68,4 +84,6 @@ WorkerEvent = (
     | HardwareUpdateEvent
     | BlocksUpdateEvent
     | FrameSyncSelectChangeEvent
+    | CurrentPeriodSetEvent
+    | NumberOfPeriodsSetEvent
 )

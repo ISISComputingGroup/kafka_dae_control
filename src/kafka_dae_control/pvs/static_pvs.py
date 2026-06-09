@@ -12,8 +12,10 @@ from kafka_dae_control.defaults import FrameSyncSelect
 from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
+    CurrentPeriodSetEvent,
     EndEvent,
     FrameSyncSelectChangeEvent,
+    NumberOfPeriodsSetEvent,
     WorkerEvent,
 )
 
@@ -23,7 +25,7 @@ logger = logging.getLogger(__name__)
 class StaticPVs:
     """Static PVs for KDAECTRL."""
 
-    def __init__(self, data: "Data", queue: Queue[WorkerEvent]) -> None:
+    def __init__(self, data: "Data", queue: Queue[WorkerEvent]) -> None:  # noqa: PLR0915
         """Set up static PVs for KDAECTRL.
 
         Args:
@@ -58,6 +60,18 @@ class StaticPVs:
         )
         self.i_run_number = SharedPV(
             nt=NTScalar(display=True, form=True), initial={"value": data.run_number}
+        )
+        self.num_periods_sp = SharedPV(
+            nt=NTScalar(display=True, form=True), initial={"value": data.num_periods}
+        )
+        self.num_periods_rbv = SharedPV(
+            nt=NTScalar(display=True, form=True), initial={"value": data.num_periods}
+        )
+        self.period_sp = SharedPV(
+            nt=NTScalar(display=True, form=True), initial={"value": data.current_period}
+        )
+        self.period_rbv = SharedPV(
+            nt=NTScalar(display=True, form=True), initial={"value": data.current_period}
         )
 
         @self.begin.put  # pragma: no cover
@@ -94,6 +108,30 @@ class StaticPVs:
             except Exception as e:  # noqa: BLE001
                 op.done(error=f"Failed to set frame_sync_select_sp: {e}")
 
+        @self.num_periods_sp.put
+        def num_periods_sp_put(pv: SharedPV, op: ServerOperation) -> None:
+            value = op.value()
+            logger.info("put with %s to num_periods_sp", value)
+            ev = EventWithValue()
+            queue.put(NumberOfPeriodsSetEvent(value=value, done_event=ev))
+            try:
+                ev.wait()
+                op.done()
+            except Exception as e:  # noqa: BLE001
+                op.done(error=f"Failed to set num_periods_sp: {e}")
+
+        @self.period_sp.put
+        def period_sp_put(pv: SharedPV, op: ServerOperation) -> None:
+            value = op.value()
+            logger.info("put with %s to period_sp", value)
+            ev = EventWithValue()
+            queue.put(CurrentPeriodSetEvent(value=value, done_event=ev))
+            try:
+                ev.wait()
+                op.done()
+            except Exception as e:  # noqa: BLE001
+                op.done(error=f"Failed to set period_sp: {e}")
+
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.
 
@@ -105,6 +143,8 @@ class StaticPVs:
         self.i_run_number.post(data.run_number)
         self.hw_running.post(data.running)
         self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.value)
+        self.num_periods_rbv.post(data.num_periods)
+        self.period_rbv.post(data.current_period)
 
 
 def static_pv_provider(
@@ -133,4 +173,10 @@ def static_pv_provider(
     static_provider.add(f"{prefix}IRUNNUMBER", static_pvs.i_run_number)
     static_provider.add(f"{prefix}DAETIMINGSOURCE", static_pvs.frame_sync_select_rbv)
     static_provider.add(f"{prefix}DAETIMINGSOURCE:SP", static_pvs.frame_sync_select_sp)
+    static_provider.add(f"{prefix}NUMPERIODS:MAX", static_pvs.num_periods_sp)
+    static_provider.add(f"{prefix}NUMPERIODS:SP", static_pvs.num_periods_sp)
+    static_provider.add(f"{prefix}NUMPERIODS", static_pvs.num_periods_rbv)
+    static_provider.add(f"{prefix}PERIOD", static_pvs.period_rbv)
+    static_provider.add(f"{prefix}PERIOD:SP", static_pvs.period_sp)
+    # TODO: period mode and other toggles
     return static_pvs, static_provider

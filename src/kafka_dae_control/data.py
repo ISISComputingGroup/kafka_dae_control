@@ -37,3 +37,9 @@ class Data(BaseModel):
     blocks: list[str] = Field(default_factory=list)
     """List of blocks to be inserted in the run start nexus structure.
      These are prefixed with the instrument and block server prefixes"""
+
+    num_periods: int = 1
+    """Number of periods. This is 1-indexed for backwards compatibility reasons."""
+
+    current_period: int = 1
+    """Current period number."""

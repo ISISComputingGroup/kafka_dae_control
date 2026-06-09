@@ -14,13 +14,17 @@ from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
+    set_current_period,
+    set_num_periods,
 )
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     BlocksUpdateEvent,
+    CurrentPeriodSetEvent,
     EndEvent,
     FrameSyncSelectChangeEvent,
     HardwareUpdateEvent,
+    NumberOfPeriodsSetEvent,
     SetIPEvent,
     WorkerEvent,
 )
@@ -67,6 +71,10 @@ def process_worker_event(  # noqa: PLR0917, PLR0913
                 handle_frame_sync_sp_change(value, config, data, sock, sock_lock, done_event)
             case SetIPEvent():
                 set_board_response_ip(config, sock, sock_lock)
+            case NumberOfPeriodsSetEvent(value=value, done_event=done_event):
+                set_num_periods(value, config, data, sock, sock_lock, done_event)
+            case CurrentPeriodSetEvent(value=value, done_event=done_event):
+                set_current_period(value, config, data, sock, sock_lock, done_event)
             case _:
                 logger.error("Unknown event type: %s", worker_event)
     except Exception:
