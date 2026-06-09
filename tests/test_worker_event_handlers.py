@@ -9,7 +9,7 @@ from streaming_data_types import deserialise_6s4t, deserialise_pl72
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
-from kafka_dae_control.defaults import FRAME_SYNC_SEL_REGISTER, FrameSyncSelect, RunRegister
+from kafka_dae_control.defaults import FrameSyncSelect, RunRegister
 from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.worker_event_handlers import (
     delivery_report_run_info,
@@ -55,14 +55,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
         )
 
         write_verify.assert_called_once()
-        (
-            _,
-            _,
-            _,
-            register_value,
-            _,
-        ) = write_verify.call_args.args
-        assert register_value == (
+        assert write_verify.call_args.kwargs["data"] == (
             RunRegister.ETHERNET_OVERRIDE
             | RunRegister.RUN_SIGNAL_ETH
             | RunRegister.STREAM_EMPTY_FRAMES
@@ -113,14 +106,7 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
         )
 
         write_and_inv_then_verify.assert_called_once()
-        (
-            _,
-            _,
-            _,
-            register_value,
-            _,
-        ) = write_and_inv_then_verify.call_args.args
-        assert register_value == RunRegister.ETHERNET_OVERRIDE
+        assert write_and_inv_then_verify.call_args.kwargs["data"] == RunRegister.ETHERNET_OVERRIDE
 
         producer.produce.assert_called_once()
         topic, blob = producer.produce.call_args.args
@@ -225,9 +211,8 @@ def test_frame_sync_select_change_writes_to_hardware(
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     handle_frame_sync_sp_change(frame_sync_select, conf, data, sock, sock_lock, done_event)
-    assert mock_write_verify.call_args[0][2] == FRAME_SYNC_SEL_REGISTER.address
-    assert mock_write_verify.call_args[0][3] == frame_sync_select.value
-    assert mock_write_verify.call_args[0][4] == FRAME_SYNC_SEL_REGISTER.size
+    assert mock_write_verify.call_args[1]["address"] == 4
+    assert mock_write_verify.call_args[1]["data"] == frame_sync_select.value
     assert done_event._ev.is_set()
 
 

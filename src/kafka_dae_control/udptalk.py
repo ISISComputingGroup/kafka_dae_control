@@ -9,7 +9,7 @@ import logging
 import socket
 
 from kafka_dae_control.comms import read, write
-from kafka_dae_control.defaults import READ_PORT, WRITE_PORT
+from kafka_dae_control.defaults import READ_PORT, REGISTER_SIZE_WORDS, WRITE_PORT
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ For example:
         "address", type=lambda x: int(x, 0), help="Register address, in int or hex format"
     )
     common_subparser.add_argument(
-        "--count", type=int, default=1, help="number of words to read/write"
+        "--count", type=int, default=REGISTER_SIZE_WORDS, help="number of words to read/write"
     )
 
     read_subparser = subparser.add_parser(
@@ -73,9 +73,11 @@ For example:
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     if args.command == "read":
-        read(sock, args.host, args.address, args.count, args.port)
+        read(sock, args.host, address=args.address, count=args.count, port=args.port)
     elif args.command == "write":
-        write(sock, args.host, args.address, args.data, args.count, args.port)
+        write(
+            sock, args.host, address=args.address, data=args.data, count=args.count, port=args.port
+        )
 
 
 if __name__ == "__main__":

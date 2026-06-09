@@ -2,11 +2,13 @@
 
 import ipaddress
 import tomllib
+from functools import cached_property
 from pathlib import Path
 
 from pydantic import BaseModel, ValidationError
 
 from kafka_dae_control.defaults import FLUSH_TIMEOUT_S, READ_PORT, WRITE_PORT
+from kafka_dae_control.firmware_xml import parse_register_map
 
 
 class ControlConfig(BaseModel):
@@ -14,6 +16,9 @@ class ControlConfig(BaseModel):
 
     board_ip: ipaddress.IPv4Address
     """IP address of the streaming control board"""
+
+    board_xml: Path
+    """Path to the streaming control board's firmware-generated XML file"""
 
     pv_prefix: str
     """PV prefix of all PVs in this IOC"""
@@ -53,6 +58,11 @@ class ControlConfig(BaseModel):
 
     flush_timeout_s: int = FLUSH_TIMEOUT_S
     """The timeout for a flush after producing run info messages"""
+
+    @cached_property
+    def register_map(self) -> dict[str, int]:
+        """Parse the register XML file to get a mapping of register names to addresses."""
+        return parse_register_map(self.board_xml)
 
 
 def load_config(config_path: str) -> ControlConfig:

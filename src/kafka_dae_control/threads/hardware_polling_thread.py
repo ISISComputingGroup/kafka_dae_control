@@ -11,9 +11,8 @@ from typing import Any, Never
 from kafka_dae_control.comms import read
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.defaults import (
-    FRAME_SYNC_SEL_REGISTER,
-    RUNNING_REGISTER,
     FrameSyncSelect,
+    Registers,
     RunRegister,
 )
 from kafka_dae_control.worker_event_types import HardwareUpdate, HardwareUpdateEvent, WorkerEvent
@@ -58,17 +57,15 @@ def poll_hardware(
             running_register_readback = read(
                 sock,
                 config.board_ip,
-                RUNNING_REGISTER.address,
-                RUNNING_REGISTER.size,
-                config.read_port,
+                address=config.register_map[Registers.RUNNING_REGISTER],
+                port=config.read_port,
             )
 
             frame_sync_select_raw_readback = read(
                 sock,
                 config.board_ip,
-                FRAME_SYNC_SEL_REGISTER.address,
-                FRAME_SYNC_SEL_REGISTER.size,
-                config.read_port,
+                address=config.register_map[Registers.FRAME_SYNC_SEL_REGISTER],
+                port=config.read_port,
             )
             if frame_sync_select_raw_readback not in FrameSyncSelect:
                 logger.error(

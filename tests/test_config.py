@@ -4,7 +4,7 @@ from unittest.mock import mock_open, patch
 
 import pytest
 
-from kafka_dae_control.config import load_config
+from kafka_dae_control.config import ControlConfig, load_config
 
 
 def test_config_loading():
@@ -15,6 +15,8 @@ instrument_name = "TESTMACHINE"
 pv_prefix = "TE:TESTMACHINE:KDAECTRL:"
 runinfo_topic = "somemachine_runInfo"
 # a comment
+
+board_xml = "test.xml"
 
 local_ip = "192.168.1.17"
 
@@ -55,3 +57,24 @@ pv_prefix = 2
         pytest.raises(ValueError, match=r"Unable to load config .*"),
     ):
         load_config("")
+
+
+@patch("kafka_dae_control.config.parse_register_map")
+def test_register_map_calls_parse_register_map(mock_register_map):  # pyright: ignore reportMissingParameterType
+    cfg = ControlConfig(
+        board_ip=ipaddress.IPv4Address(
+            "192.168.1.1",
+        ),
+        pv_prefix="",
+        local_ip=ipaddress.IPv4Address(
+            "192.168.1.2",
+        ),
+        kafka_producer={},
+        instrument_name="TEST",
+        runinfo_topic="run-info-topic",
+        board_xml=Path("test1.xml"),
+        sample_env_topic="sample-env-topic",
+        events_topic="events-topic",
+    )
+    assert cfg.register_map == mock_register_map.return_value
+    mock_register_map.assert_called_once_with(Path("test1.xml"))
