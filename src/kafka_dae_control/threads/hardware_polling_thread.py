@@ -12,6 +12,8 @@ from kafka_dae_control.comms import read
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.defaults import (
     FrameSyncSelect,
+    PeriodControlFlags,
+    PeriodMode,
     Registers,
     RunRegister,
 )
@@ -79,15 +81,29 @@ def poll_hardware(
             period_comp_current_readback = read(
                 sock,
                 config.board_ip,
-                config.register_map[Registers.PERIOD_COMP_CURRENT],
-                config.read_port,
+                address=config.register_map[Registers.PERIOD_COMP_CURRENT],
+                port=config.read_port,
             )
 
             period_number_limit_readback = read(
                 sock,
                 config.board_ip,
-                config.register_map[Registers.PERIOD_NUMBER_LIMIT],
-                config.read_port,
+                address=config.register_map[Registers.PERIOD_NUMBER_LIMIT],
+                port=config.read_port,
+            )
+
+            period_control_readback = read(
+                sock,
+                config.board_ip,
+                address=config.register_map[Registers.PERIOD_CONTROL],
+                port=config.read_port,
+            )
+            period_mode = PeriodMode(
+                period_control_readback
+                & ~int(
+                    PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE
+                    | PeriodControlFlags.END_RUN_AFTER_LAST_PERIOD_SEQUENCE
+                )
             )
 
         queue.put(
@@ -97,6 +113,7 @@ def poll_hardware(
                     frame_sync_select=FrameSyncSelect(frame_sync_select_readback),
                     period_comp_current=period_comp_current_readback,
                     period_number_limit=period_number_limit_readback,
+                    period_mode=period_mode,
                 )
             )
         )
