@@ -8,7 +8,7 @@ from p4p.server import ServerOperation, StaticProvider
 from p4p.server.thread import SharedPV
 
 from kafka_dae_control.data import Data
-from kafka_dae_control.defaults import FrameSyncSelect
+from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
 from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
@@ -43,14 +43,14 @@ class StaticPVs:
             nt=NTEnum(),
             initial={
                 "choices": [x.name for x in FrameSyncSelect],
-                "index": data.frame_sync_select_rbv.value,
+                "index": data.frame_sync_select_rbv,
             },
         )
         self.frame_sync_select_sp = SharedPV(
             nt=NTEnum(),
             initial={
                 "choices": [x.name for x in FrameSyncSelect],
-                "index": data.frame_sync_select_sp.value,
+                "index": data.frame_sync_select_sp,
             },
         )
         self.begin = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
@@ -62,16 +62,30 @@ class StaticPVs:
             nt=NTScalar(display=True, form=True), initial={"value": data.run_number}
         )
         self.num_periods_sp = SharedPV(
-            nt=NTScalar(display=True, form=True), initial={"value": data.num_periods}
+            nt=NTScalar(display=True, form=True), initial={"value": data.num_periods_sp}
         )
         self.num_periods_rbv = SharedPV(
-            nt=NTScalar(display=True, form=True), initial={"value": data.num_periods}
+            nt=NTScalar(display=True, form=True), initial={"value": data.num_periods_sp}
         )
         self.period_sp = SharedPV(
-            nt=NTScalar(display=True, form=True), initial={"value": data.current_period}
+            nt=NTScalar(display=True, form=True), initial={"value": data.current_period_sp}
         )
         self.period_rbv = SharedPV(
-            nt=NTScalar(display=True, form=True), initial={"value": data.current_period}
+            nt=NTScalar(display=True, form=True), initial={"value": data.current_period_sp}
+        )
+        self.period_type_rbv = SharedPV(
+            nt=NTEnum(),
+            initial={
+                "choices": [x.name for x in PeriodMode],
+                "index": data.period_mode_rbv,
+            },
+        )
+        self.period_type_sp = SharedPV(
+            nt=NTEnum(),
+            initial={
+                "choices": [x.name for x in PeriodMode],
+                "index": data.period_mode_sp,
+            },
         )
 
         @self.begin.put  # pragma: no cover
@@ -110,7 +124,7 @@ class StaticPVs:
 
         @self.num_periods_sp.put
         def num_periods_sp_put(pv: SharedPV, op: ServerOperation) -> None:
-            value = op.value()
+            value = int(op.value())
             logger.info("put with %s to num_periods_sp", value)
             ev = EventWithValue()
             queue.put(NumberOfPeriodsSetEvent(value=value, done_event=ev))
@@ -122,6 +136,18 @@ class StaticPVs:
 
         @self.period_sp.put
         def period_sp_put(pv: SharedPV, op: ServerOperation) -> None:
+            value = int(op.value())
+            logger.info("put with %s to period_sp", value)
+            ev = EventWithValue()
+            queue.put(CurrentPeriodSetEvent(value=value, done_event=ev))
+            try:
+                ev.wait()
+                op.done()
+            except Exception as e:  # noqa: BLE001
+                op.done(error=f"Failed to set period_sp: {e}")
+
+        @self.period_type_sp.put
+        def period_type_sp_put(pv: SharedPV, op: ServerOperation) -> None:
             value = op.value()
             logger.info("put with %s to period_sp", value)
             ev = EventWithValue()
@@ -142,9 +168,10 @@ class StaticPVs:
         self.run_number.post(str(data.run_number))
         self.i_run_number.post(data.run_number)
         self.hw_running.post(data.running)
-        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.value)
-        self.num_periods_rbv.post(data.num_periods)
-        self.period_rbv.post(data.current_period)
+        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv)
+        self.num_periods_rbv.post(data.num_periods_rbv)
+        self.period_rbv.post(data.current_period_rbv)
+        self.period_type_rbv.post(data.period_mode_rbv)
 
 
 def static_pv_provider(
@@ -178,5 +205,6 @@ def static_pv_provider(
     static_provider.add(f"{prefix}NUMPERIODS", static_pvs.num_periods_rbv)
     static_provider.add(f"{prefix}PERIOD", static_pvs.period_rbv)
     static_provider.add(f"{prefix}PERIOD:SP", static_pvs.period_sp)
-    # TODO: period mode and other toggles
+    static_provider.add(f"{prefix}PERIODTYPE", static_pvs.period_type_sp)
+    static_provider.add(f"{prefix}PERIODTYPE:SP", static_pvs.period_type_sp)
     return static_pvs, static_provider

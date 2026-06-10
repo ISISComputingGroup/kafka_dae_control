@@ -4,7 +4,7 @@ import logging
 from abc import ABC
 from dataclasses import dataclass
 
-from kafka_dae_control.defaults import FrameSyncSelect
+from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
 from kafka_dae_control.event_with_value import EventWithValue
 
 logger = logging.getLogger(__name__)
@@ -51,6 +51,7 @@ class HardwareUpdate:
     frame_sync_select: FrameSyncSelect
     period_comp_current: int
     period_number_limit: int
+    period_mode: PeriodMode
 
 
 @dataclass

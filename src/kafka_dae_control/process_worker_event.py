@@ -61,6 +61,9 @@ def process_worker_event(  # noqa: PLR0917, PLR0913
             case HardwareUpdateEvent(value=value):
                 data.running = value.hw_running
                 data.frame_sync_select_rbv = value.frame_sync_select
+                data.num_periods_rbv = value.period_number_limit
+                data.current_period_rbv = value.period_comp_current
+                data.period_mode_rbv = value.period_mode
             case BlocksUpdateEvent(value):
                 data.blocks = value
             case BeginEvent(done_event=done_event):
