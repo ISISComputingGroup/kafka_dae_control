@@ -1,0 +1,266 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kafka_dae_control.comms &mdash; kafka-dae-control 0.0.1rc1.dev178+gdc162629f documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-codeautolink.css?v=b2176991" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=60b8283d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a5af40da"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="kafka_dae_control.config" href="kafka_dae_control.config.html" />
+    <link rel="prev" title="kafka_dae_control.cli" href="kafka_dae_control.cli.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #6eb188" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            kafka-dae-control
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Developer Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pvs.html">PVs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../registers.html">Streaming control board registers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../local_development.html">Local development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architectural_decision_records.html">Architectural Decision Records</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../threads.html">Threads in this application</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../_api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="kafka_dae_control.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.cli.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.cli</span></code></a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.comms</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.config.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.data.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.defaults.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.defaults</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.event_with_value.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.event_with_value</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.firmware_xml.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.firmware_xml</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.process_worker_event.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.process_worker_event</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.pvs.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.pvs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.run_start_nexus_structure.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.run_start_nexus_structure</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.save_restore.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.save_restore</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.serve.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.serve</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.threads.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.threads</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.udptalk.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.udptalk</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.version.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.version</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.worker_event_handlers.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.worker_event_handlers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.worker_event_types.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.worker_event_types</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #6eb188" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">kafka-dae-control</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../_api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="kafka_dae_control.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.comms</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/ISISComputingGroup/kafka_dae_control/blob/main/doc/generated/kafka_dae_control.comms.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-kafka_dae_control.comms">
+<span id="kafka-dae-control-comms"></span><h1><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.comms</span></code><a class="headerlink" href="#module-kafka_dae_control.comms" title="Link to this heading"></a></h1>
+<p>Utilities for communicating to a UDP device such as a streaming control board.</p>
+<p>The functions in this module assume that they have exclusive use of the passed-in socket.
+This means that the socket object should be protected by a lock, external to this module.</p>
+<p class="rubric">Members</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kafka_dae_control.comms.read" title="kafka_dae_control.comms.read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read</span></code></a></p></td>
+<td><p>Read a register on the streaming control board and return its value.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kafka_dae_control.comms.set_board_response_ip" title="kafka_dae_control.comms.set_board_response_ip"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_board_response_ip</span></code></a></p></td>
+<td><p>Set the board's communication register to the local IP address.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kafka_dae_control.comms.write" title="kafka_dae_control.comms.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a></p></td>
+<td><p>Write a value.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kafka_dae_control.comms.write_and_inv_then_verify" title="kafka_dae_control.comms.write_and_inv_then_verify"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_and_inv_then_verify</span></code></a></p></td>
+<td><p>Write by reading the current value then ANDing it with the inverse of the new data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kafka_dae_control.comms.write_verify" title="kafka_dae_control.comms.write_verify"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_verify</span></code></a></p></td>
+<td><p>Write a value then verify it by reading it back with a retry/timeout loop.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py function">
+<dt class="sig sig-object py" id="kafka_dae_control.comms.read">
+<span class="sig-prename descclassname"><span class="pre">kafka_dae_control.comms.</span></span><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">socket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><span class="pre">IPv4Address</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">REGISTER_SIZE_WORDS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">READ_PORT</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../_modules/kafka_dae_control/comms.html#read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kafka_dae_control.comms.read" title="Link to this definition"></a></dt>
+<dd><p>Read a register on the streaming control board and return its value.</p>
+<p>This is a ‘low-level’ function that should just attempt a single read.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sock</strong> – the UDP socket instance</p></li>
+<li><p><strong>host</strong> – the IP address of the streaming control board</p></li>
+<li><p><strong>address</strong> – the address to read</p></li>
+<li><p><strong>count</strong> – how many 32-bit words to request when reading.</p></li>
+<li><p><strong>port</strong> – port to use for reading</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: The received data</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kafka_dae_control.comms.set_board_response_ip">
+<span class="sig-prename descclassname"><span class="pre">kafka_dae_control.comms.</span></span><span class="sig-name descname"><span class="pre">set_board_response_ip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig" title="kafka_dae_control.config.ControlConfig"><span class="pre">ControlConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">socket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sock_lock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.RLock" title="(in Python v3.14)"><span class="pre">RLock</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/kafka_dae_control/comms.html#set_board_response_ip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kafka_dae_control.comms.set_board_response_ip" title="Link to this definition"></a></dt>
+<dd><p>Set the board’s communication register to the local IP address.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> – The program’s configuration</p></li>
+<li><p><strong>sock</strong> – the socket instance to use</p></li>
+<li><p><strong>sock_lock</strong> – the lock to use when using the socket instance.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kafka_dae_control.comms.write">
+<span class="sig-prename descclassname"><span class="pre">kafka_dae_control.comms.</span></span><span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">socket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><span class="pre">IPv4Address</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">REGISTER_SIZE_WORDS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WRITE_PORT</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/kafka_dae_control/comms.html#write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kafka_dae_control.comms.write" title="Link to this definition"></a></dt>
+<dd><p>Write a value.</p>
+<p>This is a low-level function that should just attempt a single write without verifying it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sock</strong> – the UDP socket instance</p></li>
+<li><p><strong>host</strong> – the streaming control board host IP</p></li>
+<li><p><strong>address</strong> – the address to write to</p></li>
+<li><p><strong>data</strong> – the data to write</p></li>
+<li><p><strong>count</strong> – the number of 32-bit words to write</p></li>
+<li><p><strong>port</strong> – port to use when writing</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kafka_dae_control.comms.write_and_inv_then_verify">
+<span class="sig-prename descclassname"><span class="pre">kafka_dae_control.comms.</span></span><span class="sig-name descname"><span class="pre">write_and_inv_then_verify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig" title="kafka_dae_control.config.ControlConfig"><span class="pre">ControlConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">socket</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VerifyFunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">REGISTER_SIZE_WORDS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_attempts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WRITE_ATTEMPTS</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/kafka_dae_control/comms.html#write_and_inv_then_verify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kafka_dae_control.comms.write_and_inv_then_verify" title="Link to this definition"></a></dt>
+<dd><p>Write by reading the current value then ANDing it with the inverse of the new data.</p>
+<p>This is essentially used to “clear” a bit and call <a class="reference internal" href="#kafka_dae_control.comms.write_verify" title="kafka_dae_control.comms.write_verify"><code class="xref py py-func docutils literal notranslate"><span class="pre">write_verify()</span></code></a></p>
+<p>An example could be you want to clear bit <cite>0x1`(binary: 01). `0x3</cite> (binary: 11) is
+the current value, so you AND <cite>0x3</cite> (binary: 11)
+with <cite>0x2</cite> (binary: 10) (as this is the inverse of <cite>0x1`(binary: 01))
+then verify that you end up with `0x2</cite> (binary: 10)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> – the program’s configuration containing board IP and ports</p></li>
+<li><p><strong>sock</strong> – the UDP socket instance</p></li>
+<li><p><strong>address</strong> – the address to write to</p></li>
+<li><p><strong>data</strong> – the data to write</p></li>
+<li><p><strong>count</strong> – the number of 32-bit words to write</p></li>
+<li><p><strong>verify</strong> – Optionally verify against a different provided value by ORing it</p></li>
+<li><p><strong>write_attempts</strong> – The number of times to retry writing and verifying.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: None</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kafka_dae_control.comms.write_verify">
+<span class="sig-prename descclassname"><span class="pre">kafka_dae_control.comms.</span></span><span class="sig-name descname"><span class="pre">write_verify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig" title="kafka_dae_control.config.ControlConfig"><span class="pre">ControlConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">socket</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">address</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">verify</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">VerifyFunc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">REGISTER_SIZE_WORDS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_attempts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WRITE_ATTEMPTS</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.14)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../_modules/kafka_dae_control/comms.html#write_verify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kafka_dae_control.comms.write_verify" title="Link to this definition"></a></dt>
+<dd><p>Write a value then verify it by reading it back with a retry/timeout loop.</p>
+<p>This function takes an “attempts” argument, which will re-write if the verification times out.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> – the program’s configuration containing board IP and ports</p></li>
+<li><p><strong>sock</strong> – the UDP socket instance</p></li>
+<li><p><strong>address</strong> – the address to write to</p></li>
+<li><p><strong>data</strong> – the data to write</p></li>
+<li><p><strong>count</strong> – the number of 32-bit words to write</p></li>
+<li><p><strong>verify</strong> – Optionally verify against a different provided value by ORing it</p></li>
+<li><p><strong>write_attempts</strong> – The number of times to retry writing and verifying.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns: None</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="kafka_dae_control.cli.html" class="btn btn-neutral float-left" title="kafka_dae_control.cli" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="kafka_dae_control.config.html" class="btn btn-neutral float-right" title="kafka_dae_control.config" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

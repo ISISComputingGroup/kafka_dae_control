@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>kafka_dae_control.config &mdash; kafka-dae-control 0.0.1rc1.dev178+gdc162629f documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../_static/sphinx-codeautolink.css?v=b2176991" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=60b8283d" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=a5af40da"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="kafka_dae_control.data" href="kafka_dae_control.data.html" />
+    <link rel="prev" title="kafka_dae_control.comms" href="kafka_dae_control.comms.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #6eb188" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            kafka-dae-control
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Developer Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../pvs.html">PVs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../registers.html">Streaming control board registers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../local_development.html">Local development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../architectural_decision_records.html">Architectural Decision Records</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../threads.html">Threads in this application</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../_api.html">API</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="kafka_dae_control.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control</span></code></a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.cli.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.cli</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.comms.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.comms</span></code></a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.data.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.defaults.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.defaults</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.event_with_value.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.event_with_value</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.firmware_xml.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.firmware_xml</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.process_worker_event.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.process_worker_event</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.pvs.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.pvs</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.run_start_nexus_structure.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.run_start_nexus_structure</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.save_restore.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.save_restore</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.serve.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.serve</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.threads.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.threads</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.udptalk.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.udptalk</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.version.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.version</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.worker_event_handlers.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.worker_event_handlers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="kafka_dae_control.worker_event_types.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.worker_event_types</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #6eb188" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">kafka-dae-control</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../_api.html">API</a></li>
+          <li class="breadcrumb-item"><a href="kafka_dae_control.html"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control</span></code></a></li>
+      <li class="breadcrumb-item active"><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.config</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/ISISComputingGroup/kafka_dae_control/blob/main/doc/generated/kafka_dae_control.config.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-kafka_dae_control.config">
+<span id="kafka-dae-control-config"></span><h1><code class="docutils literal notranslate"><span class="pre">kafka_dae_control.config</span></code><a class="headerlink" href="#module-kafka_dae_control.config" title="Link to this heading"></a></h1>
+<p>Utilities for reading Control IOC configuration from TOML.</p>
+<p class="rubric">Members</p>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#kafka_dae_control.config.ControlConfig" title="kafka_dae_control.config.ControlConfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ControlConfig</span></code></a></p></td>
+<td><p>Create a new model by parsing and validating input data from keyword arguments.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#kafka_dae_control.config.load_config" title="kafka_dae_control.config.load_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_config</span></code></a></p></td>
+<td><p>Validate and load a config file at the specified path.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py class">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">kafka_dae_control.config.</span></span><span class="sig-name descname"><span class="pre">ControlConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">board_ip</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><span class="pre">IPv4Address</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">board_xml</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">pv_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">instrument_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sample_env_topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">events_topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">runinfo_topic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_ip</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><span class="pre">IPv4Address</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">poll_interval_s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kafka_producer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">state_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">WindowsPath('state.json')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pv_update_interval_s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10002</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flush_timeout_s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/kafka_dae_control/config.html#ControlConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kafka_dae_control.config.ControlConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
+<p>Create a new model by parsing and validating input data from keyword arguments.</p>
+<p>Raises [<cite>ValidationError</cite>][pydantic_core.ValidationError] if the input data cannot be
+validated to form a valid model.</p>
+<p><cite>self</cite> is explicitly positional-only to allow <cite>self</cite> as a field name.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.board_ip">
+<span class="sig-name descname"><span class="pre">board_ip</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><span class="pre">IPv4Address</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.board_ip" title="Link to this definition"></a></dt>
+<dd><p>IP address of the streaming control board</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.board_xml">
+<span class="sig-name descname"><span class="pre">board_xml</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.board_xml" title="Link to this definition"></a></dt>
+<dd><p>Path to the streaming control board’s firmware-generated XML file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.events_topic">
+<span class="sig-name descname"><span class="pre">events_topic</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.events_topic" title="Link to this definition"></a></dt>
+<dd><p>The topic to use when putting <cite>ev44</cite> placeholders in the run start nexus structure</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.flush_timeout_s">
+<span class="sig-name descname"><span class="pre">flush_timeout_s</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.flush_timeout_s" title="Link to this definition"></a></dt>
+<dd><p>The timeout for a flush after producing run info messages</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.instrument_name">
+<span class="sig-name descname"><span class="pre">instrument_name</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.instrument_name" title="Link to this definition"></a></dt>
+<dd><p>Name of the instrument</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.kafka_producer">
+<span class="sig-name descname"><span class="pre">kafka_producer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.kafka_producer" title="Link to this definition"></a></dt>
+<dd><p>Kafka producer configuration</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.local_ip">
+<span class="sig-name descname"><span class="pre">local_ip</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.14)"><span class="pre">IPv4Address</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.local_ip" title="Link to this definition"></a></dt>
+<dd><p>Local IP to set the control board IP register to</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.model_config">
+<span class="sig-name descname"><span class="pre">model_config</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.model_config" title="Link to this definition"></a></dt>
+<dd><p>Configuration for the model, should be a dictionary conforming to [<cite>ConfigDict</cite>][pydantic.config.ConfigDict].</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.poll_interval_s">
+<span class="sig-name descname"><span class="pre">poll_interval_s</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.poll_interval_s" title="Link to this definition"></a></dt>
+<dd><p>How often to poll the streaming control board</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.pv_prefix">
+<span class="sig-name descname"><span class="pre">pv_prefix</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.pv_prefix" title="Link to this definition"></a></dt>
+<dd><p>PV prefix of all PVs in this IOC</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.pv_update_interval_s">
+<span class="sig-name descname"><span class="pre">pv_update_interval_s</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><span class="pre">float</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.pv_update_interval_s" title="Link to this definition"></a></dt>
+<dd><p>How often to update the PVs</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.read_port">
+<span class="sig-name descname"><span class="pre">read_port</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.read_port" title="Link to this definition"></a></dt>
+<dd><p>The read port to use for reading from the streaming control board</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.register_map">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">register_map</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.register_map" title="Link to this definition"></a></dt>
+<dd><p>Parse the register XML file to get a mapping of register names to addresses.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.runinfo_topic">
+<span class="sig-name descname"><span class="pre">runinfo_topic</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.runinfo_topic" title="Link to this definition"></a></dt>
+<dd><p>Run info topic to push run starts/stops to</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.sample_env_topic">
+<span class="sig-name descname"><span class="pre">sample_env_topic</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.sample_env_topic" title="Link to this definition"></a></dt>
+<dd><p>The topic to use when putting <cite>f144</cite> placeholders in the run start nexus structure</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.state_file">
+<span class="sig-name descname"><span class="pre">state_file</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><span class="pre">Path</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.state_file" title="Link to this definition"></a></dt>
+<dd><p>Path to the file to save/restore state to</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="kafka_dae_control.config.ControlConfig.write_port">
+<span class="sig-name descname"><span class="pre">write_port</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><span class="pre">int</span></a></span><a class="headerlink" href="#kafka_dae_control.config.ControlConfig.write_port" title="Link to this definition"></a></dt>
+<dd><p>The write port to use for writing to the streaming control board</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="kafka_dae_control.config.load_config">
+<span class="sig-prename descclassname"><span class="pre">kafka_dae_control.config.</span></span><span class="sig-name descname"><span class="pre">load_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#kafka_dae_control.config.ControlConfig" title="kafka_dae_control.config.ControlConfig"><span class="pre">ControlConfig</span></a></span></span><a class="reference internal" href="../_modules/kafka_dae_control/config.html#load_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#kafka_dae_control.config.load_config" title="Link to this definition"></a></dt>
+<dd><p>Validate and load a config file at the specified path.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="kafka_dae_control.comms.html" class="btn btn-neutral float-left" title="kafka_dae_control.comms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="kafka_dae_control.data.html" class="btn btn-neutral float-right" title="kafka_dae_control.data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

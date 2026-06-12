@@ -1,0 +1,24 @@
+
+
+``kafka_dae_control.event_with_value``
+======================================
+        
+
+.. automodule:: kafka_dae_control.event_with_value
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        EventWithValue
+    
+    

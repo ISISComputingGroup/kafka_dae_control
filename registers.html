@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Streaming control board registers &mdash; kafka-dae-control 0.0.1rc1.dev178+gdc162629f documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-codeautolink.css?v=b2176991" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=60b8283d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=a5af40da"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Local development" href="local_development.html" />
+    <link rel="prev" title="PVs" href="pvs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #6eb188" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            kafka-dae-control
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Developer Information</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pvs.html">PVs</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Streaming control board registers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="local_development.html">Local development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectural_decision_records.html">Architectural Decision Records</a></li>
+<li class="toctree-l1"><a class="reference internal" href="threads.html">Threads in this application</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="_api.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #6eb188" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">kafka-dae-control</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Streaming control board registers</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/ISISComputingGroup/kafka_dae_control/blob/main/doc/registers.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="streaming-control-board-registers">
+<h1>Streaming control board registers<a class="headerlink" href="#streaming-control-board-registers" title="Link to this heading"></a></h1>
+<p>This page documents the registers on the streaming control board.</p>
+<p>A register is a 32-bit word usually made up of a mask with bit flags. In some cases, for example the <code class="docutils literal notranslate"><span class="pre">udp_core.udp_core_control_0_dst_ip_addr</span></code> register, it is just the big-endian representation of an integer.
+These are signified with either “Bits (mask)” or “Value”. Values are read-only unless otherwise noted with “(<code class="docutils literal notranslate"><span class="pre">rw</span></code>)”.</p>
+<p>These may be differently addressed with different boards/firmware versions, so it is laid out using the register name rather than any fixed address.</p>
+<section id="run-period-control-prefixed-registers">
+<h2><code class="docutils literal notranslate"><span class="pre">run_period_control</span></code> prefixed registers<a class="headerlink" href="#run-period-control-prefixed-registers" title="Link to this heading"></a></h2>
+<section id="run-register">
+<h3><code class="docutils literal notranslate"><span class="pre">run_register</span></code><a class="headerlink" href="#run-register" title="Link to this heading"></a></h3>
+<p>This register is used for starting/stopping the hardware and monitoring whether it’s running or not.</p>
+<p>Bits (mask):</p>
+<ul class="simple">
+<li><p>31-6: Unused</p></li>
+<li><p>5 (<code class="docutils literal notranslate"><span class="pre">used_run_signal</span></code>): Readback for if the board is actually running or not. <code class="docutils literal notranslate"><span class="pre">1</span></code>: running, <code class="docutils literal notranslate"><span class="pre">0</span></code>: not running</p></li>
+<li><p>4 (<code class="docutils literal notranslate"><span class="pre">stream_empty_frames</span></code>)(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): Toggle for streaming empty frames</p></li>
+<li><p>3 (<code class="docutils literal notranslate"><span class="pre">increment_frame_counter_n</span></code>)(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): Toggle for incrementing the frame counter even if the run signal is not <code class="docutils literal notranslate"><span class="pre">1</span></code>. <code class="docutils literal notranslate"><span class="pre">0</span></code>: increment counter, <code class="docutils literal notranslate"><span class="pre">1</span></code>: don’t increment counter</p></li>
+<li><p>2, 1 (<code class="docutils literal notranslate"><span class="pre">run_signal_select</span></code>)(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): The run signal select bits. Options: <code class="docutils literal notranslate"><span class="pre">3</span></code>/<code class="docutils literal notranslate"><span class="pre">11</span></code>: External run allowing for short pause, <code class="docutils literal notranslate"><span class="pre">2</span></code>/<code class="docutils literal notranslate"><span class="pre">10</span></code>: Ethernet run signal synced to external run signal, <code class="docutils literal notranslate"><span class="pre">1</span></code>/<code class="docutils literal notranslate"><span class="pre">01</span></code>: Ethernet run signal, <code class="docutils literal notranslate"><span class="pre">0</span></code>/<code class="docutils literal notranslate"><span class="pre">00</span></code>: External run signal</p></li>
+<li><p>0 (<code class="docutils literal notranslate"><span class="pre">run_register</span></code>)(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): Toggle to start and stop runs. <code class="docutils literal notranslate"><span class="pre">1</span></code>: start, <code class="docutils literal notranslate"><span class="pre">0</span></code>: stop</p></li>
+</ul>
+</section>
+<section id="frame-sync-sel">
+<h3><code class="docutils literal notranslate"><span class="pre">frame_sync_sel</span></code><a class="headerlink" href="#frame-sync-sel" title="Link to this heading"></a></h3>
+<p>This register is used for selecting the timing source. Only one option can be set despite it being a mask.</p>
+<p>Value <code class="docutils literal notranslate"><span class="pre">frame_sync_sel</span></code>(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): Which timing source to use. Options: <code class="docutils literal notranslate"><span class="pre">0</span></code>: Internal test clock, <code class="docutils literal notranslate"><span class="pre">1</span></code>: SMP, <code class="docutils literal notranslate"><span class="pre">2</span></code>: ISIS</p>
+</section>
+<section id="internal-frame-period">
+<h3><code class="docutils literal notranslate"><span class="pre">internal_frame_period</span></code><a class="headerlink" href="#internal-frame-period" title="Link to this heading"></a></h3>
+<p>The internal frame sync period.</p>
+<p>Value <code class="docutils literal notranslate"><span class="pre">internal_frame_period</span></code>(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): The time in microseconds to use. For example <code class="docutils literal notranslate"><span class="pre">0x04E20</span></code>=<code class="docutils literal notranslate"><span class="pre">~20ms</span></code>,<code class="docutils literal notranslate"><span class="pre">0x18600</span></code>=<code class="docutils literal notranslate"><span class="pre">~100ms</span></code></p>
+</section>
+<section id="frame-sync-delay">
+<h3><code class="docutils literal notranslate"><span class="pre">frame_sync_delay</span></code><a class="headerlink" href="#frame-sync-delay" title="Link to this heading"></a></h3>
+<p>Value <code class="docutils literal notranslate"><span class="pre">frame_sync_delay</span></code>(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): Frame Sync time delay from frame source trigger (in microseconds)</p>
+</section>
+<section id="run-period-control-fast-chopper-delay-x-run-period-control-fast-chopper-width-x">
+<h3><code class="docutils literal notranslate"><span class="pre">run_period_control.fast_chopper_delay_x</span></code> / <code class="docutils literal notranslate"><span class="pre">run_period_control.fast_chopper_width_x</span></code><a class="headerlink" href="#run-period-control-fast-chopper-delay-x-run-period-control-fast-chopper-width-x" title="Link to this heading"></a></h3>
+<p>(all <code class="docutils literal notranslate"><span class="pre">rw</span></code>) where <code class="docutils literal notranslate"><span class="pre">x</span></code> is the fast chopper number.</p>
+</section>
+<section id="period-control">
+<h3><code class="docutils literal notranslate"><span class="pre">period_control</span></code><a class="headerlink" href="#period-control" title="Link to this heading"></a></h3>
+<p>Bits (mask):</p>
+<ul class="simple">
+<li><p>31-7: Unused</p></li>
+<li><p>6 (<code class="docutils literal notranslate"><span class="pre">period_end_run_last_sequence</span></code>)(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): Toggle to end run <em>after</em> the last period sequence</p></li>
+<li><p>5, 4 (<code class="docutils literal notranslate"><span class="pre">period_mode</span></code>)(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): The period mode to use. Options: <code class="docutils literal notranslate"><span class="pre">00</span></code>: Computer (<code class="docutils literal notranslate"><span class="pre">kdaectrl</span></code> controlled), <code class="docutils literal notranslate"><span class="pre">01</span></code>: Look up table (internal period card), <code class="docutils literal notranslate"><span class="pre">02</span></code>: External signal</p></li>
+<li><p>3: Unused</p></li>
+<li><p>2: Unused</p></li>
+<li><p>1 (<code class="docutils literal notranslate"><span class="pre">period_end_run_sequence</span></code>)(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): Toggle to end run <em>at</em> the end of the period sequence</p></li>
+<li><p>0: Unused</p></li>
+</ul>
+</section>
+<section id="period-comp-current">
+<h3><code class="docutils literal notranslate"><span class="pre">period_comp_current</span></code><a class="headerlink" href="#period-comp-current" title="Link to this heading"></a></h3>
+<p>Value <code class="docutils literal notranslate"><span class="pre">period_comp_current</span></code>(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): The current period number set by <code class="docutils literal notranslate"><span class="pre">kdaectrl</span></code>.</p>
+</section>
+<section id="period-number-limit">
+<h3><code class="docutils literal notranslate"><span class="pre">period_number_limit</span></code><a class="headerlink" href="#period-number-limit" title="Link to this heading"></a></h3>
+<p>Value <code class="docutils literal notranslate"><span class="pre">period_number_limit</span></code>(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): The maximum period number.</p>
+</section>
+<section id="period-sequence-limit">
+<h3><code class="docutils literal notranslate"><span class="pre">period_sequence_limit</span></code><a class="headerlink" href="#period-sequence-limit" title="Link to this heading"></a></h3>
+<p>Value <code class="docutils literal notranslate"><span class="pre">period_sequence_limit</span></code>(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): The maximum period sequence number.</p>
+</section>
+<section id="run-pause-wait-time">
+<h3><code class="docutils literal notranslate"><span class="pre">run_pause_wait_time</span></code><a class="headerlink" href="#run-pause-wait-time" title="Link to this heading"></a></h3>
+<p>Value <code class="docutils literal notranslate"><span class="pre">run_pause_wait_time</span></code>(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): The amount of time to wait when <code class="docutils literal notranslate"><span class="pre">run_register</span></code> goes to low before stopping the run (to account for pauses).</p>
+</section>
+<section id="time-correction-enable">
+<h3><code class="docutils literal notranslate"><span class="pre">time_correction_enable</span></code><a class="headerlink" href="#time-correction-enable" title="Link to this heading"></a></h3>
+<p>Bits (mask):</p>
+<ul class="simple">
+<li><p>31-1: unused</p></li>
+<li><p>0 (<code class="docutils literal notranslate"><span class="pre">time_correction_enable</span></code>)(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): Toggle to enable firmware that corrects the frame time due to inaccuracy of board oscillators.</p></li>
+</ul>
+</section>
+<section id="time-correction-frame-length">
+<h3><code class="docutils literal notranslate"><span class="pre">time_correction_frame_length</span></code><a class="headerlink" href="#time-correction-frame-length" title="Link to this heading"></a></h3>
+<p>Value <code class="docutils literal notranslate"><span class="pre">time_correction_frame_length</span></code>(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): The frame length for the time correction process, in nanoseconds. <code class="docutils literal notranslate"><span class="pre">x3B9ACA00=1second</span> <span class="pre">(PPS)</span></code>, <code class="docutils literal notranslate"><span class="pre">x01312D00=20ms</span> <span class="pre">(TS1)</span></code>, <code class="docutils literal notranslate"><span class="pre">x05F5E100-100ms</span> <span class="pre">(TS2)</span></code></p>
+</section>
+<section id="enable-crc">
+<h3><code class="docutils literal notranslate"><span class="pre">enable_crc</span></code><a class="headerlink" href="#enable-crc" title="Link to this heading"></a></h3>
+<p>Register used to control whether or not the status packet uses a CRC check.</p>
+<p>Bits (mask):</p>
+<ul class="simple">
+<li><p>31-2: Unused</p></li>
+<li><p>1 (<code class="docutils literal notranslate"><span class="pre">tx</span></code>)(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): Controls if the TX path should perform status packet check</p></li>
+<li><p>0 (<code class="docutils literal notranslate"><span class="pre">rx</span></code>)(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): Controls if the RX path should perform status packet check</p></li>
+</ul>
+</section>
+<section id="crc-error-count">
+<h3><code class="docutils literal notranslate"><span class="pre">crc_error_count</span></code><a class="headerlink" href="#crc-error-count" title="Link to this heading"></a></h3>
+<p>Value <code class="docutils literal notranslate"><span class="pre">crc_error_count</span></code>: The number of CRC errors detected.</p>
+</section>
+<section id="crc-present">
+<h3><code class="docutils literal notranslate"><span class="pre">crc_present</span></code><a class="headerlink" href="#crc-present" title="Link to this heading"></a></h3>
+<p>Bits (mask):</p>
+<ul class="simple">
+<li><p>31-1: Unused</p></li>
+<li><p>0 (<code class="docutils literal notranslate"><span class="pre">crc_present</span></code>): A single bit flag that shows if a CRC is present.</p></li>
+</ul>
+</section>
+<section id="crc-pass">
+<h3><code class="docutils literal notranslate"><span class="pre">crc_pass</span></code><a class="headerlink" href="#crc-pass" title="Link to this heading"></a></h3>
+<p>Bits (mask):</p>
+<ul class="simple">
+<li><p>31-1: Unused</p></li>
+<li><p>0 (<code class="docutils literal notranslate"><span class="pre">crc_pass</span></code>): A single bit flag showing if the CRC is correct</p></li>
+</ul>
+</section>
+<section id="years">
+<h3><code class="docutils literal notranslate"><span class="pre">years</span></code><a class="headerlink" href="#years" title="Link to this heading"></a></h3>
+<p>Value: Current status packet time - years</p>
+</section>
+<section id="days">
+<h3><code class="docutils literal notranslate"><span class="pre">days</span></code><a class="headerlink" href="#days" title="Link to this heading"></a></h3>
+<p>Value: Current status packet time - days</p>
+</section>
+<section id="hours">
+<h3><code class="docutils literal notranslate"><span class="pre">hours</span></code><a class="headerlink" href="#hours" title="Link to this heading"></a></h3>
+<p>Value: Current status packet time - hours</p>
+</section>
+<section id="minutes">
+<h3><code class="docutils literal notranslate"><span class="pre">minutes</span></code><a class="headerlink" href="#minutes" title="Link to this heading"></a></h3>
+<p>Value: Current status packet time - minutes</p>
+</section>
+<section id="seconds">
+<h3><code class="docutils literal notranslate"><span class="pre">seconds</span></code><a class="headerlink" href="#seconds" title="Link to this heading"></a></h3>
+<p>Value: Current status packet time - seconds</p>
+</section>
+<section id="milliseconds">
+<h3><code class="docutils literal notranslate"><span class="pre">milliseconds</span></code><a class="headerlink" href="#milliseconds" title="Link to this heading"></a></h3>
+<p>Value: Current status packet time - milliseconds</p>
+</section>
+<section id="microseconds">
+<h3><code class="docutils literal notranslate"><span class="pre">microseconds</span></code><a class="headerlink" href="#microseconds" title="Link to this heading"></a></h3>
+<p>Value: Current status packet time - microseconds</p>
+</section>
+<section id="nanoseconds">
+<h3><code class="docutils literal notranslate"><span class="pre">nanoseconds</span></code><a class="headerlink" href="#nanoseconds" title="Link to this heading"></a></h3>
+<p>Value: Current status packet time - nanoseconds</p>
+</section>
+<section id="ppp-current-value">
+<h3><code class="docutils literal notranslate"><span class="pre">ppp_current_value</span></code><a class="headerlink" href="#ppp-current-value" title="Link to this heading"></a></h3>
+<p>Value: Protons per pulse in the current frame.</p>
+</section>
+<section id="period-number">
+<h3><code class="docutils literal notranslate"><span class="pre">period_number</span></code><a class="headerlink" href="#period-number" title="Link to this heading"></a></h3>
+<p>Value: The current period number.</p>
+</section>
+<section id="veto-number">
+<h3><code class="docutils literal notranslate"><span class="pre">veto_number</span></code><a class="headerlink" href="#veto-number" title="Link to this heading"></a></h3>
+<p>Value: The current veto number.</p>
+</section>
+<section id="veto-mask">
+<h3><code class="docutils literal notranslate"><span class="pre">veto_mask</span></code><a class="headerlink" href="#veto-mask" title="Link to this heading"></a></h3>
+<p>Bits (mask) (<code class="docutils literal notranslate"><span class="pre">rw</span></code>): The vetos to ignore.</p>
+</section>
+<section id="good-frame-count">
+<h3><code class="docutils literal notranslate"><span class="pre">good_frame_count</span></code><a class="headerlink" href="#good-frame-count" title="Link to this heading"></a></h3>
+<p>Value: Count of the good (non-vetoed) frames in the run.</p>
+</section>
+<section id="raw-frame-count">
+<h3><code class="docutils literal notranslate"><span class="pre">raw_frame_count</span></code><a class="headerlink" href="#raw-frame-count" title="Link to this heading"></a></h3>
+<p>Value: Count of all the frames in the run.</p>
+</section>
+<section id="ppp-total-count">
+<h3><code class="docutils literal notranslate"><span class="pre">ppp_total_count</span></code><a class="headerlink" href="#ppp-total-count" title="Link to this heading"></a></h3>
+<p>Value: Sum of the protons per pulse in the run.</p>
+</section>
+<section id="time-since-gps">
+<h3><code class="docutils literal notranslate"><span class="pre">time_since_gps</span></code><a class="headerlink" href="#time-since-gps" title="Link to this heading"></a></h3>
+<p>Value: The time in microseconds since the last GPS signal was received.</p>
+</section>
+<section id="sp-tx-enable">
+<h3><code class="docutils literal notranslate"><span class="pre">sp_tx_enable</span></code><a class="headerlink" href="#sp-tx-enable" title="Link to this heading"></a></h3>
+<p>Bits (mask):</p>
+<ul class="simple">
+<li><p>31-1: Unused</p></li>
+<li><p>0 (<code class="docutils literal notranslate"><span class="pre">sp_tx_enable</span></code>)(<code class="docutils literal notranslate"><span class="pre">rw</span></code>): Toggle to enable the status packet in the UDP stream.</p></li>
+</ul>
+</section>
+</section>
+<section id="firmware-number-prefixed-registers">
+<h2><code class="docutils literal notranslate"><span class="pre">firmware_number</span></code> prefixed registers<a class="headerlink" href="#firmware-number-prefixed-registers" title="Link to this heading"></a></h2>
+<p>These are self-describing and describe the board firmware version.</p>
+</section>
+<section id="fpga-mon-cont-prefixed-registers">
+<h2><code class="docutils literal notranslate"><span class="pre">fpga_mon_cont</span></code> prefixed registers<a class="headerlink" href="#fpga-mon-cont-prefixed-registers" title="Link to this heading"></a></h2>
+<p>These are internal registers used to monitor parameters on the FPGA such as temperature.</p>
+</section>
+<section id="udp-core-prefixed-registers">
+<h2><code class="docutils literal notranslate"><span class="pre">udp_core</span></code> prefixed registers<a class="headerlink" href="#udp-core-prefixed-registers" title="Link to this heading"></a></h2>
+<p>These are mostly related to networking and internal device state. The only one <code class="docutils literal notranslate"><span class="pre">kdaectrl</span></code> uses currently is <code class="docutils literal notranslate"><span class="pre">udp_core_control_0_dst_ip_addr</span></code> which is a big-endian representation of the <code class="docutils literal notranslate"><span class="pre">IPv4</span></code> address for the “client”, which in the case of <code class="docutils literal notranslate"><span class="pre">kdaectrl</span></code> is the host running it.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="pvs.html" class="btn btn-neutral float-left" title="PVs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="local_development.html" class="btn btn-neutral float-right" title="Local development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

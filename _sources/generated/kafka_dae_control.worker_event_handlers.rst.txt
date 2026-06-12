@@ -1,0 +1,30 @@
+
+
+``kafka_dae_control.worker_event_handlers``
+===========================================
+        
+        
+        
+        
+
+.. automodule:: kafka_dae_control.worker_event_handlers
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        delivery_report_run_info
+        handle_begin
+        handle_end
+        handle_frame_sync_sp_change
+    
+    

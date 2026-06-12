@@ -1,0 +1,41 @@
+﻿
+
+``kafka_dae_control``
+=====================
+
+.. automodule:: kafka_dae_control
+    :members:
+    :show-inheritance:
+
+    
+    
+    .. rubric:: Submodules
+
+    .. autosummary::
+        :toctree:
+        :template: custom-module-template.rst
+        :recursive:
+    
+        cli
+        comms
+        config
+        data
+        defaults
+        event_with_value
+        firmware_xml
+        process_worker_event
+        pvs
+        run_start_nexus_structure
+        save_restore
+        serve
+        threads
+        udptalk
+        version
+        worker_event_handlers
+        worker_event_types
+    
+    
+
+    
+    
+    

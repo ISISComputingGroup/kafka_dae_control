@@ -1,0 +1,30 @@
+
+
+``kafka_dae_control.defaults``
+==============================
+        
+        
+        
+        
+
+.. automodule:: kafka_dae_control.defaults
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        FrameSyncSelect
+        Register
+        Registers
+        RunRegister
+    
+    

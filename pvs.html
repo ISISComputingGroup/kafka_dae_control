@@ -1,0 +1,153 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PVs &mdash; kafka-dae-control 0.0.1rc1.dev178+gdc162629f documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-codeautolink.css?v=b2176991" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=60b8283d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=a5af40da"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Streaming control board registers" href="registers.html" />
+    <link rel="prev" title="Kafka DAE Control" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #6eb188" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            kafka-dae-control
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Developer Information</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">PVs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registers.html">Streaming control board registers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="local_development.html">Local development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectural_decision_records.html">Architectural Decision Records</a></li>
+<li class="toctree-l1"><a class="reference internal" href="threads.html">Threads in this application</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="_api.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #6eb188" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">kafka-dae-control</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">PVs</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/ISISComputingGroup/kafka_dae_control/blob/main/doc/pvs.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="pvs">
+<h1>PVs<a class="headerlink" href="#pvs" title="Link to this heading"></a></h1>
+<p>This page describes the data held by each PV served by this IOC.</p>
+<section id="beginrunex">
+<h2><code class="docutils literal notranslate"><span class="pre">BEGINRUNEX</span></code><a class="headerlink" href="#beginrunex" title="Link to this heading"></a></h2>
+<p>This is used for starting a run.</p>
+<p>Setting this PV to <code class="docutils literal notranslate"><span class="pre">1</span></code> triggers an event which firstly starts the hardware by setting the run status register’s lowest bit to 1, then sends a <a class="reference external" href="https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/pl72_run_start.fbs">run start</a> to Kafka. If either of those two fail, the put will error.</p>
+</section>
+<section id="endrun">
+<h2><code class="docutils literal notranslate"><span class="pre">ENDRUN</span></code><a class="headerlink" href="#endrun" title="Link to this heading"></a></h2>
+<p>This is used for ending a run.</p>
+<p>Setting this PV to <code class="docutils literal notranslate"><span class="pre">1</span></code> triggers an event which firstly stops the hardware by setting the run status register’s lowest bit to 0, then sends a <a class="reference external" href="https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/6s4t_run_stop.fbs">run stop</a> to Kafka. If either of those two fail, the put will error.</p>
+</section>
+<section id="daetimingsource-daetimingsource-sp">
+<h2><code class="docutils literal notranslate"><span class="pre">DAETIMINGSOURCE</span></code> / <code class="docutils literal notranslate"><span class="pre">DAETIMINGSOURCE:SP</span></code><a class="headerlink" href="#daetimingsource-daetimingsource-sp" title="Link to this heading"></a></h2>
+<p>These PVs respectively display the status of and set the streaming control board’s timing source (or <code class="docutils literal notranslate"><span class="pre">frame_sync_select</span></code> as named by its register)
+The options are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">INTERNAL_TEST_CLOCK</span></code>: The streaming control board uses it’s internal clock to mark the beginning of new frames, without synchronizing with any external signals. This is useful for testing when an external timing source is not present, but is not useful for scientific data collections.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ISIS</span></code>: This synchronizes with the ISIS accelerator timing pulse.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">SMP</span></code>: This synchronizes to an external timing pulse, usually from a chopper.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UNKNOWN</span></code>: The timing source is unknown – the hardware is in a strange state.</p></li>
+</ul>
+</section>
+<section id="hwrunning">
+<h2><code class="docutils literal notranslate"><span class="pre">HWRUNNING</span></code><a class="headerlink" href="#hwrunning" title="Link to this heading"></a></h2>
+<p>This PV indicates whether the hardware is running or not, as determined by the status register (in particular the <code class="docutils literal notranslate"><span class="pre">0x20</span></code> bit-flag)</p>
+</section>
+<section id="title-users">
+<h2><code class="docutils literal notranslate"><span class="pre">TITLE</span></code> / <code class="docutils literal notranslate"><span class="pre">USERS</span></code><a class="headerlink" href="#title-users" title="Link to this heading"></a></h2>
+<p>These are just “soft” PVs used for forming the <a class="reference external" href="https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/pl72_run_start.fbs">run starts</a> and <a class="reference external" href="https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/6s4t_run_stop.fbs">stops</a></p>
+</section>
+<section id="runnumber-irunnumber">
+<h2><code class="docutils literal notranslate"><span class="pre">RUNNUMBER</span></code> / <code class="docutils literal notranslate"><span class="pre">IRUNNUMBER</span></code><a class="headerlink" href="#runnumber-irunnumber" title="Link to this heading"></a></h2>
+<p>These are the current run number. A run stop increments these. They are read-only from EPICS, but changing the <a class="reference internal" href="local_development.html#statefile"><span class="std std-ref">State file</span></a> can update them.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Kafka DAE Control" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="registers.html" class="btn btn-neutral float-right" title="Streaming control board registers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

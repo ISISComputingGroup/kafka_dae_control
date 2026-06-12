@@ -1,0 +1,32 @@
+
+
+``kafka_dae_control.comms``
+===========================
+        
+        
+        
+        
+        
+
+.. automodule:: kafka_dae_control.comms
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        read
+        set_board_response_ip
+        write
+        write_and_inv_then_verify
+        write_verify
+    
+    

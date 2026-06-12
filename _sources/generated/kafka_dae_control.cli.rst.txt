@@ -1,0 +1,24 @@
+
+
+``kafka_dae_control.cli``
+=========================
+        
+
+.. automodule:: kafka_dae_control.cli
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        main
+    
+    

@@ -1,0 +1,1058 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Index &mdash; kafka-dae-control 0.0.1rc1.dev178+gdc162629f documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/sphinx-codeautolink.css?v=b2176991" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=60b8283d" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=a5af40da"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+      <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
+
+
+
+
+
+const initStyles = () => {
+    const defaultStyle = document.createElement('style');
+    defaultStyle.textContent = `pre.mermaid {
+    /* Same as .mermaid-container > pre */
+    display: block;
+    width: 100%;
+}
+
+pre.mermaid > svg {
+    /* Same as .mermaid-container > pre > svg */
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}`;
+    document.head.appendChild(defaultStyle);
+
+    const fullscreenStyle = document.createElement('style');
+    fullscreenStyle.textContent = `.mermaid-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.mermaid-container > pre {
+    display: block;
+    width: 100%;
+}
+
+.mermaid-container > pre > svg {
+    height: 500px;
+    width: 100%;
+    max-width: 100% !important;
+}
+
+.mermaid-fullscreen-btn {
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    color: #333;
+}
+
+.mermaid-fullscreen-btn:hover {
+    opacity: 100% !important;
+    background: rgba(255, 255, 255, 1);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-btn.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-btn.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 3px 10px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal {
+    display: none;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 95vw;
+    height: 100vh;
+    background: rgba(255, 255, 255, 0.98);
+    z-index: 9999;
+    padding: 20px;
+    overflow: auto;
+}
+
+.mermaid-fullscreen-modal.dark-theme {
+    background: rgba(0, 0, 0, 0.98);
+}
+
+.mermaid-fullscreen-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen {
+    position: relative;
+    width: 95vw;
+    height: 90vh;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen.dark-theme {
+    background: #1a1a1a;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+}
+
+.mermaid-container-fullscreen pre.mermaid {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mermaid-container-fullscreen .mermaid svg {
+    height: 100% !important;
+    width: 100% !important;
+    cursor: grab;
+}
+
+.mermaid-fullscreen-close {
+    position: fixed !important;
+    top: 20px !important;
+    right: 20px !important;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    font-size: 24px;
+    line-height: 1;
+    color: #333;
+}
+
+.mermaid-fullscreen-close:hover {
+    background: white;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+    transform: scale(1.1);
+}
+
+.mermaid-fullscreen-close.dark-theme {
+    background: rgba(50, 50, 50, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e0e0e0;
+}
+
+.mermaid-fullscreen-close.dark-theme:hover {
+    background: rgba(60, 60, 60, 1);
+    box-shadow: 0 6px 16px rgba(255, 255, 255, 0.2);
+}
+
+.mermaid-fullscreen-modal .mermaid-fullscreen-btn {
+    display: none !important;
+}`;
+    document.head.appendChild(fullscreenStyle);
+}
+
+// Detect if page has dark background
+const isDarkTheme = () => {
+    // We use a set of heuristics:
+    // 1. Check for common dark mode classes or attributes
+    // 2. Check computed background color brightness
+    if (document.documentElement.classList.contains('dark') ||
+        document.documentElement.getAttribute('data-theme') === 'dark' ||
+        document.body.classList.contains('dark') ||
+        document.body.getAttribute('data-theme') === 'dark') {
+        // console.log("Dark theme detected via class/attribute");
+        return true;
+    }
+    if (document.documentElement.classList.contains('light') ||
+        document.documentElement.getAttribute('data-theme') === 'light' ||
+        document.body.classList.contains('light') ||
+        document.body.getAttribute('data-theme') === 'light') {
+        // console.log("Light theme detected via class/attribute");
+        return false;
+    }
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // console.log("Dark theme detected via prefers-color-scheme");
+        return true;
+    }
+    const bgColor = window.getComputedStyle(document.body).backgroundColor;
+    const match = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+        const r = parseInt(match[1]);
+        const g = parseInt(match[2]);
+        const b = parseInt(match[3]);
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        // console.log("Background color brightness:", brightness);
+        return brightness < 128;
+    }
+    // console.log("No dark or light theme detected, defaulting to light theme");
+    return false;
+};
+
+let darkTheme = isDarkTheme();
+let modal = null;
+let modalContent = null;
+let previousScrollOffset = [window.scrollX, window.scrollY];
+
+const runMermaid = async (rerun) => {
+    console.log("Running mermaid diagrams, rerun =", rerun);
+    // clear all existing mermaid charts
+    let all_mermaids = document.querySelectorAll(".mermaid");
+
+    if (rerun) {
+        all_mermaids.forEach((el) => {
+            if(!el.hasAttribute("data-original-code")) {
+                // store original code
+                // console.log(`Storing original code for first run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+            if(el.getAttribute("data-processed") === "true") {
+                // remove and restore original
+                el.removeAttribute("data-processed");
+                // console.log(`Restoring original code for re-run: `, el.getAttribute('data-original-code'));
+                el.innerHTML = el.getAttribute('data-original-code');
+            } else {
+                // store original code
+                // console.log(`Storing original code for re-run: `, el.innerHTML);
+                el.setAttribute('data-original-code', el.innerHTML);
+            }
+        });
+        await mermaid.run();
+    }
+
+    all_mermaids = document.querySelectorAll(".mermaid");
+    const mermaids_processed = document.querySelectorAll(".mermaid[data-processed='true']");
+
+    if ("True" === "True") {
+        const mermaids_to_add_zoom = -1 === -1 ? all_mermaids.length : -1;
+        if(mermaids_to_add_zoom > 0) {
+            var svgs = d3.selectAll(".mermaid svg");
+            if(all_mermaids.length !== mermaids_processed.length) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else if(svgs.size() !== mermaids_to_add_zoom) {
+                setTimeout(() => runMermaid(false), 200);
+                return;
+            } else {
+                svgs.each(function() {
+                    var svg = d3.select(this);
+                    svg.html("<g class='wrapper'>" + svg.html() + "</g>");
+                    var inner = svg.select("g");
+                    var zoom = d3.zoom().on("zoom", function(event) {
+                        inner.attr("transform", event.transform);
+                    });
+                    svg.call(zoom);
+                });
+            }
+        }
+    } else if(all_mermaids.length !== mermaids_processed.length) {
+        // Wait for mermaid to process all diagrams
+        setTimeout(() => runMermaid(false), 200);
+        return;
+    }
+
+    // Stop here if not adding fullscreen capability
+    if ("True" !== "True") return;
+
+    if (modal !== null ) {
+        // Destroy existing modal
+        modal.remove();
+        modal = null;
+        modalContent = null;
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'mermaid-fullscreen-modal' + (darkTheme ? ' dark-theme' : '');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-label', 'Fullscreen diagram viewer');
+    modal.innerHTML = `
+        <button class="mermaid-fullscreen-close${darkTheme ? ' dark-theme' : ''}" aria-label="Close fullscreen">✕</button>
+        <div class="mermaid-container-fullscreen${darkTheme ? ' dark-theme' : ''}"></div>
+    `;
+    document.body.appendChild(modal);
+
+    modalContent = modal.querySelector('.mermaid-container-fullscreen');
+    const closeBtn = modal.querySelector('.mermaid-fullscreen-close');
+
+    const closeModal = () => {
+        modal.classList.remove('active');
+        modalContent.innerHTML = '';
+        document.body.style.overflow = ''
+        window.scrollTo({left: previousScrollOffset[0], top: previousScrollOffset[1], behavior: 'instant'});
+    };
+
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+
+    document.querySelectorAll('.mermaid').forEach((mermaidDiv) => {
+        if (mermaidDiv.parentNode.classList.contains('mermaid-container') ||
+            mermaidDiv.closest('.mermaid-fullscreen-modal')) {
+            // Already processed, adjust button class if needed
+            const existingBtn = mermaidDiv.parentNode.querySelector('.mermaid-fullscreen-btn');
+            if (existingBtn) {
+                existingBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+            }
+            return;
+        }
+
+        const container = document.createElement('div');
+        container.className = 'mermaid-container';
+        mermaidDiv.parentNode.insertBefore(container, mermaidDiv);
+        container.appendChild(mermaidDiv);
+
+        const fullscreenBtn = document.createElement('button');
+        fullscreenBtn.className = 'mermaid-fullscreen-btn' + (darkTheme ? ' dark-theme' : '');
+        fullscreenBtn.setAttribute('aria-label', 'View diagram in fullscreen');
+        fullscreenBtn.textContent = '⛶';
+        fullscreenBtn.style.opacity = '50%';
+
+        // Calculate dynamic position based on diagram's margin and padding
+        const diagramStyle = window.getComputedStyle(mermaidDiv);
+        const marginTop = parseFloat(diagramStyle.marginTop) || 0;
+        const marginRight = parseFloat(diagramStyle.marginRight) || 0;
+        const paddingTop = parseFloat(diagramStyle.paddingTop) || 0;
+        const paddingRight = parseFloat(diagramStyle.paddingRight) || 0;
+        fullscreenBtn.style.top = `${marginTop + paddingTop + 4}px`;
+        fullscreenBtn.style.right = `${marginRight + paddingRight + 4}px`;
+
+        fullscreenBtn.addEventListener('click', () => {
+            previousScrollOffset = [window.scroll, window.scrollY];
+            const clone = mermaidDiv.cloneNode(true);
+            modalContent.innerHTML = '';
+            modalContent.appendChild(clone);
+
+            const svg = clone.querySelector('svg');
+            if (svg) {
+                svg.removeAttribute('width');
+                svg.removeAttribute('height');
+                svg.style.width = '100%';
+                svg.style.height = 'auto';
+                svg.style.maxWidth = '100%';
+                svg.style.sdisplay = 'block';
+
+                if ("True" === "True") {
+                    setTimeout(() => {
+                        const g = svg.querySelector('g');
+                        if (g) {
+                            var svgD3 = d3.select(svg);
+                            svgD3.html("<g class='wrapper'>" + svgD3.html() + "</g>");
+                            var inner = svgD3.select("g");
+                            var zoom = d3.zoom().on("zoom", function(event) {
+                                inner.attr("transform", event.transform);
+                            });
+                            svgD3.call(zoom);
+                        }
+                    }, 100);
+                }
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+        container.appendChild(fullscreenBtn);
+    });
+};
+
+const load = async () => {
+    initStyles();
+
+    await runMermaid(true);
+
+    const reRunIfThemeChanges = async () => {
+        const newDarkTheme = isDarkTheme();
+        if (newDarkTheme !== darkTheme) {
+            darkTheme = newDarkTheme;
+            console.log("Theme change detected, re-running mermaid with", darkTheme ? "dark" : "default", "theme");
+            await mermaid.initialize(
+                {...JSON.parse(
+                    `{"startOnLoad": false}`
+                ),
+                ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+                }
+            );
+            await runMermaid(true);
+        }
+    };
+
+    // Update theme classes when theme changes
+    const themeObserver = new MutationObserver(reRunIfThemeChanges);
+    themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+    themeObserver.observe(document.body, {
+        attributes: true,
+        attributeFilter: ['class', 'style', 'data-theme']
+    });
+};
+
+
+
+
+
+console.log("Initializing mermaid with", darkTheme ? "dark" : "default", "theme");
+mermaid.initialize(
+    {...JSON.parse(
+        `{"startOnLoad": false}`
+    ),
+    ...{ darkMode: darkTheme, theme: darkTheme ? 'dark' : 'default' },
+    }
+);
+
+window.addEventListener("load", load);
+window.runMermaid = runMermaid;</script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="#" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: #6eb188" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            kafka-dae-control
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Developer Information</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pvs.html">PVs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="registers.html">Streaming control board registers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="local_development.html">Local development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architectural_decision_records.html">Architectural Decision Records</a></li>
+<li class="toctree-l1"><a class="reference internal" href="threads.html">Threads in this application</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="_api.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu"  style="background: #6eb188" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">kafka-dae-control</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Index</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/ISISComputingGroup/kafka_dae_control/blob/main/doc/genindex" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+
+<h1 id="index">Index</h1>
+
+<div class="genindex-jumpbox">
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
+ | <a href="#K"><strong>K</strong></a>
+ | <a href="#L"><strong>L</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#U"><strong>U</strong></a>
+ | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
+ 
+</div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.defaults.html#kafka_dae_control.defaults.Register.address">address (kafka_dae_control.defaults.Register attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.firmware_xml.html#kafka_dae_control.firmware_xml.BadFirmwareXMLError">BadFirmwareXMLError</a>
+</li>
+      <li><a href="generated/kafka_dae_control.worker_event_types.html#kafka_dae_control.worker_event_types.BeginEvent">BeginEvent (class in kafka_dae_control.worker_event_types)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.data.html#kafka_dae_control.data.Data.blocks">blocks (kafka_dae_control.data.Data attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.worker_event_types.html#kafka_dae_control.worker_event_types.BlocksUpdateEvent">BlocksUpdateEvent (class in kafka_dae_control.worker_event_types)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.board_ip">board_ip (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.board_xml">board_xml (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig">ControlConfig (class in kafka_dae_control.config)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.data.html#kafka_dae_control.data.Data">Data (class in kafka_dae_control.data)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.worker_event_handlers.html#kafka_dae_control.worker_event_handlers.delivery_report_run_info">delivery_report_run_info() (in module kafka_dae_control.worker_event_handlers)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.worker_event_types.html#kafka_dae_control.worker_event_types.EndEvent">EndEvent (class in kafka_dae_control.worker_event_types)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.event_with_value.html#kafka_dae_control.event_with_value.EventWithValue.err">err (kafka_dae_control.event_with_value.EventWithValue property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.events_topic">events_topic (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.event_with_value.html#kafka_dae_control.event_with_value.EventWithValue">EventWithValue (class in kafka_dae_control.event_with_value)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.flush_timeout_s">flush_timeout_s (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.data.html#kafka_dae_control.data.Data.frame_sync_select_rbv">frame_sync_select_rbv (kafka_dae_control.data.Data attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.data.html#kafka_dae_control.data.Data.frame_sync_select_sp">frame_sync_select_sp (kafka_dae_control.data.Data attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.defaults.html#kafka_dae_control.defaults.FrameSyncSelect">FrameSyncSelect (class in kafka_dae_control.defaults)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.worker_event_types.html#kafka_dae_control.worker_event_types.FrameSyncSelectChangeEvent">FrameSyncSelectChangeEvent (class in kafka_dae_control.worker_event_types)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.run_start_nexus_structure.html#kafka_dae_control.run_start_nexus_structure.generate_nexus_structure">generate_nexus_structure() (in module kafka_dae_control.run_start_nexus_structure)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.worker_event_handlers.html#kafka_dae_control.worker_event_handlers.handle_begin">handle_begin() (in module kafka_dae_control.worker_event_handlers)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.worker_event_handlers.html#kafka_dae_control.worker_event_handlers.handle_end">handle_end() (in module kafka_dae_control.worker_event_handlers)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.worker_event_handlers.html#kafka_dae_control.worker_event_handlers.handle_frame_sync_sp_change">handle_frame_sync_sp_change() (in module kafka_dae_control.worker_event_handlers)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.threads.hardware_polling_thread.html#kafka_dae_control.threads.hardware_polling_thread.hardware_poll_thread">hardware_poll_thread() (in module kafka_dae_control.threads.hardware_polling_thread)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.worker_event_types.html#kafka_dae_control.worker_event_types.HardwareUpdate">HardwareUpdate (class in kafka_dae_control.worker_event_types)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.worker_event_types.html#kafka_dae_control.worker_event_types.HardwareUpdateEvent">HardwareUpdateEvent (class in kafka_dae_control.worker_event_types)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.instrument_name">instrument_name (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.data.html#kafka_dae_control.data.Data.job_id">job_id (kafka_dae_control.data.Data attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="K">K</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    kafka_dae_control
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.html#module-kafka_dae_control">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.cli
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.cli.html#module-kafka_dae_control.cli">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.comms
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.comms.html#module-kafka_dae_control.comms">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.config
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.config.html#module-kafka_dae_control.config">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.data
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.data.html#module-kafka_dae_control.data">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.defaults
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.defaults.html#module-kafka_dae_control.defaults">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.event_with_value
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.event_with_value.html#module-kafka_dae_control.event_with_value">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.firmware_xml
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.firmware_xml.html#module-kafka_dae_control.firmware_xml">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.process_worker_event
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.process_worker_event.html#module-kafka_dae_control.process_worker_event">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.pvs
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.pvs.html#module-kafka_dae_control.pvs">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.pvs.camonitor_callbacks
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.pvs.camonitor_callbacks.html#module-kafka_dae_control.pvs.camonitor_callbacks">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    kafka_dae_control.pvs.static_pvs
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.pvs.static_pvs.html#module-kafka_dae_control.pvs.static_pvs">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.run_start_nexus_structure
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.run_start_nexus_structure.html#module-kafka_dae_control.run_start_nexus_structure">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.save_restore
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.save_restore.html#module-kafka_dae_control.save_restore">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.serve
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.serve.html#module-kafka_dae_control.serve">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.threads
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.threads.html#module-kafka_dae_control.threads">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.threads.hardware_polling_thread
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.threads.hardware_polling_thread.html#module-kafka_dae_control.threads.hardware_polling_thread">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.threads.update_pvs_thread
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.threads.update_pvs_thread.html#module-kafka_dae_control.threads.update_pvs_thread">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.udptalk
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.udptalk.html#module-kafka_dae_control.udptalk">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.version
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.version.html#module-kafka_dae_control.version">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.worker_event_handlers
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.worker_event_handlers.html#module-kafka_dae_control.worker_event_handlers">module</a>
+</li>
+      </ul></li>
+      <li>
+    kafka_dae_control.worker_event_types
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.worker_event_types.html#module-kafka_dae_control.worker_event_types">module</a>
+</li>
+      </ul></li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.kafka_producer">kafka_producer (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.load_config">load_config() (in module kafka_dae_control.config)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.save_restore.html#kafka_dae_control.save_restore.load_data">load_data() (in module kafka_dae_control.save_restore)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.local_ip">local_ip (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.cli.html#kafka_dae_control.cli.main">main() (in module kafka_dae_control.cli)</a>
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.udptalk.html#kafka_dae_control.udptalk.main">(in module kafka_dae_control.udptalk)</a>
+</li>
+      </ul></li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.model_config">model_config (kafka_dae_control.config.ControlConfig attribute)</a>
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.data.html#kafka_dae_control.data.Data.model_config">(kafka_dae_control.data.Data attribute)</a>
+</li>
+      </ul></li>
+      <li>
+    module
+
+      <ul>
+        <li><a href="generated/kafka_dae_control.html#module-kafka_dae_control">kafka_dae_control</a>
+</li>
+        <li><a href="generated/kafka_dae_control.cli.html#module-kafka_dae_control.cli">kafka_dae_control.cli</a>
+</li>
+        <li><a href="generated/kafka_dae_control.comms.html#module-kafka_dae_control.comms">kafka_dae_control.comms</a>
+</li>
+        <li><a href="generated/kafka_dae_control.config.html#module-kafka_dae_control.config">kafka_dae_control.config</a>
+</li>
+        <li><a href="generated/kafka_dae_control.data.html#module-kafka_dae_control.data">kafka_dae_control.data</a>
+</li>
+        <li><a href="generated/kafka_dae_control.defaults.html#module-kafka_dae_control.defaults">kafka_dae_control.defaults</a>
+</li>
+        <li><a href="generated/kafka_dae_control.event_with_value.html#module-kafka_dae_control.event_with_value">kafka_dae_control.event_with_value</a>
+</li>
+        <li><a href="generated/kafka_dae_control.firmware_xml.html#module-kafka_dae_control.firmware_xml">kafka_dae_control.firmware_xml</a>
+</li>
+        <li><a href="generated/kafka_dae_control.process_worker_event.html#module-kafka_dae_control.process_worker_event">kafka_dae_control.process_worker_event</a>
+</li>
+        <li><a href="generated/kafka_dae_control.pvs.html#module-kafka_dae_control.pvs">kafka_dae_control.pvs</a>
+</li>
+        <li><a href="generated/kafka_dae_control.pvs.camonitor_callbacks.html#module-kafka_dae_control.pvs.camonitor_callbacks">kafka_dae_control.pvs.camonitor_callbacks</a>
+</li>
+        <li><a href="generated/kafka_dae_control.pvs.static_pvs.html#module-kafka_dae_control.pvs.static_pvs">kafka_dae_control.pvs.static_pvs</a>
+</li>
+        <li><a href="generated/kafka_dae_control.run_start_nexus_structure.html#module-kafka_dae_control.run_start_nexus_structure">kafka_dae_control.run_start_nexus_structure</a>
+</li>
+        <li><a href="generated/kafka_dae_control.save_restore.html#module-kafka_dae_control.save_restore">kafka_dae_control.save_restore</a>
+</li>
+        <li><a href="generated/kafka_dae_control.serve.html#module-kafka_dae_control.serve">kafka_dae_control.serve</a>
+</li>
+        <li><a href="generated/kafka_dae_control.threads.html#module-kafka_dae_control.threads">kafka_dae_control.threads</a>
+</li>
+        <li><a href="generated/kafka_dae_control.threads.hardware_polling_thread.html#module-kafka_dae_control.threads.hardware_polling_thread">kafka_dae_control.threads.hardware_polling_thread</a>
+</li>
+        <li><a href="generated/kafka_dae_control.threads.update_pvs_thread.html#module-kafka_dae_control.threads.update_pvs_thread">kafka_dae_control.threads.update_pvs_thread</a>
+</li>
+        <li><a href="generated/kafka_dae_control.udptalk.html#module-kafka_dae_control.udptalk">kafka_dae_control.udptalk</a>
+</li>
+        <li><a href="generated/kafka_dae_control.version.html#module-kafka_dae_control.version">kafka_dae_control.version</a>
+</li>
+        <li><a href="generated/kafka_dae_control.worker_event_handlers.html#module-kafka_dae_control.worker_event_handlers">kafka_dae_control.worker_event_handlers</a>
+</li>
+        <li><a href="generated/kafka_dae_control.worker_event_types.html#module-kafka_dae_control.worker_event_types">kafka_dae_control.worker_event_types</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.firmware_xml.html#kafka_dae_control.firmware_xml.parse_register_map">parse_register_map() (in module kafka_dae_control.firmware_xml)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.threads.hardware_polling_thread.html#kafka_dae_control.threads.hardware_polling_thread.poll_hardware">poll_hardware() (in module kafka_dae_control.threads.hardware_polling_thread)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.poll_interval_s">poll_interval_s (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.process_worker_event.html#kafka_dae_control.process_worker_event.process_worker_event">process_worker_event() (in module kafka_dae_control.process_worker_event)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.pv_prefix">pv_prefix (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.pv_update_interval_s">pv_update_interval_s (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.comms.html#kafka_dae_control.comms.read">read() (in module kafka_dae_control.comms)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.read_port">read_port (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.defaults.html#kafka_dae_control.defaults.Register">Register (class in kafka_dae_control.defaults)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.register_map">register_map (kafka_dae_control.config.ControlConfig property)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.defaults.html#kafka_dae_control.defaults.Registers">Registers (class in kafka_dae_control.defaults)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.data.html#kafka_dae_control.data.Data.run_number">run_number (kafka_dae_control.data.Data attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.runinfo_topic">runinfo_topic (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.data.html#kafka_dae_control.data.Data.running">running (kafka_dae_control.data.Data attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.defaults.html#kafka_dae_control.defaults.RunRegister">RunRegister (class in kafka_dae_control.defaults)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.sample_env_topic">sample_env_topic (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.save_restore.html#kafka_dae_control.save_restore.save_file">save_file() (in module kafka_dae_control.save_restore)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.serve.html#kafka_dae_control.serve.serve">serve() (in module kafka_dae_control.serve)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.event_with_value.html#kafka_dae_control.event_with_value.EventWithValue.set">set() (kafka_dae_control.event_with_value.EventWithValue method)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.comms.html#kafka_dae_control.comms.set_board_response_ip">set_board_response_ip() (in module kafka_dae_control.comms)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.worker_event_types.html#kafka_dae_control.worker_event_types.SetIPEvent">SetIPEvent (class in kafka_dae_control.worker_event_types)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.defaults.html#kafka_dae_control.defaults.Register.size">size (kafka_dae_control.defaults.Register attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.state_file">state_file (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.pvs.static_pvs.html#kafka_dae_control.pvs.static_pvs.static_pv_provider">static_pv_provider() (in module kafka_dae_control.pvs.static_pvs)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.pvs.static_pvs.html#kafka_dae_control.pvs.static_pvs.StaticPVs">StaticPVs (class in kafka_dae_control.pvs.static_pvs)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="U">U</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.pvs.static_pvs.html#kafka_dae_control.pvs.static_pvs.StaticPVs.update_all">update_all() (kafka_dae_control.pvs.static_pvs.StaticPVs method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.pvs.camonitor_callbacks.html#kafka_dae_control.pvs.camonitor_callbacks.update_blocks">update_blocks() (in module kafka_dae_control.pvs.camonitor_callbacks)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.threads.update_pvs_thread.html#kafka_dae_control.threads.update_pvs_thread.update_pvs_thread">update_pvs_thread() (in module kafka_dae_control.threads.update_pvs_thread)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.event_with_value.html#kafka_dae_control.event_with_value.EventWithValue.value">value (kafka_dae_control.event_with_value.EventWithValue property)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.event_with_value.html#kafka_dae_control.event_with_value.EventWithValue.wait">wait() (kafka_dae_control.event_with_value.EventWithValue method)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.worker_event_types.html#kafka_dae_control.worker_event_types.WorkerEventWithValue">WorkerEventWithValue (class in kafka_dae_control.worker_event_types)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.comms.html#kafka_dae_control.comms.write">write() (in module kafka_dae_control.comms)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="generated/kafka_dae_control.comms.html#kafka_dae_control.comms.write_and_inv_then_verify">write_and_inv_then_verify() (in module kafka_dae_control.comms)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.config.html#kafka_dae_control.config.ControlConfig.write_port">write_port (kafka_dae_control.config.ControlConfig attribute)</a>
+</li>
+      <li><a href="generated/kafka_dae_control.comms.html#kafka_dae_control.comms.write_verify">write_verify() (in module kafka_dae_control.comms)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
