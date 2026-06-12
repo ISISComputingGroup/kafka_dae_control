@@ -98,13 +98,21 @@ def poll_hardware(
                 address=config.register_map[Registers.PERIOD_CONTROL],
                 port=config.read_port,
             )
-            period_mode = PeriodMode(
-                period_control_readback
-                & ~int(
-                    PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE
-                    | PeriodControlFlags.END_RUN_AFTER_LAST_PERIOD_SEQUENCE
-                )
+
+            period_mode_isolated = period_control_readback & ~int(
+                PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE
+                | PeriodControlFlags.END_RUN_AFTER_LAST_PERIOD_SEQUENCE
             )
+
+            logger.warning("period mode isolated: %s", period_mode_isolated)
+
+            if period_mode_isolated in PeriodMode:
+                period_mode = PeriodMode(period_mode_isolated)
+            else:
+                logger.warning("%s is not a valid period mode", period_mode_isolated)
+                period_mode = PeriodMode.UNKNOWN
+
+            logger.warning(f"PERIOD MDOE IS {period_mode}: {period_mode.name}")
 
         queue.put(
             HardwareUpdateEvent(

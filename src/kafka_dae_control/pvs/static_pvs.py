@@ -16,6 +16,7 @@ from kafka_dae_control.worker_event_types import (
     EndEvent,
     FrameSyncSelectChangeEvent,
     NumberOfPeriodsSetEvent,
+    PeriodModeSetEvent,
     WorkerEvent,
 )
 
@@ -115,7 +116,7 @@ class StaticPVs:
             value = op.value()
             logger.info("put with %s to frame_sync_select_sp", value)
             ev = EventWithValue()
-            queue.put(FrameSyncSelectChangeEvent(value=FrameSyncSelect(value), done_event=ev))
+            queue.put(FrameSyncSelectChangeEvent(value=FrameSyncSelect[str(value)], done_event=ev))
             try:
                 ev.wait()
                 op.done()
@@ -151,7 +152,7 @@ class StaticPVs:
             value = op.value()
             logger.info("put with %s to period_sp", value)
             ev = EventWithValue()
-            queue.put(CurrentPeriodSetEvent(value=value, done_event=ev))
+            queue.put(PeriodModeSetEvent(value=PeriodMode[str(value)], done_event=ev))
             try:
                 ev.wait()
                 op.done()
@@ -171,7 +172,7 @@ class StaticPVs:
         self.frame_sync_select_rbv.post(data.frame_sync_select_rbv)
         self.num_periods_rbv.post(data.num_periods_rbv)
         self.period_rbv.post(data.current_period_rbv)
-        self.period_type_rbv.post(data.period_mode_rbv)
+        self.period_type_rbv.post(data.period_mode_rbv.name)
 
 
 def static_pv_provider(
@@ -205,6 +206,6 @@ def static_pv_provider(
     static_provider.add(f"{prefix}NUMPERIODS", static_pvs.num_periods_rbv)
     static_provider.add(f"{prefix}PERIOD", static_pvs.period_rbv)
     static_provider.add(f"{prefix}PERIOD:SP", static_pvs.period_sp)
-    static_provider.add(f"{prefix}PERIODTYPE", static_pvs.period_type_sp)
+    static_provider.add(f"{prefix}PERIODTYPE", static_pvs.period_type_rbv)
     static_provider.add(f"{prefix}PERIODTYPE:SP", static_pvs.period_type_sp)
     return static_pvs, static_provider

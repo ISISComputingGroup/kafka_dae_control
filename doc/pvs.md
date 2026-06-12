@@ -27,11 +27,8 @@ The options are:
 
 This PV indicates whether the hardware is running or not, as determined by the status register (in particular the `0x20` bit-flag)
 
-## `TITLE` / `USERS`
-
-These are just "soft" PVs used for forming the [run starts](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/pl72_run_start.fbs) and [stops](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/6s4t_run_stop.fbs)
-
-
 ## `RUNNUMBER` / `IRUNNUMBER`
 
 These are the current run number. A run stop increments these. They are read-only from EPICS, but changing the {ref}`statefile` can update them. 
+
+## TODO: period PVs
