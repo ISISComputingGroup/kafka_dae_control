@@ -78,6 +78,11 @@ class NumberOfPeriodsSetEvent(WorkerEventWithValue[int]):
     done_event: EventWithValue[None]
 
 
+@dataclass
+class PeriodModeSetEvent(WorkerEventWithValue[PeriodMode]):
+    done_event: EventWithValue[None]
+
+
 WorkerEvent = (
     SetIPEvent
     | BeginEvent
@@ -87,4 +92,5 @@ WorkerEvent = (
     | FrameSyncSelectChangeEvent
     | CurrentPeriodSetEvent
     | NumberOfPeriodsSetEvent
+    | PeriodModeSetEvent
 )
