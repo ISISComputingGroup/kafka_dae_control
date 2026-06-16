@@ -296,14 +296,15 @@ def set_period_mode(  # noqa: PLR0913, PLR0917
         done_event: The event to call set() on when complete
 
     """
-    # todo set the two toggles as we're write_verifying here
     try:
         with sock_lock:
             write_verify(
                 config,
                 sock,
                 address=config.register_map[Registers.PERIOD_CONTROL],
-                data=value.value,
+                data=value.value
+                | data.period_end_run_after_last_sequence
+                | data.period_end_run_after_last_sequence,
                 verify=lambda x: x == value.value,
             )
     except Exception as e:
