@@ -54,7 +54,7 @@ class EventWithValue[T]:
 
     @property
     def err(self) -> Exception | None:
-        """Get the exception.
+        """The exception.
 
         Returns: The exception.
 
