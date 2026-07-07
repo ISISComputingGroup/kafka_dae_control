@@ -66,6 +66,14 @@ def process_worker_event(  # noqa: PLR0917, PLR0913
                 data.num_periods_rbv = value.period_number_limit
                 data.current_period_rbv = value.period_comp_current
                 data.period_mode_rbv = value.period_mode
+                data.period_end_run_after_last_sequence_rbv = (
+                    value.period_end_run_after_last_sequence
+                )
+                data.period_end_run_after_last_sequence_sp = (
+                    value.period_end_run_after_last_sequence
+                )
+                data.period_end_run_at_end_of_sequence_rbv = value.period_end_run_at_last_sequence
+                data.period_end_run_at_end_of_sequence_sp = value.period_end_run_at_last_sequence
             case BlocksUpdateEvent(value):
                 data.blocks = value
             case BeginEvent(done_event=done_event):

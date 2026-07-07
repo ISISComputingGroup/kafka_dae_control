@@ -38,8 +38,7 @@ def serve(config: ControlConfig) -> None:
     Returns: None
 
     """
-    # log the register mapping
-    logger.info("Config mapping: %s", config.register_map)
+    logger.debug("Config mapping: %s", config.register_map)
     queue = Queue(maxsize=0)
     queue.put(SetIPEvent())
 

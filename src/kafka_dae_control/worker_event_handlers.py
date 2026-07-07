@@ -303,12 +303,12 @@ def set_period_mode(  # noqa: PLR0913, PLR0917
                 sock,
                 address=config.register_map[Registers.PERIOD_CONTROL],
                 data=value.value
-                | data.period_end_run_after_last_sequence
-                | data.period_end_run_after_last_sequence,
+                | data.period_end_run_after_last_sequence_sp
+                | data.period_end_run_after_last_sequence_sp,
                 verify=lambda x: x == value.value,
             )
     except Exception as e:
-        logger.exception("Failed to set current period: ")
+        logger.exception("Failed to set period mode: ")
         done_event.err = e
         return
     data.current_period_sp = value

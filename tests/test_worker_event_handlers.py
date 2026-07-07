@@ -9,13 +9,16 @@ from streaming_data_types import deserialise_6s4t, deserialise_pl72
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
-from kafka_dae_control.defaults import FrameSyncSelect, RunRegister
+from kafka_dae_control.defaults import FrameSyncSelect, RunRegister, PeriodMode
 from kafka_dae_control.event_with_value import EventWithValue
 from kafka_dae_control.worker_event_handlers import (
     delivery_report_run_info,
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
+    set_num_periods,
+    set_current_period,
+    set_period_mode,
 )
 
 
@@ -228,5 +231,58 @@ def test_frame_sync_select_failed_to_write_sets_err(
     handle_frame_sync_sp_change(
         FrameSyncSelect.INTERNAL_TEST_CLOCK, conf, data, sock, sock_lock, done_event
     )
+    assert done_event.err is not None
+    assert done_event._ev.is_set()
+
+
+def test_set_num_periods_writes_to_hardware():
+    pass
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
+def test_set_num_periods_fails_errors(m: Mock, data: Data, conf: ControlConfig):
+    done_event = EventWithValue()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    set_num_periods(1, conf, data, sock, sock_lock, done_event)
+    assert done_event.err is not None
+    assert done_event._ev.is_set()
+
+
+def test_set_current_period_writes_to_hardware():
+    pass
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
+def test_set_current_period_fails_errors(m: Mock, data: Data, conf: ControlConfig):
+    done_event = EventWithValue()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    set_current_period(2, conf, data, sock, sock_lock, done_event)
+    assert done_event.err is not None
+    assert done_event._ev.is_set()
+
+@pytest.mark.parametrize(
+    "period_mode",
+    [
+        PeriodMode.LOOK_UP_TABLE,
+        PeriodMode.EXTERNAL,
+        PeriodMode.COMPUTER,
+        PeriodMode.NOT_USED
+    ]
+)
+def test_set_period_mode_writes_to_hardware(period_mode: PeriodMode):
+    pass
+
+def test_set_period_mode_with_toggles_writes_to_hardware():
+    pass
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
+def test_set_period_mode_fails_errors(m: Mock, data: Data, conf: ControlConfig):
+    done_event = EventWithValue()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    set_period_mode(PeriodMode.LOOK_UP_TABLE, conf, data, sock, sock_lock, done_event)
     assert done_event.err is not None
     assert done_event._ev.is_set()
