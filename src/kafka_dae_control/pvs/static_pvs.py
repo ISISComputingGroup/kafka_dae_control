@@ -88,23 +88,6 @@ class StaticPVs:
                 "index": data.period_mode_sp,
             },
         )
-        self.period_end_run_after_last_sequence_sp = SharedPV(
-            nt=NTScalar(display=True, form=True),
-            initial={"value": data.period_end_run_after_last_sequence_sp},
-        )
-        self.period_end_run_after_last_sequence_rbv = SharedPV(
-            nt=NTScalar(display=True, form=True),
-            initial={"value": data.period_end_run_after_last_sequence_rbv},
-        )
-
-        self.period_end_run_at_last_sequence_sp = SharedPV(
-            nt=NTScalar(display=True, form=True),
-            initial={"value": data.period_end_run_at_end_of_sequence_sp},
-        )
-        self.period_end_run_at_last_sequence_rbv = SharedPV(
-            nt=NTScalar(display=True, form=True),
-            initial={"value": data.period_end_run_at_end_of_sequence_rbv},
-        )
 
         @self.begin.put  # pragma: no cover
         def begin_put(_: SharedPV, op: ServerOperation) -> None:
@@ -176,14 +159,6 @@ class StaticPVs:
             except Exception as e:  # noqa: BLE001
                 op.done(error=f"Failed to set period_sp: {e}")
 
-        @self.period_end_run_at_last_sequence_sp.put
-        def period_end_run_at_last_sequence_sp_put(pv: SharedPV, op: ServerOperation) -> None:
-            op.done(error="Not implemented")
-
-        @self.period_end_run_after_last_sequence_sp.put
-        def period_end_run_at_end_of_sequence_sp_put(pv: SharedPV, op: ServerOperation) -> None:
-            op.done(error="Not implemented")
-
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.
 
@@ -198,10 +173,6 @@ class StaticPVs:
         self.num_periods_rbv.post(data.num_periods_rbv)
         self.period_rbv.post(data.current_period_rbv)
         self.period_type_rbv.post(data.period_mode_rbv.name)
-        self.period_end_run_at_last_sequence_rbv.post(data.period_end_run_after_last_sequence_rbv)
-        self.period_end_run_after_last_sequence_rbv.post(
-            data.period_end_run_after_last_sequence_rbv
-        )
 
 
 def static_pv_provider(
@@ -237,16 +208,4 @@ def static_pv_provider(
     static_provider.add(f"{prefix}PERIOD:SP", static_pvs.period_sp)
     static_provider.add(f"{prefix}PERIODTYPE", static_pvs.period_type_rbv)
     static_provider.add(f"{prefix}PERIODTYPE:SP", static_pvs.period_type_sp)
-    static_provider.add(
-        f"{prefix}PERIOD:END_RUN_AFTER_SEQ:SP", static_pvs.period_end_run_after_last_sequence_sp
-    )
-    static_provider.add(
-        f"{prefix}PERIOD:END_RUN_AFTER_SEQ:RBV", static_pvs.period_end_run_after_last_sequence_rbv
-    )
-    static_provider.add(
-        f"{prefix}PERIOD:END_RUN_AT_SEQ:SP", static_pvs.period_end_run_at_last_sequence_sp
-    )
-    static_provider.add(
-        f"{prefix}PERIOD:END_RUN_AT_SEQ:RBV", static_pvs.period_end_run_at_last_sequence_rbv
-    )
     return static_pvs, static_provider

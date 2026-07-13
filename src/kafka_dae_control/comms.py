@@ -31,6 +31,43 @@ SLEEP_AFTER_WRITE_S = 0.1
 type VerifyFunc = Callable[[int], bool]
 
 
+def write_or_then_verify(  # noqa: PLR0913
+    config: ControlConfig,
+    sock: socket.SocketType,
+    *,
+    address: int,
+    data: int,
+    verify: VerifyFunc,
+    count: int = REGISTER_SIZE_WORDS,
+    write_attempts: int = WRITE_ATTEMPTS,
+) -> None:
+    """Write by reading the current value and ORing it with the new data.
+
+    Args:
+        config: the program's configuration containing board IP and ports
+        sock: the UDP socket instance
+        address: the address to write to
+        data: the data to write
+        count: the number of 32-bit words to write
+        verify: Optionally verify against a different provided value by ORing it
+        write_attempts: The number of times to retry writing and verifying.
+
+    """
+    current_val = read(sock, config.board_ip, address=address, count=count, port=config.read_port)
+    new_value = current_val | data
+    logger.debug("OR of current value (%s) and new value (%s) is %s", current_val, data, new_value)
+    # write the new value and verify
+    write_verify(
+        config,
+        sock,
+        address=address,
+        data=new_value,
+        verify=verify,
+        count=count,
+        write_attempts=write_attempts,
+    )
+
+
 def write_and_inv_then_verify(  # noqa: PLR0913
     config: ControlConfig,
     sock: socket.SocketType,

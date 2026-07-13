@@ -13,6 +13,7 @@ from kafka_dae_control.comms import (
     set_board_response_ip,
     write,
     write_and_inv_then_verify,
+    write_or_then_verify,
     write_verify,
 )
 from kafka_dae_control.config import ControlConfig
@@ -20,6 +21,7 @@ from kafka_dae_control.defaults import (
     READ_PORT,
     RECEIVE_BUFFER_SIZE,
     WRITE_PORT,
+    PeriodControlFlags,
     RunRegister,
 )
 
@@ -268,3 +270,41 @@ def test_inv_write_verify_retries(
         )
 
     assert mock_write.call_count == 2
+
+
+@patch("kafka_dae_control.comms.write_verify")
+@patch(
+    "kafka_dae_control.comms.read",
+    return_value=PeriodControlFlags.MODE_COMPUTER
+    | PeriodControlFlags.END_RUN_AFTER_LAST_PERIOD_SEQUENCE,
+)
+def test_write_or_then_verify_works(
+    mock_read,  # pyright: ignore reportMissingParameterType
+    mock_write_verify,  # pyright: ignore reportMissingParameterType
+    conf: ControlConfig,
+):
+    conf.board_ip = HOST
+    sock = Mock()
+    verify = Mock()
+
+    write_or_then_verify(
+        conf,
+        sock,
+        address=1234,
+        data=PeriodControlFlags.MODE_EXTERNAL,
+        verify=verify,
+        count=1,
+        write_attempts=3,
+    )
+
+    mock_read.assert_called_once_with(sock, HOST, address=1234, count=1, port=READ_PORT)
+    mock_write_verify.assert_called_once_with(
+        conf,
+        sock,
+        address=1234,
+        data=PeriodControlFlags.MODE_EXTERNAL
+        | PeriodControlFlags.END_RUN_AFTER_LAST_PERIOD_SEQUENCE,
+        verify=verify,
+        count=1,
+        write_attempts=3,
+    )

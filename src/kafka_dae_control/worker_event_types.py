@@ -52,8 +52,6 @@ class HardwareUpdate:
     period_comp_current: int
     period_number_limit: int
     period_mode: PeriodMode
-    period_end_run_after_last_sequence: bool
-    period_end_run_at_last_sequence: bool
 
 
 @dataclass

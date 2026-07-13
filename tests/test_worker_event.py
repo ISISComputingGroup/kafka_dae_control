@@ -85,8 +85,6 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
                 period_comp_current=12,
                 period_number_limit=13,
                 period_mode=PeriodMode.COMPUTER,
-                period_end_run_after_last_sequence=False,
-                period_end_run_at_last_sequence=True,
             )
         ),
         conf,
@@ -100,8 +98,6 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
     assert data.period_mode_rbv == PeriodMode.COMPUTER
     assert data.current_period_rbv == 12
     assert data.num_periods_rbv == 13
-    assert not data.period_end_run_after_last_sequence_rbv
-    assert data.period_end_run_at_end_of_sequence_rbv
 
 
 @patch("kafka_dae_control.process_worker_event.set_num_periods")

@@ -66,7 +66,6 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
     assert hwup.frame_sync_select == FrameSyncSelect(1)
     assert hwup.period_comp_current == 2
     assert hwup.period_number_limit == 3
-    assert hwup.period_end_run_at_last_sequence
     assert hwup.period_mode == PeriodMode.EXTERNAL
 
 

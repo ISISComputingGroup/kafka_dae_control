@@ -55,15 +55,3 @@ class Data(BaseModel):
 
     period_mode_rbv: PeriodMode = PeriodMode.UNKNOWN
     """The period mode readback."""
-
-    period_end_run_after_last_sequence_sp: bool = False
-    """Toggle for ending run after the last sequence."""
-
-    period_end_run_after_last_sequence_rbv: bool = False
-    """Readback for ending run after the last sequence."""
-
-    period_end_run_at_end_of_sequence_sp: bool = False
-    """Toggle for ending run at end of sequence."""
-
-    period_end_run_at_end_of_sequence_rbv: bool = False
-    """Readback for ending run at end of sequence."""
