@@ -20,6 +20,12 @@ from kafka_dae_control.worker_event_handlers import (
     set_num_periods,
     set_period_mode,
 )
+from tests.conftest import (
+    FRAME_SYNC_SEL_ADDRESS,
+    PERIOD_COMP_CURRENT_ADDRESS,
+    PERIOD_CONTROL_ADDRESS,
+    PERIOD_NUMBER_LIMIT_ADDRESS,
+)
 
 
 def test_beginning_starts_hardware_sends_run_start_and_sets_running(
@@ -214,7 +220,7 @@ def test_frame_sync_select_change_writes_to_hardware(
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     handle_frame_sync_sp_change(frame_sync_select, conf, data, sock, sock_lock, done_event)
-    assert mock_write_verify.call_args[1]["address"] == 4
+    assert mock_write_verify.call_args[1]["address"] == FRAME_SYNC_SEL_ADDRESS
     assert mock_write_verify.call_args[1]["data"] == frame_sync_select.value
     assert done_event._ev.is_set()
 
@@ -235,8 +241,17 @@ def test_frame_sync_select_failed_to_write_sets_err(
     assert done_event._ev.is_set()
 
 
-def test_set_num_periods_writes_to_hardware():
-    pass
+@patch("kafka_dae_control.worker_event_handlers.write_verify")
+def test_set_num_periods_writes_to_hardware(
+    mock_write_verify: Mock, data: Data, conf: ControlConfig
+):
+    done_event = EventWithValue()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    set_num_periods(123, conf, data, sock, sock_lock, done_event)
+    assert mock_write_verify.call_args[1]["address"] == PERIOD_NUMBER_LIMIT_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == 123
+    assert done_event._ev.is_set()
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
@@ -249,8 +264,17 @@ def test_set_num_periods_fails_errors(m: Mock, data: Data, conf: ControlConfig):
     assert done_event._ev.is_set()
 
 
-def test_set_current_period_writes_to_hardware():
-    pass
+@patch("kafka_dae_control.worker_event_handlers.write_verify")
+def test_set_current_period_writes_to_hardware(
+    mock_write_verify: Mock, data: Data, conf: ControlConfig
+):
+    done_event = EventWithValue()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    set_current_period(234, conf, data, sock, sock_lock, done_event)
+    assert mock_write_verify.call_args[1]["address"] == PERIOD_COMP_CURRENT_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == 234
+    assert done_event._ev.is_set()
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
@@ -267,12 +291,17 @@ def test_set_current_period_fails_errors(m: Mock, data: Data, conf: ControlConfi
     "period_mode",
     [PeriodMode.LOOK_UP_TABLE, PeriodMode.EXTERNAL, PeriodMode.COMPUTER, PeriodMode.NOT_USED],
 )
-def test_set_period_mode_writes_to_hardware(period_mode: PeriodMode):
-    pass
-
-
-def test_set_period_mode_with_toggles_writes_to_hardware():
-    pass
+@patch("kafka_dae_control.worker_event_handlers.write_or_then_verify")
+def test_set_period_mode_writes_to_hardware(
+    mock_write_verify: Mock, data: Data, conf: ControlConfig, period_mode: PeriodMode
+):
+    done_event = EventWithValue()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    set_period_mode(period_mode, conf, data, sock, sock_lock, done_event)
+    assert mock_write_verify.call_args[1]["address"] == PERIOD_CONTROL_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == period_mode.value
+    assert done_event._ev.is_set()
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)

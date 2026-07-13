@@ -31,4 +31,18 @@ This PV indicates whether the hardware is running or not, as determined by the s
 
 These are the current run number. A run stop increments these. They are read-only from EPICS, but changing the {ref}`statefile` can update them. 
 
-## TODO: period PVs
+## `PERIOD` / `PERIOD:SP`
+
+The current period number.
+
+## `NUMPERIODS`/ `NUMPERIODS:MAX` / `NUMPERIODS:SP`
+
+The maximum period number - note that `NUMPERIODS:MAX` is just an alias to `NUMPERIODS`
+
+## `PERIODTYPE` / `PERIODTYPE:SP`
+
+The current period mode to use. Options are: 
+`0`/`COMPUTER`: Let the control PC (IBEX) set the period modes
+`1`/`LOOK_UP_TABLE`: Internal period card mode, with a look-up table 
+`2`/`NOT_USED`: Periods not used at all
+`3`/`EXTERNAL`: Use an external signal to the streaming hardware. 
