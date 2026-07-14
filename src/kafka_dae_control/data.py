@@ -39,16 +39,16 @@ class Data(BaseModel):
      These are prefixed with the instrument and block server prefixes"""
 
     num_periods_sp: int = 1
-    """Number of periods (setpoint). This is 1-indexed for backwards compatibility reasons."""
+    """Number of periods (setpoint)."""
 
     num_periods_rbv: int = 1
-    """Number of periods (readback). This is 1-indexed for backwards compatibility reasons."""
+    """Number of periods (readback)."""
 
     current_period_sp: int = 1
-    """Current period number setpoint."""
+    """Current period number setpoint. This is 1-indexed for backwards compatibility reasons."""
 
     current_period_rbv: int = 1
-    """Current period number readback."""
+    """Current period number readback. This is 1-indexed for backwards compatibility reasons."""
 
     period_mode_sp: PeriodMode = PeriodMode.UNKNOWN
     """The period mode setpoint."""

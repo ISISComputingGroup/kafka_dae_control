@@ -66,21 +66,21 @@ class BlocksUpdateEvent(WorkerEventWithValue[list[str]]):
 
 @dataclass
 class CurrentPeriodSetEvent(WorkerEventWithValue[int]):
-    """An event signalling a current period set."""
+    """An event signalling the current period was set by a user."""
 
     done_event: EventWithValue[None]
 
 
 @dataclass
 class NumberOfPeriodsSetEvent(WorkerEventWithValue[int]):
-    """An event signalling a number of periods set."""
+    """An event signalling the number of periods was set by a user."""
 
     done_event: EventWithValue[None]
 
 
 @dataclass
 class PeriodModeSetEvent(WorkerEventWithValue[PeriodMode]):
-    """An event signalling a period mode set."""
+    """An event signalling a period mode was set by a user."""
 
     done_event: EventWithValue[None]
 
