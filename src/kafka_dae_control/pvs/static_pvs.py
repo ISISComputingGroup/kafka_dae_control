@@ -59,6 +59,29 @@ class StaticPVs:
         self.i_run_number = SharedPV(
             nt=NTScalar(display=True, form=True), initial={"value": data.run_number}
         )
+        self.veto_names_array = SharedPV(
+            nt=NTScalar("as", display=True, form=True),
+            initial={
+                "value": data.veto_names_array,
+            },
+        )
+        self.soft_vetos_array = SharedPV(
+            nt=NTScalar("al", display=True, form=True),
+            initial={
+                "value": data.soft_vetoes_array,
+                "display.units": "",
+                "display.precision": 0,
+            },
+        )
+        self.hard_vetos_array = SharedPV(
+            nt=NTScalar("al", display=True, form=True),
+            initial={
+                "value": data.soft_vetoes_array,
+                "display.units": "",
+                "display.precision": 0,
+            },
+        )
+        # todo: the above are SPs, does it make sense to do RBVs, even if they aren't user facing?
 
         @self.begin.put  # pragma: no cover
         def begin_put(_: SharedPV, op: ServerOperation) -> None:
@@ -133,4 +156,7 @@ def static_pv_provider(
     static_provider.add(f"{prefix}IRUNNUMBER", static_pvs.i_run_number)
     static_provider.add(f"{prefix}DAETIMINGSOURCE", static_pvs.frame_sync_select_rbv)
     static_provider.add(f"{prefix}DAETIMINGSOURCE:SP", static_pvs.frame_sync_select_sp)
+    static_provider.add(f"{prefix}VETO_NAMES", static_pvs.veto_names_array)
+    static_provider.add(f"{prefix}HARD_VETOES", static_pvs.hard_vetos_array)
+    static_provider.add(f"{prefix}SOFT_VETOES", static_pvs.soft_vetos_array)
     return static_pvs, static_provider

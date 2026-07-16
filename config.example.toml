@@ -5,7 +5,7 @@ board_ip = "192.168.1.250"
 instrument_name = "TESTMACHINE"
 
 # The firmware-generated xml file containing addresses of registers etc.
-board_xml = "./example_xml/vxiscb_supermusr_ic_memory_map_output.xml"
+board_xml = "./example_xml/vxiscb_SP_streaming_ic_memory_map_output.xml"
 
 # PV prefix of all PVs in this IOC
 pv_prefix = "TE:TESTMACHINE:KDAECTRL:"

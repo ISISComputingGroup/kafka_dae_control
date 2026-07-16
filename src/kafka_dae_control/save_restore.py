@@ -12,6 +12,7 @@ RUNNING_KEY = "running"
 
 logger = logging.getLogger(__name__)
 
+# TODO: save and restore veto settings
 
 def save_file(data: "Data", *_: int | str, state_file: Path) -> None:
     """Save relevant dataclass fields to a file.

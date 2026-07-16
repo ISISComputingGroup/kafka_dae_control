@@ -37,3 +37,13 @@ class Data(BaseModel):
     blocks: list[str] = Field(default_factory=list)
     """List of blocks to be inserted in the run start nexus structure.
      These are prefixed with the instrument and block server prefixes"""
+
+    veto_names_array: list[str] = Field(default_factory=list)
+    """
+    Veto names, as a numpy array of strings.
+    """
+
+    soft_vetoes_array: list[int] = Field(default_factory=list)
+
+    hard_vetoes_array: list[int] = Field(default_factory=list)
+

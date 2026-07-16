@@ -24,6 +24,7 @@ class Registers(StrEnum):
 
     RUNNING_REGISTER = "run_register"
     FRAME_SYNC_SEL_REGISTER = "frame_sync_sel"
+    VETO_CONTROL_REGISTER = "veto_mask"
 
     COMMS_REGISTER = "udp_core_control_0_dst_ip_addr"
 

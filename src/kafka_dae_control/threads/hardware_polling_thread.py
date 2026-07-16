@@ -76,6 +76,13 @@ def poll_hardware(
             else:
                 frame_sync_select_readback = FrameSyncSelect(frame_sync_select_raw_readback)
 
+            veto_control_raw_readback = read(
+                sock,
+                config.board_ip,
+                address=config.register_map[Registers.VETO_CONTROL_REGISTER],
+                port=config.read_port
+            )
+
         queue.put(
             HardwareUpdateEvent(
                 HardwareUpdate(
