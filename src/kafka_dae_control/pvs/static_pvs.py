@@ -139,6 +139,9 @@ class StaticPVs:
         def period_sp_put(pv: SharedPV, op: ServerOperation) -> None:
             value = int(op.value())
             logger.info("put with %s to period_sp", value)
+            if value < 1:
+                op.done(error="Period must be greater than 0")
+                return
             ev = EventWithValue()
             queue.put(CurrentPeriodSetEvent(value=value, done_event=ev))
             try:

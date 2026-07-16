@@ -266,7 +266,7 @@ def set_current_period(  # noqa: PLR0913, PLR0917
                 config,
                 sock,
                 address=config.register_map[Registers.PERIOD_COMP_CURRENT],
-                data=value,
+                data=value - 1,
                 verify=lambda x: x == value,
             )
     except Exception as e:

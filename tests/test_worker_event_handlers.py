@@ -265,7 +265,7 @@ def test_set_num_periods_fails_errors(m: Mock, data: Data, conf: ControlConfig):
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify")
-def test_set_current_period_writes_to_hardware(
+def test_set_current_period_writes_zero_indexed_to_hardware(
     mock_write_verify: Mock, data: Data, conf: ControlConfig
 ):
     done_event = EventWithValue()
@@ -273,7 +273,7 @@ def test_set_current_period_writes_to_hardware(
     sock_lock = MagicMock(spec=RLock())
     set_current_period(234, conf, data, sock, sock_lock, done_event)
     assert mock_write_verify.call_args[1]["address"] == PERIOD_COMP_CURRENT_ADDRESS
-    assert mock_write_verify.call_args[1]["data"] == 234
+    assert mock_write_verify.call_args[1]["data"] == 233
     assert done_event._ev.is_set()
 
 

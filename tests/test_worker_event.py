@@ -96,7 +96,7 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
     assert data.running
     assert data.frame_sync_select_rbv == FrameSyncSelect.INTERNAL_TEST_CLOCK
     assert data.period_mode_rbv == PeriodMode.COMPUTER
-    assert data.current_period_rbv == 12
+    assert data.current_period_rbv == 13
     assert data.num_periods_rbv == 13
 
 
