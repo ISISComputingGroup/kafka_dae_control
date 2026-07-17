@@ -53,7 +53,7 @@ def delivery_report_run_info(
         done_event.set()
 
 
-def handle_begin(  # noqa: PLR0913, PLR0917
+def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
     config: ControlConfig,
     data: Data,
     producer: Producer,
@@ -115,7 +115,7 @@ def handle_begin(  # noqa: PLR0913, PLR0917
         return
 
 
-def handle_end(  # noqa: PLR0913, PLR0917
+def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
     config: ControlConfig,
     data: Data,
     producer: Producer,
@@ -167,7 +167,7 @@ def handle_end(  # noqa: PLR0913, PLR0917
         return
 
 
-def handle_frame_sync_sp_change(  # noqa: PLR0913, PLR0917
+def handle_frame_sync_sp_change(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
     value: FrameSyncSelect,
     config: ControlConfig,
     data: Data,

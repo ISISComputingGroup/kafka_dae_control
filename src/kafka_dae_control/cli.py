@@ -9,7 +9,7 @@ from kafka_dae_control.serve import serve
 
 # needed for p4p and pyepics to work together
 try:
-    import epicscorelibs.path.pyepics  # noqa: F401
+    import epicscorelibs.path.pyepics  # ruff:ignore[unused-import]
 except ImportError:
     pass
 import sys
