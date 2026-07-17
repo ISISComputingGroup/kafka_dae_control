@@ -15,7 +15,7 @@ def test_update_pvs_thread(mock_sleep: Mock, data: Data, conf: ControlConfig):
     data.running = True
 
     pvs = Mock(Spec=StaticPVs)
-    with pytest.raises(Exception):  # noqa: B017, PT011
+    with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
         update_pvs_thread(pvs, data, conf)
     pvs.update_all.assert_called_once_with(data)
 
@@ -26,6 +26,6 @@ def test_update_pvs_thread_catches_exception_and_logs_it(
 ):
     pvs = Mock(spec=StaticPVs)
     pvs.update_all.side_effect = Exception
-    with pytest.raises(Exception):  # noqa: B017, PT011
+    with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
         update_pvs_thread(pvs, data, conf)
     assert "PV update failed:" in caplog.text

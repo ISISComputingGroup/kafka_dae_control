@@ -31,7 +31,7 @@ SLEEP_AFTER_WRITE_S = 0.1
 type VerifyFunc = Callable[[int], bool]
 
 
-def write_and_inv_then_verify(  # noqa: PLR0913
+def write_and_inv_then_verify(  # ruff:ignore[too-many-arguments]
     config: ControlConfig,
     sock: socket.SocketType,
     *,
@@ -81,7 +81,7 @@ def write_and_inv_then_verify(  # noqa: PLR0913
     )
 
 
-def write_verify(  # noqa: PLR0913
+def write_verify(  # ruff:ignore[too-many-arguments]
     config: ControlConfig,
     sock: socket.SocketType,
     *,
@@ -132,7 +132,7 @@ def write_verify(  # noqa: PLR0913
     )
 
 
-def write(  # noqa: PLR0913
+def write(  # ruff:ignore[too-many-arguments]
     sock: socket.SocketType,
     host: ipaddress.IPv4Address,
     *,

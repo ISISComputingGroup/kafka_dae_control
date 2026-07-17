@@ -1,4 +1,4 @@
-# ruff: noqa
+# ruff: file-ignore [pytest-fixture-param-without-value, pytest-raises-too-broad, assert-raises-exception ]
 import ipaddress
 from unittest.mock import patch
 

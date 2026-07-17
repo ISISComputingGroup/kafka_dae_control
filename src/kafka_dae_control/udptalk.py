@@ -24,7 +24,7 @@ def main() -> None:
 For example:
     `udptalk read 192.168.1.100 0x0 --count 1` will read 1 32-bit word from the 0x0 register from 192.168.1.100.
     `udptalk write 192.168.1.100 0x0 0x13` will write 0x13 to the 0x0 register on 192.168.1.100.
-""",  # noqa: E501
+""",  # ruff:ignore[line-too-long]
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
