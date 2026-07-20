@@ -3,6 +3,7 @@
 import logging
 import socket
 import threading
+import time
 import uuid
 from datetime import datetime
 from functools import partial
@@ -10,7 +11,7 @@ from queue import Queue
 from zoneinfo import ZoneInfo
 
 from confluent_kafka import KafkaError, Message, Producer
-from streaming_data_types import serialise_6s4t, serialise_pl72
+from streaming_data_types import serialise_6s4t, serialise_pl72, serialise_vc00
 
 from kafka_dae_control.comms import write_and_inv_then_verify, write_verify
 from kafka_dae_control.config import ControlConfig
@@ -24,12 +25,13 @@ from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
-from kafka_dae_control.worker_event_types import WorkerEvent
+from kafka_dae_control.utils import or_two_int_lists
+from kafka_dae_control.worker_event_types import WorkerEvent, SoftVetoesUpdateEvent
 
 logger = logging.getLogger(__name__)
 
 
-def delivery_report_run_info(
+def delivery_report_set_error_or_done(
     done_event: EventWithError, err: KafkaError | None, msg: Message
 ) -> None:
     """Act on a Kafka delivery report.
@@ -102,7 +104,9 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
                 verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
             )
         producer.produce(
-            config.runinfo_topic, blob, callback=partial(delivery_report_run_info, done_event)
+            config.runinfo_topic,
+            blob,
+            callback=partial(delivery_report_set_error_or_done, done_event),
         )
         producer.flush(timeout=config.flush_timeout_s)
         logger.info("sent run start to %s", config.runinfo_topic)
@@ -153,7 +157,9 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
                 verify=lambda x: x & RunRegister.STATUS_RUNNING == 0,
             )
         producer.produce(
-            config.runinfo_topic, blob, callback=partial(delivery_report_run_info, done_event)
+            config.runinfo_topic,
+            blob,
+            callback=partial(delivery_report_set_error_or_done, done_event),
         )
         producer.flush(timeout=config.flush_timeout_s)
         logger.info("sent run stop to %s", config.runinfo_topic)
@@ -201,3 +207,34 @@ def handle_frame_sync_sp_change(  # ruff:ignore[too-many-arguments, too-many-pos
         return
     data.frame_sync_select_sp = value
     done_event.set()
+
+
+def handle_soft_vetoes_change(
+    value: list[int],
+    config: ControlConfig,
+    data: Data,
+    producer: Producer,
+    done_event: EventWithError,
+):
+    blob = serialise_vc00(time.time_ns(), vetoes=or_two_int_lists(value, data.hard_vetoes_array))
+    producer.produce(config.runinfo_topic, value=blob, callback=partial(delivery_report_set_error_or_done, done_event))
+
+
+def handle_hard_vetoes_change(
+    value: list[int],
+    config: ControlConfig,
+    data: Data,
+    producer: Producer,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithError,
+):
+    #  - set the vetoes on the hardware
+    #  - send a vc00 to kafka, with data.all_vetoes (after settings data)
+    # if the above both work set done on the event with value
+    blob = serialise_vc00(time.time_ns(), vetoes=or_two_int_lists(value, data.soft_vetoes_array))
+    producer.produce(config.runinfo_topic, value=blob, callback=partial(delivery_report_set_error_or_done, done_event))
+    # todo: check that runinfo topic is correct
+    # todo: check that above and other places where we do kafka-then-hardware that set() isnt called prematurely
+    # todo: set on hardware
+    pass

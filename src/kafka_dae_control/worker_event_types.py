@@ -62,12 +62,12 @@ class BlocksUpdateEvent(WorkerEventWithValue[list[str]]):
 
 
 @dataclass
-class SoftVetoesUpdateEvent(WorkerEventWithValue[int], DoneEvent):
+class SoftVetoesUpdateEvent(WorkerEventWithValue[list[int]], DoneEvent):
     """An event signalling the soft vetoes have been set."""
 
 
 @dataclass
-class HardVetoesUpdateEvent(WorkerEventWithValue[int], DoneEvent):
+class HardVetoesUpdateEvent(WorkerEventWithValue[list[int]], DoneEvent):
     """An event signalling the hard vetoes have been set."""
 
 

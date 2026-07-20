@@ -12,7 +12,7 @@ from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import FrameSyncSelect, RunRegister
 from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.worker_event_handlers import (
-    delivery_report_run_info,
+    delivery_report_set_error_or_done,
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
@@ -187,7 +187,7 @@ def test_exception_during_end_if_not_running(
 def test_delivery_report_cb_sets_error_if_error():
     done_event = EventWithError()
     error = KafkaError(error=KafkaError.KAFKA_STORAGE_ERROR)  # pyright: ignore[reportCallIssue]
-    delivery_report_run_info(done_event, error, Message())
+    delivery_report_set_error_or_done(done_event, error, Message())
     assert "Error with kafka delivery: KAFKA_STORAGE_ERROR" in str(done_event.err)
     assert done_event.is_set()
 
@@ -195,7 +195,7 @@ def test_delivery_report_cb_sets_error_if_error():
 def test_delivery_report_cb_calls_set_if_no_error():
     done_event = EventWithError()
     msg = Message(topic="mytopic123", value=b"myvalue234")
-    delivery_report_run_info(done_event, None, msg)
+    delivery_report_set_error_or_done(done_event, None, msg)
     assert done_event.is_set()
 
 
