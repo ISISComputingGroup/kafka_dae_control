@@ -47,3 +47,14 @@ class Data(BaseModel):
 
     hard_vetoes_array: list[int] = Field(default_factory=list)
 
+    @property
+    def all_vetoes(self) -> int:
+        """A bitwise OR of all the vetoes (soft or hard).
+
+        Returns: All the vetoes.
+
+        """
+        all_vetoes = 0
+        for s, h in zip(self.soft_vetoes_array, self.hard_vetoes_array, strict=True):
+            all_vetoes = (all_vetoes << 1) | (s | h)
+        return all_vetoes

@@ -80,7 +80,7 @@ def poll_hardware(
                 sock,
                 config.board_ip,
                 address=config.register_map[Registers.VETO_CONTROL_REGISTER],
-                port=config.read_port
+                port=config.read_port,
             )
 
         queue.put(

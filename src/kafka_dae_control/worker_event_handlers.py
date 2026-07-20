@@ -20,7 +20,7 @@ from kafka_dae_control.defaults import (
     Registers,
     RunRegister,
 )
-from kafka_dae_control.event_with_value import EventWithValue
+from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 def delivery_report_run_info(
-    done_event: EventWithValue[None], err: KafkaError | None, msg: Message
+    done_event: EventWithError, err: KafkaError | None, msg: Message
 ) -> None:
     """Act on a Kafka delivery report.
 
@@ -59,7 +59,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
     producer: Producer,
     sock: socket.SocketType,
     sock_lock: threading.RLock,
-    done_event: EventWithValue[None],
+    done_event: EventWithError,
     queue: Queue[WorkerEvent],
 ) -> None:
     """Handle a begin command.
@@ -121,7 +121,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
     producer: Producer,
     sock: socket.SocketType,
     sock_lock: threading.RLock,
-    done_event: EventWithValue[None],
+    done_event: EventWithError,
     queue: Queue[WorkerEvent],
 ) -> None:
     """Handle an end command.
@@ -173,7 +173,7 @@ def handle_frame_sync_sp_change(  # ruff:ignore[too-many-arguments, too-many-pos
     data: Data,
     sock: socket.SocketType,
     sock_lock: threading.RLock,
-    done_event: EventWithValue[None],
+    done_event: EventWithError,
 ) -> None:
     """Handle a frame sync select setpoint change.
 

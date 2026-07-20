@@ -10,7 +10,7 @@ from streaming_data_types import deserialise_6s4t, deserialise_pl72
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import FrameSyncSelect, RunRegister
-from kafka_dae_control.event_with_value import EventWithValue
+from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.worker_event_handlers import (
     delivery_report_run_info,
     handle_begin,
@@ -185,18 +185,18 @@ def test_exception_during_end_if_not_running(
 
 
 def test_delivery_report_cb_sets_error_if_error():
-    done_event = EventWithValue()
+    done_event = EventWithError()
     error = KafkaError(error=KafkaError.KAFKA_STORAGE_ERROR)  # pyright: ignore[reportCallIssue]
     delivery_report_run_info(done_event, error, Message())
     assert "Error with kafka delivery: KAFKA_STORAGE_ERROR" in str(done_event.err)
-    assert done_event._ev.is_set()
+    assert done_event.is_set()
 
 
 def test_delivery_report_cb_calls_set_if_no_error():
-    done_event = EventWithValue()
+    done_event = EventWithError()
     msg = Message(topic="mytopic123", value=b"myvalue234")
     delivery_report_run_info(done_event, None, msg)
-    assert done_event._ev.is_set()
+    assert done_event.is_set()
 
 
 @pytest.mark.parametrize(
@@ -207,13 +207,13 @@ def test_delivery_report_cb_calls_set_if_no_error():
 def test_frame_sync_select_change_writes_to_hardware(
     mock_write_verify: Mock, data: Data, conf: ControlConfig, frame_sync_select: FrameSyncSelect
 ):
-    done_event = EventWithValue()
+    done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     handle_frame_sync_sp_change(frame_sync_select, conf, data, sock, sock_lock, done_event)
     assert mock_write_verify.call_args[1]["address"] == 4
     assert mock_write_verify.call_args[1]["data"] == frame_sync_select.value
-    assert done_event._ev.is_set()
+    assert done_event.is_set()
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
@@ -222,11 +222,11 @@ def test_frame_sync_select_failed_to_write_sets_err(
     data: Data,
     conf: ControlConfig,
 ):
-    done_event = EventWithValue()
+    done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     handle_frame_sync_sp_change(
         FrameSyncSelect.INTERNAL_TEST_CLOCK, conf, data, sock, sock_lock, done_event
     )
     assert done_event.err is not None
-    assert done_event._ev.is_set()
+    assert done_event.is_set()

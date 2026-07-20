@@ -23,6 +23,8 @@ from kafka_dae_control.worker_event_types import (
     HardwareUpdateEvent,
     SetIPEvent,
     WorkerEvent,
+    SoftVetoesUpdateEvent,
+    HardVetoesUpdateEvent,
 )
 
 logger = logging.getLogger(__name__)
@@ -67,6 +69,18 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 handle_frame_sync_sp_change(value, config, data, sock, sock_lock, done_event)
             case SetIPEvent():
                 set_board_response_ip(config, sock, sock_lock)
+            case SoftVetoesUpdateEvent(value=value, done_event=done_event):
+                # todo: add a SoftVetoSetUpdate to the queue
+                # this will get picked up then send a vc00 to kafka, with data.all_vetoes (after setting data)
+                # if that works, set done on the event with value
+                pass
+            case HardVetoesUpdateEvent(value=value, done_event=done_event):
+                # todo: add a HardVetoSetUpdate to the queue
+                # this will get picked up then:
+                #  - set the vetoes on the hardware
+                #  - send a vc00 to kafka, with data.all_vetoes  (after settings data)
+                # if the above both work set done on the event with value
+                pass
             case _:
                 logger.error("Unknown event type: %s", worker_event)
     except Exception:

@@ -5,7 +5,7 @@ from abc import ABC
 from dataclasses import dataclass
 
 from kafka_dae_control.defaults import FrameSyncSelect
-from kafka_dae_control.event_with_value import EventWithValue
+from kafka_dae_control.event_with_error import EventWithError
 
 logger = logging.getLogger(__name__)
 
@@ -15,25 +15,20 @@ class SetIPEvent:
 
 
 @dataclass
-class BeginEvent:
+class DoneEvent:
+    """A class containing an EventWithError instance."""
+
+    done_event: EventWithError
+
+
+@dataclass
+class BeginEvent(DoneEvent):
     """An event signalling a begin."""
 
-    done_event: EventWithValue[None]
-
 
 @dataclass
-class EndEvent:
+class EndEvent(DoneEvent):
     """An event signalling an end."""
-
-    done_event: EventWithValue[None]
-
-
-@dataclass
-class FrameSyncSelectChangeEvent:
-    """An event signalling a change in the frame sync select setpoint."""
-
-    value: FrameSyncSelect
-    done_event: EventWithValue[None]
 
 
 @dataclass
@@ -41,6 +36,11 @@ class WorkerEventWithValue[T](ABC):
     """A worker event with a value field."""
 
     value: T
+
+
+@dataclass
+class FrameSyncSelectChangeEvent(WorkerEventWithValue[FrameSyncSelect], DoneEvent):
+    """An event signalling a change in the frame sync select setpoint."""
 
 
 @dataclass
@@ -61,6 +61,16 @@ class BlocksUpdateEvent(WorkerEventWithValue[list[str]]):
     """An event signalling a blocks update."""
 
 
+@dataclass
+class SoftVetoesUpdateEvent(WorkerEventWithValue[int], DoneEvent):
+    """An event signalling the soft vetoes have been set."""
+
+
+@dataclass
+class HardVetoesUpdateEvent(WorkerEventWithValue[int], DoneEvent):
+    """An event signalling the hard vetoes have been set."""
+
+
 WorkerEvent = (
     SetIPEvent
     | BeginEvent
@@ -68,4 +78,6 @@ WorkerEvent = (
     | HardwareUpdateEvent
     | BlocksUpdateEvent
     | FrameSyncSelectChangeEvent
+    | SoftVetoesUpdateEvent
+    | HardVetoesUpdateEvent
 )
