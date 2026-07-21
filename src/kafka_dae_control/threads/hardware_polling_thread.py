@@ -88,6 +88,7 @@ def poll_hardware(
                 HardwareUpdate(
                     hw_running=running_register_readback & RunRegister.STATUS_RUNNING != 0,
                     frame_sync_select=FrameSyncSelect(frame_sync_select_readback),
+                    hard_vetoes=veto_control_raw_readback,
                 )
             )
         )

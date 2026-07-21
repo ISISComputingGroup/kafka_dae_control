@@ -7,6 +7,7 @@ import pytest
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.defaults import (
     FrameSyncSelect,
+    Registers,
     RunRegister,
 )
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread
@@ -16,7 +17,7 @@ from kafka_dae_control.worker_event_types import HardwareUpdate
 @patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)
 @patch(
     "kafka_dae_control.threads.hardware_polling_thread.read",
-    side_effect=[RunRegister.STATUS_RUNNING, 0x1],
+    side_effect=[RunRegister.STATUS_RUNNING, 0x1, 0b0001],
 )
 def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, conf: ControlConfig):
     sock = Mock()
@@ -30,13 +31,19 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
             call(
                 sock,
                 conf.board_ip,
-                address=0,
+                address=conf.register_map[Registers.RUNNING_REGISTER],
                 port=conf.read_port,
             ),
             call(
                 sock,
                 conf.board_ip,
-                address=4,
+                address=conf.register_map[Registers.FRAME_SYNC_SEL_REGISTER],
+                port=conf.read_port,
+            ),
+            call(
+                sock,
+                conf.board_ip,
+                address=conf.register_map[Registers.VETO_CONTROL_REGISTER],
                 port=conf.read_port,
             ),
         ]
@@ -44,14 +51,14 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
     assert queue.get().value == HardwareUpdate(
-        hw_running=True, frame_sync_select=FrameSyncSelect(1)
+        hw_running=True, frame_sync_select=FrameSyncSelect(1), hard_vetoes=0b0001
     )
 
 
 @patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)
 @patch(
     "kafka_dae_control.threads.hardware_polling_thread.read",
-    side_effect=[RunRegister.STATUS_RUNNING, 1234],
+    side_effect=[RunRegister.STATUS_RUNNING, 1234, 0b0001],
 )
 def test_read_frame_sync_select_invalid_sets_invalid(
     mock_read: Mock, mock_sleep: Mock, conf: ControlConfig, caplog: pytest.LogCaptureFixture
@@ -65,7 +72,7 @@ def test_read_frame_sync_select_invalid_sets_invalid(
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
     assert queue.get().value == HardwareUpdate(
-        hw_running=True, frame_sync_select=FrameSyncSelect.UNKNOWN
+        hw_running=True, frame_sync_select=FrameSyncSelect.UNKNOWN, hard_vetoes=0b0001
     )
 
 

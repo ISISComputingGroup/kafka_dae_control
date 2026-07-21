@@ -77,7 +77,9 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
         Queue(),
         HardwareUpdateEvent(
             value=HardwareUpdate(
-                hw_running=True, frame_sync_select=FrameSyncSelect.INTERNAL_TEST_CLOCK
+                hw_running=True,
+                frame_sync_select=FrameSyncSelect.INTERNAL_TEST_CLOCK,
+                hard_vetoes=0b001,
             )
         ),
         conf,
@@ -88,6 +90,7 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
     )
     assert data.running
     assert data.frame_sync_select_rbv == FrameSyncSelect.INTERNAL_TEST_CLOCK
+    assert data.hard_vetoes_array == 0b001
 
 
 @patch("kafka_dae_control.process_worker_event.handle_frame_sync_sp_change")

@@ -30,6 +30,7 @@ def conf() -> ControlConfig:
         Registers.RUNNING_REGISTER: 0,
         Registers.FRAME_SYNC_SEL_REGISTER: 4,
         Registers.COMMS_REGISTER: 268435492,
+        Registers.VETO_CONTROL_REGISTER: 12345679,
     }
     return cc
 
