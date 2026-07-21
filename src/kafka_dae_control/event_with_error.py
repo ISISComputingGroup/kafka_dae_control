@@ -14,15 +14,16 @@ class EventWithError(threading.Event):
         super().__init__()
         self._err = None
 
-    def wait(self, timeout: float | None = None) -> None:
+    def wait(self, timeout: float | None = None) -> bool:
         """Wait for the event to be set.
 
         Either return after waiting, or raise if there is an exception.
 
         """
-        super().wait(timeout)
+        res = super().wait(timeout)
         if self._err is not None:
             raise self._err
+        return res
 
     @property
     def err(self) -> Exception | None:

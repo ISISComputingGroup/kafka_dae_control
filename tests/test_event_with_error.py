@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -26,8 +26,7 @@ def test_wait_unblocks_when_error_set():
 
 
 @patch("kafka_dae_control.event_with_error.threading.Event.wait")
-def test_wait_does_not_raise_when_no_error_set(mock_super_wait):
+def test_wait_does_not_raise_when_no_error_set(mock_super_wait: Mock):
     ev = EventWithError()
-    ev.err = None
     ev.wait()
     assert mock_super_wait.called
