@@ -13,7 +13,7 @@ def or_two_int_lists(x: list[int], y: list[int]) -> int:
 
     Returns: The result of ORing the two lists.
 
-    """
+    """  # ruff: ignore[non-imperative-mood]
     result = 0
     for s, h in zip(x, y, strict=True):
         result = (result << 1) | (s | h)

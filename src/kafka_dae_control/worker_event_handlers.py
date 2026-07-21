@@ -26,7 +26,7 @@ from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
 from kafka_dae_control.utils import or_two_int_lists
-from kafka_dae_control.worker_event_types import WorkerEvent, SoftVetoesUpdateEvent
+from kafka_dae_control.worker_event_types import WorkerEvent
 
 logger = logging.getLogger(__name__)
 
@@ -215,12 +215,28 @@ def handle_soft_vetoes_change(
     data: Data,
     producer: Producer,
     done_event: EventWithError,
-):
+) -> None:
+    """Handle a soft veto configuration change.
+
+    This sends a vc00 update with the hard and soft vetoes.
+
+    Args:
+        value: The bitmask list of hard vetoes to set.
+        config: The program's configuration.
+        data: the data class containing the state of the program.
+        producer: the Kafka producer.
+        done_event: The event to call set() on when complete
+
+    """
     blob = serialise_vc00(time.time_ns(), vetoes=or_two_int_lists(value, data.hard_vetoes_array))
-    producer.produce(config.runinfo_topic, value=blob, callback=partial(delivery_report_set_error_or_done, done_event))
+    producer.produce(
+        config.vetoes_topic,
+        value=blob,
+        callback=partial(delivery_report_set_error_or_done, done_event),
+    )
 
 
-def handle_hard_vetoes_change(
+def handle_hard_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
     value: list[int],
     config: ControlConfig,
     data: Data,
@@ -228,13 +244,41 @@ def handle_hard_vetoes_change(
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithError,
-):
-    #  - set the vetoes on the hardware
-    #  - send a vc00 to kafka, with data.all_vetoes (after settings data)
-    # if the above both work set done on the event with value
+) -> None:
+    """Handle a hard veto configuration change.
+
+    This sets the vetoes on the hardware, then sends a vc00 update with the hard and soft vetoes.
+
+    Args:
+        value: The bitmask list of hard vetoes to set.
+        config: The program's configuration.
+        data: the data class containing the state of the program.
+        producer: the Kafka producer.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+        done_event: The event to call set() on when complete
+
+    """
+    try:
+        with sock_lock:
+            out = 0
+            for bit in value:
+                out = (out << 1) | bit
+            write_verify(
+                config,
+                sock,
+                address=config.register_map[Registers.VETO_CONTROL_REGISTER],
+                data=out,
+                verify=lambda x: x == out,
+            )
+    except Exception as e:
+        logger.exception("Failed to set frame sync select: ")
+        done_event.err = e
+        return
+
     blob = serialise_vc00(time.time_ns(), vetoes=or_two_int_lists(value, data.soft_vetoes_array))
-    producer.produce(config.runinfo_topic, value=blob, callback=partial(delivery_report_set_error_or_done, done_event))
-    # todo: check that runinfo topic is correct
-    # todo: check that above and other places where we do kafka-then-hardware that set() isnt called prematurely
-    # todo: set on hardware
-    pass
+    producer.produce(
+        config.vetoes_topic,
+        value=blob,
+        callback=partial(delivery_report_set_error_or_done, done_event),
+    )

@@ -1,5 +1,3 @@
-from unittest.mock import Mock
-
 import pytest
 
 from kafka_dae_control.event_with_error import EventWithError

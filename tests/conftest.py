@@ -24,6 +24,7 @@ def conf() -> ControlConfig:
         board_xml=Path("blah.xml"),
         sample_env_topic="sample-env-topic",
         events_topic="events-topic",
+        vetoes_topic="vetoes-topic",
     )
     cc.register_map = {
         Registers.RUNNING_REGISTER: 0,

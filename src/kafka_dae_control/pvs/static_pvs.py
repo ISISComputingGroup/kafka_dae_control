@@ -14,9 +14,9 @@ from kafka_dae_control.worker_event_types import (
     BeginEvent,
     EndEvent,
     FrameSyncSelectChangeEvent,
-    WorkerEvent,
-    SoftVetoesUpdateEvent,
     HardVetoesUpdateEvent,
+    SoftVetoesUpdateEvent,
+    WorkerEvent,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class StaticPVs:
     """Static PVs for KDAECTRL."""
 
-    def __init__(self, data: "Data", queue: Queue[WorkerEvent]) -> None:
+    def __init__(self, data: "Data", queue: Queue[WorkerEvent]) -> None:  # ruff:ignore [too-many-statements]
         """Set up static PVs for KDAECTRL.
 
         Args:
@@ -135,7 +135,7 @@ class StaticPVs:
             try:
                 ev.wait()
                 op.done()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set soft_vetoes: {e}")
 
         @self.hard_vetoes_sp.put
@@ -147,7 +147,7 @@ class StaticPVs:
             try:
                 ev.wait()
                 op.done()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set soft_vetoes: {e}")
 
     def update_all(self, data: Data) -> None:

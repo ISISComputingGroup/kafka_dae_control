@@ -35,6 +35,9 @@ class ControlConfig(BaseModel):
     runinfo_topic: str
     """Run info topic to push run starts/stops to"""
 
+    vetoes_topic: str
+    """Veto configuration topic to push veto configuration updates to"""
+
     local_ip: ipaddress.IPv4Address
     """Local IP to set the control board IP register to"""
 

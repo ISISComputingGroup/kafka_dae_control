@@ -1,4 +1,5 @@
 import pytest
+
 from kafka_dae_control.utils import or_two_int_lists
 
 

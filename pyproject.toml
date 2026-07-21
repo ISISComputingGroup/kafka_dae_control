@@ -28,7 +28,7 @@ classifiers = [
 
 dependencies = [
   "p4p", # For serving kdaectrl PVs
-  "isis-streaming-data-types", # for constructing run starts/stops.
+  "isis-streaming-data-types>=0.1.2", # for constructing run starts/stops.
   "confluent-kafka", # For kafka ops
   "pyepics", # for getting parts of run-start nexus structure from blockserver
   "ibex-non-ca-helpers", # for utilities like dehex_and_decompress

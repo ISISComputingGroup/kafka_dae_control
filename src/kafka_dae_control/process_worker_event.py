@@ -14,19 +14,19 @@ from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
-    handle_soft_vetoes_change,
     handle_hard_vetoes_change,
+    handle_soft_vetoes_change,
 )
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     BlocksUpdateEvent,
     EndEvent,
     FrameSyncSelectChangeEvent,
+    HardVetoesUpdateEvent,
     HardwareUpdateEvent,
     SetIPEvent,
-    WorkerEvent,
     SoftVetoesUpdateEvent,
-    HardVetoesUpdateEvent,
+    WorkerEvent,
 )
 
 logger = logging.getLogger(__name__)

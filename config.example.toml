@@ -20,6 +20,9 @@ sample_env_topic = "TESTMACHINE_sampleEnv"
 # Kafka topic to use when putting event placeholders in the run start message's nexus_structure
 events_topic = "TESTMACHINE_events"
 
+# Kafka topic to use when pushing veto configuration updates to
+vetoes_topic = "TESTMACHINE_vetoConfig"
+
 # Local IP to send to the streaming board so it responds thereafter
 local_ip = "192.168.1.17"
 
