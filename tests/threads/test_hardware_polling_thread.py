@@ -51,7 +51,42 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
     assert queue.get().value == HardwareUpdate(
-        hw_running=True, frame_sync_select=FrameSyncSelect(1), hard_vetoes=0b0001
+        hw_running=True,
+        frame_sync_select=FrameSyncSelect(1),
+        hard_vetoes=[
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+        ],
     )
 
 
@@ -72,7 +107,42 @@ def test_read_frame_sync_select_invalid_sets_invalid(
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
     assert queue.get().value == HardwareUpdate(
-        hw_running=True, frame_sync_select=FrameSyncSelect.UNKNOWN, hard_vetoes=0b0001
+        hw_running=True,
+        frame_sync_select=FrameSyncSelect.UNKNOWN,
+        hard_vetoes=[
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+        ],
     )
 
 

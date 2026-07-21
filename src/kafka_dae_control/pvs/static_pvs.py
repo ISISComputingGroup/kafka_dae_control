@@ -192,6 +192,6 @@ def static_pv_provider(
     static_provider.add(f"{prefix}DAETIMINGSOURCE:SP", static_pvs.frame_sync_select_sp)
     static_provider.add(f"{prefix}VETO:NAMES", static_pvs.veto_names_array)
     static_provider.add(f"{prefix}VETO:HARD:SP", static_pvs.hard_vetoes_sp)
-    static_provider.add(f"{prefix}VETO:HARD", static_pvs.hard_vetoes_sp)
+    static_provider.add(f"{prefix}VETO:HARD", static_pvs.hard_vetoes_rbv)
     static_provider.add(f"{prefix}VETO:SOFT:SP", static_pvs.soft_vetoes)
     return static_pvs, static_provider

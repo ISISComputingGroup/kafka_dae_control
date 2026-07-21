@@ -49,7 +49,7 @@ class HardwareUpdate:
 
     hw_running: bool
     frame_sync_select: FrameSyncSelect
-    hard_vetoes: int
+    hard_vetoes: list[int]
 
 
 @dataclass
