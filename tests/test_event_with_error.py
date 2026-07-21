@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import pytest
 
 from kafka_dae_control.event_with_error import EventWithError
@@ -21,3 +23,11 @@ def test_wait_unblocks_when_error_set():
     ev.err = OverflowError()
     with pytest.raises(OverflowError):
         ev.wait()
+
+
+@patch("kafka_dae_control.event_with_error.threading.Event.wait")
+def test_wait_does_not_raise_when_no_error_set(mock_super_wait):
+    ev = EventWithError()
+    ev.err = None
+    ev.wait()
+    assert mock_super_wait.called

@@ -13,9 +13,11 @@ from kafka_dae_control.worker_event_types import (
     BlocksUpdateEvent,
     EndEvent,
     FrameSyncSelectChangeEvent,
+    HardVetoesUpdateEvent,
     HardwareUpdate,
     HardwareUpdateEvent,
     SetIPEvent,
+    SoftVetoesUpdateEvent,
 )
 
 
@@ -109,3 +111,35 @@ def test_frame_sync_select_change_calls_handle_frame_sync_sp_change(
         Mock(),
     )
     assert mock_handle_frame_sync_sp_change.called
+
+
+@patch("kafka_dae_control.process_worker_event.handle_soft_vetoes_change")
+def test_soft_vetoes_change_calls_handle_soft_vetoes_change(
+    mock_handle_soft_vetoes_change: Mock, conf: ControlConfig, data: Data
+):
+    process_worker_event(
+        Queue(),
+        SoftVetoesUpdateEvent(value=[0, 1, 0, 1, 0, 1, 0, 1], done_event=Mock()),
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        Mock(),
+    )
+    assert mock_handle_soft_vetoes_change.called
+
+
+@patch("kafka_dae_control.process_worker_event.handle_hard_vetoes_change")
+def test_hard_vetoes_change_calls_handle_hard_vetoes_change(
+    mock_handle_hard_vetoes_change: Mock, conf: ControlConfig, data: Data
+):
+    process_worker_event(
+        Queue(),
+        HardVetoesUpdateEvent(value=[0, 1, 0, 1, 0, 1, 0, 1], done_event=Mock()),
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        Mock(),
+    )
+    assert mock_handle_hard_vetoes_change.called
