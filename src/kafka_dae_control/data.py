@@ -49,8 +49,11 @@ class Data(BaseModel):
     soft_vetoes: int = 0xFFFF
     """Soft vetoes bit mask"""
 
-    hard_vetoes: int = 0xFFFF
+    hard_vetoes_rbv: int = 0xFFFF
     """Hard vetoes bit mask"""
+
+    hard_vetoes_sp: int = 0xFFFF
+    """Hard vetoes setpoint"""
 
     @property
     def soft_vetoes_array(self) -> npt.NDArray[np.uint8]:
@@ -60,4 +63,9 @@ class Data(BaseModel):
     @property
     def hard_vetoes_array(self) -> npt.NDArray[np.uint8]:
         """An array representation of the hard vetoes bit mask."""
-        return mask_to_array(self.hard_vetoes)
+        return mask_to_array(self.hard_vetoes_rbv)
+
+    @property
+    def hard_vetoes_sp_array(self) -> npt.NDArray[np.uint8]:
+        """An array representation of the hard vetoes bit mask."""
+        return mask_to_array(self.hard_vetoes_sp)

@@ -239,10 +239,10 @@ def test_frame_sync_select_failed_to_write_sets_err(
 
 
 def test_soft_veto_change_sends_update_to_kafka(data: Data, conf: ControlConfig):
-    data.hard_vetoes_array = [0, 1, 0, 0, 0, 0, 0, 0]
+    data.hard_vetoes_sp = 0b1000000
     producer = Mock()
     done_event = EventWithError()
-    handle_soft_vetoes_change([0, 0, 0, 0, 1, 0, 0, 0], conf, data, producer, done_event)
+    handle_soft_vetoes_change(0b1000, conf, data, producer, done_event)
 
     assert deserialise_vc00(producer.mock_calls[0][2]["value"]).vetoes == 0b01001000
 
@@ -253,14 +253,12 @@ def test_hard_vetoes_change_writes_to_hardware(
     data: Data,
     conf: ControlConfig,
 ):
-    data.soft_vetoes_array = [0, 0, 0, 0, 0, 0, 1, 0]
+    data.soft_vetoes = 0b10
     done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     producer = Mock()
-    handle_hard_vetoes_change(
-        [0, 0, 0, 0, 1, 0, 0, 1], conf, data, producer, sock, sock_lock, done_event
-    )
+    handle_hard_vetoes_change(0b01001, conf, data, producer, sock, sock_lock, done_event)
 
     assert deserialise_vc00(producer.mock_calls[0][2]["value"]).vetoes == 0b00001011
 
@@ -277,14 +275,12 @@ def test_hard_vetoes_change_failed_to_write_sets_err(
     data: Data,
     conf: ControlConfig,
 ):
-    data.soft_vetoes_array = [0, 0, 0, 0, 0, 0, 1, 0]
+    data.soft_vetoes = 0b10
     done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     producer = Mock()
-    handle_hard_vetoes_change(
-        [0, 0, 0, 0, 1, 0, 0, 1], conf, data, producer, sock, sock_lock, done_event
-    )
+    handle_hard_vetoes_change(0b1001, conf, data, producer, sock, sock_lock, done_event)
 
     assert done_event.err is not None
     assert done_event.is_set()

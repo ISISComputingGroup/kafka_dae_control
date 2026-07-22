@@ -42,7 +42,7 @@ def test_mask_to_array():
                 0,
                 1,
             ],
-            dtype=np.bool,
+            dtype=np.uint8,
         )
     ).all()
 
@@ -83,6 +83,6 @@ def test_array_to_mask():
             0,
             1,
         ],
-        dtype=np.bool,
+        dtype=np.uint8,
     )
     assert array_to_mask(array) == 0b0100_0000_0000_0000_0000_0000_0000_0001

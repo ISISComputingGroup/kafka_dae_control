@@ -79,7 +79,7 @@ class StaticPVs:
         self.hard_vetoes_sp = SharedPV(
             nt=NTScalar("al", display=True, form=True),
             initial={
-                "value": data.hard_vetoes_array,
+                "value": data.hard_vetoes_sp_array,
                 "display.units": "",
                 "display.precision": 0,
             },
@@ -135,6 +135,7 @@ class StaticPVs:
             queue.put(SoftVetoesUpdateEvent(value=array_to_mask(value), done_event=ev))
             try:
                 ev.wait()
+                pv.post(value)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set soft_vetoes: {e}")
@@ -147,9 +148,10 @@ class StaticPVs:
             queue.put(HardVetoesUpdateEvent(value=array_to_mask(value), done_event=ev))
             try:
                 ev.wait()
+                pv.post(value)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
-                op.done(error=f"Failed to set soft_vetoes: {e}")
+                op.done(error=f"Failed to set hard_vetoes: {e}")
 
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.

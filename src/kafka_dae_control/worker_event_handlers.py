@@ -102,6 +102,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
                 | RunRegister.STREAM_EMPTY_FRAMES,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
             )
+        logger.debug("About to produce blob %s to %s", blob, config.runinfo_topic)
         producer.produce(
             config.runinfo_topic,
             blob,
@@ -155,6 +156,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
                 data=RunRegister.ETHERNET_OVERRIDE,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING == 0,
             )
+        logger.debug("About to produce blob %s to %s", blob, config.runinfo_topic)
         producer.produce(
             config.runinfo_topic,
             blob,
@@ -227,13 +229,17 @@ def handle_soft_vetoes_change(
         done_event: The event to call set() on when complete
 
     """
-    blob = serialise_vc00(time.time_ns(), vetoes=value | data.hard_vetoes)
+    blob = serialise_vc00(time.time_ns(), vetoes=value | data.hard_vetoes_sp)
+    logger.debug("About to produce blob %s to %s", blob, config.vetoes_topic)
     producer.produce(
         config.vetoes_topic,
         value=blob,
         callback=partial(delivery_report_set_error_or_done, done_event),
     )
+    producer.flush(timeout=config.flush_timeout_s)
     data.soft_vetoes = value
+    logger.debug("Saving file")
+    save_file(data, state_file=config.state_file)
 
 
 def handle_hard_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
@@ -274,9 +280,13 @@ def handle_hard_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-posit
         return
 
     blob = serialise_vc00(time.time_ns(), vetoes=value | data.soft_vetoes)
+    logger.debug("About to produce blob %s to %s", blob, config.vetoes_topic)
     producer.produce(
         config.vetoes_topic,
         value=blob,
         callback=partial(delivery_report_set_error_or_done, done_event),
     )
-    data.hard_vetoes = value
+    producer.flush(timeout=config.flush_timeout_s)
+    data.hard_vetoes_sp = value
+    logger.debug("Saving file")
+    save_file(data, state_file=config.state_file)

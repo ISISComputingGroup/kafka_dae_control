@@ -62,7 +62,7 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
             case HardwareUpdateEvent(value=value):
                 data.running = value.hw_running
                 data.frame_sync_select_rbv = value.frame_sync_select
-                data.hard_vetoes = value.hard_vetoes
+                data.hard_vetoes_rbv = value.hard_vetoes
             case BlocksUpdateEvent(value):
                 data.blocks = value
             case BeginEvent(done_event=done_event):

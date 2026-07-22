@@ -11,7 +11,7 @@ from kafka_dae_control.save_restore import load_data, save_file
 
 
 def test_save_restore_takes_data_and_saves_relevant_fields():
-    d = Data(job_id="1234", run_number=2345, running=False)
+    d = Data(job_id="1234", run_number=2345, running=False, soft_vetoes=12, hard_vetoes_sp=13)
 
     m = MagicMock(spec=Path)
     m.exists.return_value = True
@@ -27,6 +27,8 @@ def test_save_restore_takes_data_and_saves_relevant_fields():
     assert written == {
         "job_id": "1234",
         "run_number": 2345,
+        "soft_vetoes": 12,
+        "hard_vetoes_sp": 13,
     }
 
 
@@ -38,7 +40,9 @@ def test_save_restore_loads_data_then_can_be_used_for_constructing_dataclass():
     mock_file.read.return_value = """{
           "job_id": "e1bf4e61-9e3d-418b-988d-b50c63056ef8",
           "run_number": 1,
-          "running": false
+          "running": false,
+          "hard_vetoes_sp": 9,
+          "soft_vetoes": 1
         }"""
 
     m.open.return_value.__enter__.return_value = mock_file
@@ -47,6 +51,8 @@ def test_save_restore_loads_data_then_can_be_used_for_constructing_dataclass():
 
     assert d.job_id == "e1bf4e61-9e3d-418b-988d-b50c63056ef8"
     assert d.run_number == 1
+    assert d.hard_vetoes_sp == 9
+    assert d.soft_vetoes == 1
     assert not d.running
 
 

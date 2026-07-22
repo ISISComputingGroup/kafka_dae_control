@@ -9,12 +9,10 @@ from kafka_dae_control.data import Data
 RUN_NUMBER_KEY = "run_number"
 JOB_ID_KEY = "job_id"
 RUNNING_KEY = "running"
-HARD_VETOES_KEY = "hard_vetoes"
+HARD_VETOES_KEY = "hard_vetoes_sp"
 SOFT_VETOES_KEY = "soft_vetoes"
 
 logger = logging.getLogger(__name__)
-
-# TODO: save and restore veto settings
 
 
 def save_file(data: "Data", *_: int | str, state_file: Path) -> None:
@@ -32,7 +30,7 @@ def save_file(data: "Data", *_: int | str, state_file: Path) -> None:
             {
                 RUN_NUMBER_KEY: data.run_number,
                 JOB_ID_KEY: data.job_id,
-                HARD_VETOES_KEY: data.hard_vetoes,
+                HARD_VETOES_KEY: data.hard_vetoes_sp,
                 SOFT_VETOES_KEY: data.soft_vetoes,
             },
             file,
