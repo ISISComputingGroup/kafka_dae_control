@@ -56,12 +56,13 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
         sock_lock: the lock to use when using the socket instance
 
     """
+    logger.debug("Processing worker event: %s", worker_event)
     try:
         match worker_event:
             case HardwareUpdateEvent(value=value):
                 data.running = value.hw_running
                 data.frame_sync_select_rbv = value.frame_sync_select
-                data.hard_vetoes_array = value.hard_vetoes
+                data.hard_vetoes = value.hard_vetoes
             case BlocksUpdateEvent(value):
                 data.blocks = value
             case BeginEvent(done_event=done_event):

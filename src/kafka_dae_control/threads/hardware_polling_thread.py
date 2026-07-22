@@ -83,14 +83,12 @@ def poll_hardware(
                 port=config.read_port,
             )
 
-            veto_bit_list = [veto_control_raw_readback >> i & 1 for i in range(31, -1, -1)]
-
         queue.put(
             HardwareUpdateEvent(
                 HardwareUpdate(
                     hw_running=running_register_readback & RunRegister.STATUS_RUNNING != 0,
                     frame_sync_select=FrameSyncSelect(frame_sync_select_readback),
-                    hard_vetoes=veto_bit_list,
+                    hard_vetoes=veto_control_raw_readback,
                 )
             )
         )

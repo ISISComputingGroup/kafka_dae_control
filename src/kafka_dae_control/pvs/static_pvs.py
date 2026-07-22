@@ -10,6 +10,7 @@ from p4p.server.thread import SharedPV
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import FrameSyncSelect
 from kafka_dae_control.event_with_error import EventWithError
+from kafka_dae_control.utils import array_to_mask
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     EndEvent,
@@ -78,7 +79,7 @@ class StaticPVs:
         self.hard_vetoes_sp = SharedPV(
             nt=NTScalar("al", display=True, form=True),
             initial={
-                "value": data.soft_vetoes_array,
+                "value": data.hard_vetoes_array,
                 "display.units": "",
                 "display.precision": 0,
             },
@@ -86,7 +87,7 @@ class StaticPVs:
         self.hard_vetoes_rbv = SharedPV(
             nt=NTScalar("al", display=True, form=True),
             initial={
-                "value": data.soft_vetoes_array,
+                "value": data.hard_vetoes_array,
                 "display.units": "",
                 "display.precision": 0,
             },
@@ -131,7 +132,7 @@ class StaticPVs:
             value = op.value()
             logger.info("put with %s to soft_vetoes", value)
             ev = EventWithError()
-            queue.put(SoftVetoesUpdateEvent(value=value, done_event=ev))
+            queue.put(SoftVetoesUpdateEvent(value=array_to_mask(value), done_event=ev))
             try:
                 ev.wait()
                 op.done()
@@ -141,9 +142,9 @@ class StaticPVs:
         @self.hard_vetoes_sp.put
         def hard_vetoes_put(pv: SharedPV, op: ServerOperation) -> None:
             value = op.value()
-            logger.info("put with %s to soft_vetoes", value)
+            logger.info("put with %s to hard_vetoes", value)
             ev = EventWithError()
-            queue.put(HardVetoesUpdateEvent(value=value, done_event=ev))
+            queue.put(HardVetoesUpdateEvent(value=array_to_mask(value), done_event=ev))
             try:
                 ev.wait()
                 op.done()

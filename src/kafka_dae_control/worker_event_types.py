@@ -4,6 +4,9 @@ import logging
 from abc import ABC
 from dataclasses import dataclass
 
+import numpy as np
+import numpy.typing as npt
+
 from kafka_dae_control.defaults import FrameSyncSelect
 from kafka_dae_control.event_with_error import EventWithError
 
@@ -49,7 +52,7 @@ class HardwareUpdate:
 
     hw_running: bool
     frame_sync_select: FrameSyncSelect
-    hard_vetoes: list[int]
+    hard_vetoes: int
 
 
 @dataclass
@@ -63,12 +66,12 @@ class BlocksUpdateEvent(WorkerEventWithValue[list[str]]):
 
 
 @dataclass
-class SoftVetoesUpdateEvent(WorkerEventWithValue[list[int]], DoneEvent):
+class SoftVetoesUpdateEvent(WorkerEventWithValue[npt.NDArray[np.uint8]], DoneEvent):
     """An event signalling the soft vetoes have been set."""
 
 
 @dataclass
-class HardVetoesUpdateEvent(WorkerEventWithValue[list[int]], DoneEvent):
+class HardVetoesUpdateEvent(WorkerEventWithValue[npt.NDArray[np.uint8]], DoneEvent):
     """An event signalling the hard vetoes have been set."""
 
 

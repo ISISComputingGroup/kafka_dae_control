@@ -25,7 +25,6 @@ from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
-from kafka_dae_control.utils import or_two_int_lists
 from kafka_dae_control.worker_event_types import WorkerEvent
 
 logger = logging.getLogger(__name__)
@@ -210,7 +209,7 @@ def handle_frame_sync_sp_change(  # ruff:ignore[too-many-arguments, too-many-pos
 
 
 def handle_soft_vetoes_change(
-    value: list[int],
+    value: int,
     config: ControlConfig,
     data: Data,
     producer: Producer,
@@ -228,16 +227,17 @@ def handle_soft_vetoes_change(
         done_event: The event to call set() on when complete
 
     """
-    blob = serialise_vc00(time.time_ns(), vetoes=or_two_int_lists(value, data.hard_vetoes_array))
+    blob = serialise_vc00(time.time_ns(), vetoes=value | data.hard_vetoes)
     producer.produce(
         config.vetoes_topic,
         value=blob,
         callback=partial(delivery_report_set_error_or_done, done_event),
     )
+    data.soft_vetoes = value
 
 
 def handle_hard_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
-    value: list[int],
+    value: int,
     config: ControlConfig,
     data: Data,
     producer: Producer,
@@ -261,24 +261,22 @@ def handle_hard_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-posit
     """
     try:
         with sock_lock:
-            out = 0
-            for bit in value:
-                out = (out << 1) | bit
             write_verify(
                 config,
                 sock,
                 address=config.register_map[Registers.VETO_CONTROL_REGISTER],
-                data=out,
-                verify=lambda x: x == out,
+                data=value,
+                verify=lambda x: x == value,
             )
     except Exception as e:
-        logger.exception("Failed to set frame sync select: ")
+        logger.exception("Failed to set hard vetoes: ")
         done_event.err = e
         return
 
-    blob = serialise_vc00(time.time_ns(), vetoes=or_two_int_lists(value, data.soft_vetoes_array))
+    blob = serialise_vc00(time.time_ns(), vetoes=value | data.soft_vetoes)
     producer.produce(
         config.vetoes_topic,
         value=blob,
         callback=partial(delivery_report_set_error_or_done, done_event),
     )
+    data.hard_vetoes = value

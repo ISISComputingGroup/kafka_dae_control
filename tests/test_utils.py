@@ -1,18 +1,88 @@
-import pytest
+import numpy as np
 
-from kafka_dae_control.utils import or_two_int_lists
-
-
-def test_all_vetoes():
-    x = [0, 1, 0, 1]
-    y = [1, 0, 1, 0]
-
-    assert or_two_int_lists(x, y) == 0b1111
+from kafka_dae_control.utils import array_to_mask, mask_to_array
 
 
-def test_lists_with_different_lengths_raises():
-    x = [0, 1, 0]
-    y = [0, 1]
+def test_mask_to_array():
+    mask = 0b1010_0000_0000_0000_0000_0000_0000_0101
+    assert (
+        mask_to_array(mask)
+        == np.asarray(
+            [
+                1,
+                0,
+                1,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                1,
+                0,
+                1,
+            ],
+            dtype=np.bool,
+        )
+    ).all()
 
-    with pytest.raises(ValueError):  # ruff:ignore[pytest-raises-too-broad], this is really testing zip()'s assertion gets propagated.
-        or_two_int_lists(x, y)
+
+def test_array_to_mask():
+    array = np.asarray(
+        [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+        ],
+        dtype=np.bool,
+    )
+    assert array_to_mask(array) == 0b0100_0000_0000_0000_0000_0000_0000_0001

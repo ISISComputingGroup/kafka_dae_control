@@ -3,9 +3,12 @@
 import logging
 from typing import TypeVar
 
+import numpy as np
+import numpy.typing as npt
 from pydantic import BaseModel, Field
 
-from kafka_dae_control.defaults import FrameSyncSelect
+from kafka_dae_control.defaults import NUM_VETOES, FrameSyncSelect
+from kafka_dae_control.utils import mask_to_array
 
 logger = logging.getLogger(__name__)
 
@@ -38,11 +41,23 @@ class Data(BaseModel):
     """List of blocks to be inserted in the run start nexus structure.
      These are prefixed with the instrument and block server prefixes"""
 
-    veto_names_array: list[str] = Field(default_factory=list)
+    veto_names_array: list[str] = Field(default=[f"veto_{n}" for n in range(NUM_VETOES)])
     """
     Veto names, as a numpy array of strings.
     """
 
-    soft_vetoes_array: list[int] = Field(default=[0] * 32)
+    soft_vetoes: int = 0xFFFF
+    """Soft vetoes bit mask"""
 
-    hard_vetoes_array: list[int] = Field(default=[0] * 32)
+    hard_vetoes: int = 0xFFFF
+    """Hard vetoes bit mask"""
+
+    @property
+    def soft_vetoes_array(self) -> npt.NDArray[np.uint8]:
+        """An array representation of the soft vetoes bit mask."""
+        return mask_to_array(self.soft_vetoes)
+
+    @property
+    def hard_vetoes_array(self) -> npt.NDArray[np.uint8]:
+        """An array representation of the hard vetoes bit mask."""
+        return mask_to_array(self.hard_vetoes)
