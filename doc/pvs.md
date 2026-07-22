@@ -34,4 +34,19 @@ These are just "soft" PVs used for forming the [run starts](https://github.com/I
 
 ## `RUNNUMBER` / `IRUNNUMBER`
 
-These are the current run number. A run stop increments these. They are read-only from EPICS, but changing the {ref}`statefile` can update them. 
+These are the current run number. A run stop increments these. They are read-only from EPICS, but changing the {ref}`statefile` can update them.
+
+
+## `VETO:NAMES`
+Array of veto names, corresponding to the veto bit mask. Note that this is not changeable at runtime and must be set in the program's configuration file.
+
+## `VETO:HARD:SP` / `VETO:HARD`
+Hard veto configuration array. This corresponds to the veto names array.
+Setting this will write to hardware and then pushes a [`vc00`](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/vc00_veto_configuration.fbs) blob, containing a bitwise `OR` of both soft and hard vetoes into the veto configuration topic.
+
+`VETO:HARD` is used as a readback for what is currently set on the streaming control board.
+
+## `VETO:SOFT:SP`
+Soft veto configuration array. This corresponds to the veto names array.
+
+Setting this push a [`vc00`](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/vc00_veto_configuration.fbs) blob, containing a bitwise `OR` of both soft and hard vetoes into the veto configuration topic.
