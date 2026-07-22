@@ -49,4 +49,4 @@ valid_xml_str = """<?xml version="1.0" ?>
       <node absolute_id="vxiscb_supermusr_iconnect.udp_core.udp_core_control_0_src_ip_addr" absolute_offset="10000028" address="0x00000028" description="UDP Source(Board) IP Address" hw_rst="0xC0A80103" id="udp_core_control_0_src_ip_addr" mask="0xFFFFFFFF" permission="rw" size="1"/>
    </node>
 </node>
-"""  # noqa: E501, RUF001
+"""  # ruff:ignore[line-too-long, ambiguous-unicode-character-string]

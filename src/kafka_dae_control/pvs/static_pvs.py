@@ -97,7 +97,7 @@ class StaticPVs:
             try:
                 ev.wait()
                 op.done()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to begin: {e}")
 
         @self.end.put  # pragma: no cover
@@ -108,7 +108,7 @@ class StaticPVs:
             try:
                 ev.wait()
                 op.done()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to end: {e}")
 
         @self.frame_sync_select_sp.put
@@ -120,7 +120,7 @@ class StaticPVs:
             try:
                 ev.wait()
                 op.done()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set frame_sync_select_sp: {e}")
 
         @self.num_periods_sp.put

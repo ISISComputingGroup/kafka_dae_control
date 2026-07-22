@@ -1,4 +1,4 @@
-# ruff: noqa PLC1901
+# ruff:file-ignore [compare-to-empty-string]
 import json
 from pathlib import Path
 from unittest.mock import MagicMock

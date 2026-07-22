@@ -34,7 +34,7 @@ from kafka_dae_control.worker_event_types import (
 logger = logging.getLogger(__name__)
 
 
-def process_worker_event(  # noqa: PLR0917, PLR0913
+def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many-arguments]
     queue: Queue[WorkerEvent],
     worker_event: WorkerEvent,
     config: ControlConfig,

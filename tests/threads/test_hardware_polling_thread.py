@@ -37,7 +37,7 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     queue = Queue()
-    with pytest.raises(Exception):  # noqa: B017, PT011
+    with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
         hardware_poll_thread(conf, queue, sock, sock_lock)
 
     mock_read.assert_has_calls(
@@ -80,7 +80,7 @@ def test_read_frame_sync_select_invalid_sets_invalid(
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     queue = Queue()
-    with pytest.raises(Exception):  # noqa: B017, PT011
+    with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
         hardware_poll_thread(conf, queue, sock, sock_lock)
 
     assert sock_lock.__enter__.called
@@ -116,7 +116,7 @@ def test_read_throws_exception_logs(
     sock_lock = MagicMock(spec=RLock())
     queue = Queue()
 
-    with pytest.raises(Exception):  # noqa: B017, PT011
+    with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
         hardware_poll_thread(conf, queue, sock, sock_lock)
 
     assert "Error occurred when polling hardware: " in caplog.text
