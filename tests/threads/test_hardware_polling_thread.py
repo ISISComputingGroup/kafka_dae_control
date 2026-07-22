@@ -99,7 +99,7 @@ def test_period_mode_invalid_sets_unknown(
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     queue = Queue()
-    with pytest.raises(Exception):  # noqa: B017, PT011
+    with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
         hardware_poll_thread(conf, queue, sock, sock_lock)
 
     assert sock_lock.__enter__.called

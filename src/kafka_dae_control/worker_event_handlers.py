@@ -204,7 +204,7 @@ def handle_frame_sync_sp_change(  # ruff:ignore[too-many-arguments, too-many-pos
     done_event.set()
 
 
-def set_num_periods(  # noqa: PLR0913, PLR0917
+def set_num_periods(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
     value: int,
     config: ControlConfig,
     data: Data,
@@ -241,7 +241,7 @@ def set_num_periods(  # noqa: PLR0913, PLR0917
     done_event.set()
 
 
-def set_current_period(  # noqa: PLR0913, PLR0917
+def set_current_period(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
     value: int,
     config: ControlConfig,
     data: Data,
@@ -277,7 +277,7 @@ def set_current_period(  # noqa: PLR0913, PLR0917
     done_event.set()
 
 
-def set_period_mode(  # noqa: PLR0913, PLR0917
+def set_period_mode(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
     value: PeriodMode,
     config: ControlConfig,
     data: Data,

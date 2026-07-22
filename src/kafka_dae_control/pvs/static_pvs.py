@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class StaticPVs:
     """Static PVs for KDAECTRL."""
 
-    def __init__(self, data: "Data", queue: Queue[WorkerEvent]) -> None:  # noqa: PLR0915
+    def __init__(self, data: "Data", queue: Queue[WorkerEvent]) -> None:  # ruff:ignore[too-many-statements]
         """Set up static PVs for KDAECTRL.
 
         Args:
@@ -134,7 +134,7 @@ class StaticPVs:
                 ev.wait()
                 pv.post(value)
                 op.done()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set num_periods_sp: {e}")
 
         @self.period_sp.put
@@ -150,7 +150,7 @@ class StaticPVs:
                 ev.wait()
                 pv.post(value)
                 op.done()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set period_sp: {e}")
 
         @self.period_type_sp.put
@@ -163,7 +163,7 @@ class StaticPVs:
                 ev.wait()
                 pv.post(value)
                 op.done()
-            except Exception as e:  # noqa: BLE001
+            except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set period_sp: {e}")
 
     def update_all(self, data: Data) -> None:
