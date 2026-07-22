@@ -119,6 +119,7 @@ class StaticPVs:
             queue.put(FrameSyncSelectChangeEvent(value=FrameSyncSelect[str(value)], done_event=ev))
             try:
                 ev.wait()
+                pv.post(value)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set frame_sync_select_sp: {e}")
@@ -131,6 +132,7 @@ class StaticPVs:
             queue.put(NumberOfPeriodsSetEvent(value=value, done_event=ev))
             try:
                 ev.wait()
+                pv.post(value)
                 op.done()
             except Exception as e:  # noqa: BLE001
                 op.done(error=f"Failed to set num_periods_sp: {e}")
@@ -146,6 +148,7 @@ class StaticPVs:
             queue.put(CurrentPeriodSetEvent(value=value, done_event=ev))
             try:
                 ev.wait()
+                pv.post(value)
                 op.done()
             except Exception as e:  # noqa: BLE001
                 op.done(error=f"Failed to set period_sp: {e}")
@@ -158,6 +161,7 @@ class StaticPVs:
             queue.put(PeriodModeSetEvent(value=PeriodMode[str(value)], done_event=ev))
             try:
                 ev.wait()
+                pv.post(value)
                 op.done()
             except Exception as e:  # noqa: BLE001
                 op.done(error=f"Failed to set period_sp: {e}")
