@@ -34,6 +34,15 @@ nitpick_ignore_regex = [
     ("py:class", r"^confluent_kafka.cimpl.Message"),
     ("py:class", r"^kafka_dae_control.comms.VerifyFunc"),
     ("py:class", r"^pydantic.main.BaseModel"),
+    ("py:class", r"^numpy.uint8"),
+    ("py:class", r"^numpy.ndarray"),
+    ("py:class", r"^numpy.dtype"),
+    ("py:class", r"^numpy._typing._array_like.NDArray"),
+    ("py:class", r"^annotated_types\..*"),
+    ("py:class", r"^FieldInfo$"),
+    ("py:class", r"^NoneType"),
+    ("py:class", r"^MinLen"),
+    ("py:class", r"^MaxLen"),
 ]
 
 myst_enable_extensions = ["dollarmath", "strikethrough", "colon_fence", "attrs_block"]

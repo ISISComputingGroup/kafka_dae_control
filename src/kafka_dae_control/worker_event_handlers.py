@@ -219,10 +219,10 @@ def handle_soft_vetoes_change(
 ) -> None:
     """Handle a soft veto configuration change.
 
-    This sends a vc00 update with the hard and soft vetoes.
+    This sends a `vc00` update with the hard and soft vetoes.
 
     Args:
-        value: The bitmask list of hard vetoes to set.
+        value: The bit mask list of hard vetoes to set.
         config: The program's configuration.
         data: the data class containing the state of the program.
         producer: the Kafka producer.
@@ -253,10 +253,10 @@ def handle_hard_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-posit
 ) -> None:
     """Handle a hard veto configuration change.
 
-    This sets the vetoes on the hardware, then sends a vc00 update with the hard and soft vetoes.
+    This sets the vetoes on the hardware, then sends a `vc00` update with the hard and soft vetoes.
 
     Args:
-        value: The bitmask list of hard vetoes to set.
+        value: The bit mask list of hard vetoes to set.
         config: The program's configuration.
         data: the data class containing the state of the program.
         producer: the Kafka producer.

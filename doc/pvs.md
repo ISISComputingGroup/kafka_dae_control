@@ -42,11 +42,11 @@ Array of veto names, corresponding to the veto bit mask. Note that this is not c
 
 ## `VETO:HARD:SP` / `VETO:HARD`
 Hard veto configuration array. This corresponds to the veto names array.
-Setting this will write to hardware and then pushes a [`vc00`](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/vc00_veto_configuration.fbs) blob, containing a bitwise `OR` of both soft and hard vetoes into the veto configuration topic.
+Setting this will write to hardware and then pushes a [`vc00`](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/vc00_veto_configuration.fbs) blob, containing a bit-wise `OR` of both soft and hard vetoes into the veto configuration topic.
 
 `VETO:HARD` is used as a readback for what is currently set on the streaming control board.
 
 ## `VETO:SOFT:SP`
 Soft veto configuration array. This corresponds to the veto names array.
 
-Setting this push a [`vc00`](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/vc00_veto_configuration.fbs) blob, containing a bitwise `OR` of both soft and hard vetoes into the veto configuration topic.
+Setting this push a [`vc00`](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/vc00_veto_configuration.fbs) blob, containing a bit-wise `OR` of both soft and hard vetoes into the veto configuration topic.

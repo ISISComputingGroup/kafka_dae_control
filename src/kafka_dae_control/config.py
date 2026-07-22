@@ -68,7 +68,7 @@ class ControlConfig(BaseModel):
     )
     """Veto names, as a list of strings.
 
-    The first item in this list has bitmask (1 << 0), the last item has bitmask (1 << 31).
+    The first item in this list has bit mask (1 << 0), the last item has bit mask (1 << 31).
     There must be exactly 32 entries in this list.
     """
 
