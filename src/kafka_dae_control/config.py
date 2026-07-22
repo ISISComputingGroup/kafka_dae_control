@@ -59,7 +59,7 @@ class ControlConfig(BaseModel):
     flush_timeout_s: int = FLUSH_TIMEOUT_S
     """The timeout for a flush after producing run info messages"""
 
-    resend_ip_after_connection_failures: PositiveInt = 50
+    resend_ip_after_connection_failures: PositiveInt = 10
     """
     If this many communication failures happen in a row, resend the local
     IP address to the streaming control board. This can be required to restore
