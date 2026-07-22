@@ -58,7 +58,7 @@ def hardware_poll_thread(
         ):
             # We've failed to communicate with the board several times in a row.
             # Maybe it has been power cycled and lost IP to respond to.
-            logger.info(
+            logger.error(
                 "Hardware polling failed %s times in a row. "
                 "Attempting to resend local IP to streaming control board to recover. "
                 "If the connection does not recover, the streaming control board may be offline.",
