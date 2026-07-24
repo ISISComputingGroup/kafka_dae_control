@@ -43,6 +43,7 @@ nitpick_ignore_regex = [
     ("py:class", r"^NoneType"),
     ("py:class", r"^MinLen"),
     ("py:class", r"^MaxLen"),
+    ("py:class", r"^annotated_types.Gt$"),
 ]
 
 myst_enable_extensions = ["dollarmath", "strikethrough", "colon_fence", "attrs_block"]

@@ -6,7 +6,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Annotated
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field, PositiveInt, ValidationError
 
 from kafka_dae_control.defaults import FLUSH_TIMEOUT_S, NUM_VETOES, READ_PORT, WRITE_PORT
 from kafka_dae_control.firmware_xml import parse_register_map
@@ -70,6 +70,13 @@ class ControlConfig(BaseModel):
 
     The first item in this list has bit mask (1 << 0), the last item has bit mask (1 << 31).
     There must be exactly 32 entries in this list.
+    """
+
+    resend_ip_after_connection_failures: PositiveInt = 10
+    """
+    If this many communication failures happen in a row, resend the local
+    IP address to the streaming control board. This can be required to restore
+    communication after the streaming control board is restarted.
     """
 
     @cached_property

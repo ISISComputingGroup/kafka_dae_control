@@ -29,6 +29,9 @@ local_ip = "192.168.1.17"
 # file to save state to
 state_file = "state.json"
 
+# Resend IP address to streaming control board after this many comms failures in a row
+resend_ip_after_connection_failures = 10
+
 [kafka_producer]
 "bootstrap.servers" = "livedata.isis.cclrc.ac.uk:31092"
 "enable.idempotence" = "true"
