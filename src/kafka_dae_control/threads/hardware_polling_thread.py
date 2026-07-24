@@ -17,7 +17,12 @@ from kafka_dae_control.defaults import (
     Registers,
     RunRegister,
 )
-from kafka_dae_control.worker_event_types import HardwareUpdate, HardwareUpdateEvent, WorkerEvent
+from kafka_dae_control.worker_event_types import (
+    HardwareUpdate,
+    HardwareUpdateEvent,
+    SetIPEvent,
+    WorkerEvent,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,14 +42,38 @@ def hardware_poll_thread(
         sock_lock: the lock to use when using the socket instance
 
     """
+    consecutive_comms_errors = 0
     while True:
-        poll_hardware(config, queue, sock, sock_lock)
+        success = poll_hardware(config, queue, sock, sock_lock)
+
+        if success:
+            consecutive_comms_errors = 0
+        else:
+            consecutive_comms_errors += 1
+            logger.debug(
+                "%s comms errors in a row while polling hardware", consecutive_comms_errors
+            )
+
+        if (
+            consecutive_comms_errors > 0
+            and consecutive_comms_errors % config.resend_ip_after_connection_failures == 0
+        ):
+            # We've failed to communicate with the board several times in a row.
+            # Maybe it has been power cycled and lost IP to respond to.
+            logger.error(
+                "Hardware polling failed %s times in a row. "
+                "Attempting to resend local IP to streaming control board to recover. "
+                "If the connection does not recover, the streaming control board may be offline.",
+                consecutive_comms_errors,
+            )
+            queue.put(SetIPEvent())
+
         sleep(config.poll_interval_s)
 
 
 def poll_hardware(
     config: ControlConfig, queue: Queue[Any], sock: socket.SocketType, sock_lock: RLock
-) -> None:
+) -> bool:
     """Poll the hardware and send updates to the worker thread's queue.
 
     Args:
@@ -52,6 +81,9 @@ def poll_hardware(
         queue: the worker thread queue to add updates to after polling hardware
         sock: the socket instance
         sock_lock: the lock to use when using the socket instance
+
+    Returns:
+        True if the hardware poll was successful, False otherwise
 
     """
     try:
@@ -123,6 +155,8 @@ def poll_hardware(
                 )
             )
         )
+        return True
 
     except Exception:
         logger.exception("Error occurred when polling hardware: ")
+        return False

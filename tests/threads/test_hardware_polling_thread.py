@@ -1,3 +1,4 @@
+import logging
 from queue import Queue
 from threading import RLock
 from unittest.mock import MagicMock, Mock, call, patch
@@ -12,7 +13,7 @@ from kafka_dae_control.defaults import (
     RunRegister,
 )
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread
-from kafka_dae_control.worker_event_types import HardwareUpdate
+from kafka_dae_control.worker_event_types import HardwareUpdate, SetIPEvent
 from tests.conftest import (
     FRAME_SYNC_SEL_ADDRESS,
     PERIOD_COMP_CURRENT_ADDRESS,
@@ -120,3 +121,30 @@ def test_read_throws_exception_logs(
         hardware_poll_thread(conf, queue, sock, sock_lock)
 
     assert "Error occurred when polling hardware: " in caplog.text
+
+
+@patch(
+    "kafka_dae_control.threads.hardware_polling_thread.sleep",
+    side_effect=[None, None, None, Exception],
+)
+@patch("kafka_dae_control.threads.hardware_polling_thread.poll_hardware", return_value=False)
+def test_many_comms_errors_in_a_row_cause_ip_to_be_resent(
+    mock_read: Mock, mock_sleep: Mock, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    conf.resend_ip_after_connection_failures = 3
+
+    queue = Queue()
+    sock = MagicMock()
+    sock_lock = MagicMock(spec=RLock())
+
+    caplog.set_level(logging.DEBUG)
+
+    with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
+        hardware_poll_thread(conf, queue, sock, sock_lock)
+
+    assert "1 comms errors in a row while polling hardware" in caplog.text
+    assert "2 comms errors in a row while polling hardware" in caplog.text
+    assert "3 comms errors in a row while polling hardware" in caplog.text
+    assert "Attempting to resend local IP to streaming control board to recover" in caplog.text
+
+    assert isinstance(queue.get(), SetIPEvent)
