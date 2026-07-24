@@ -5,7 +5,7 @@ import tomllib
 from functools import cached_property
 from pathlib import Path
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, PositiveInt, ValidationError
 
 from kafka_dae_control.defaults import FLUSH_TIMEOUT_S, READ_PORT, WRITE_PORT
 from kafka_dae_control.firmware_xml import parse_register_map
@@ -58,6 +58,13 @@ class ControlConfig(BaseModel):
 
     flush_timeout_s: int = FLUSH_TIMEOUT_S
     """The timeout for a flush after producing run info messages"""
+
+    resend_ip_after_connection_failures: PositiveInt = 10
+    """
+    If this many communication failures happen in a row, resend the local
+    IP address to the streaming control board. This can be required to restore
+    communication after the streaming control board is restarted.
+    """
 
     @cached_property
     def register_map(self) -> dict[str, int]:
