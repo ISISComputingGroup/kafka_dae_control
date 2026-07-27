@@ -10,6 +10,10 @@ FLUSH_TIMEOUT_S = 1
 REGISTER_SIZE_WORDS = 1
 NUM_VETOES = 32
 
+DISABLED_VETO_VALUE = 0
+SOFT_VETO_VALUE = 1
+HARD_VETO_VALUE = 2
+
 
 class Register(NamedTuple):
     """a register with associated size."""

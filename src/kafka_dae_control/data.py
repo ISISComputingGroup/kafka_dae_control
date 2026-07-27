@@ -3,12 +3,9 @@
 import logging
 from typing import TypeVar
 
-import numpy as np
-import numpy.typing as npt
 from pydantic import BaseModel, Field
 
 from kafka_dae_control.defaults import NUM_VETOES, FrameSyncSelect
-from kafka_dae_control.utils import mask_to_array
 
 logger = logging.getLogger(__name__)
 
@@ -43,29 +40,12 @@ class Data(BaseModel):
 
     veto_names_array: list[str] = Field(default=[f"veto_{n}" for n in range(NUM_VETOES)])
     """
-    Veto names, as a numpy array of strings.
+    Veto names, as a numpy array of strings. This is indexed so that 0 is veto 0.
     """
 
-    soft_vetoes: int = 0xFFFF
-    """Soft vetoes bit mask"""
+    vetoes: list[int] = Field(default=[0] * NUM_VETOES)
+    """Vetoes array containing 0 for disabled, 1 for soft, 2 for hard.
+     This is indexed so that item 0 is veto 0."""
 
     hard_vetoes_rbv: int = 0xFFFF
-    """Hard vetoes bit mask"""
-
-    hard_vetoes_sp: int = 0xFFFF
-    """Hard vetoes setpoint"""
-
-    @property
-    def soft_vetoes_array(self) -> npt.NDArray[np.uint8]:
-        """An array representation of the soft vetoes bit mask."""
-        return mask_to_array(self.soft_vetoes)
-
-    @property
-    def hard_vetoes_array(self) -> npt.NDArray[np.uint8]:
-        """An array representation of the hard vetoes bit mask."""
-        return mask_to_array(self.hard_vetoes_rbv)
-
-    @property
-    def hard_vetoes_sp_array(self) -> npt.NDArray[np.uint8]:
-        """An array representation of the hard vetoes bit mask."""
-        return mask_to_array(self.hard_vetoes_sp)
+    """Hard vetoes readback bit mask"""

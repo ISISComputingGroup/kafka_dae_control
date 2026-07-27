@@ -10,13 +10,17 @@ from functools import partial
 from queue import Queue
 from zoneinfo import ZoneInfo
 
+import numpy as np
 from confluent_kafka import KafkaError, Message, Producer
+from numpy import typing as npt
 from streaming_data_types import serialise_6s4t, serialise_pl72, serialise_vc00
 
 from kafka_dae_control.comms import write_and_inv_then_verify, write_verify
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import (
+    HARD_VETO_VALUE,
+    SOFT_VETO_VALUE,
     FrameSyncSelect,
     Registers,
     RunRegister,
@@ -25,6 +29,7 @@ from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
+from kafka_dae_control.utils import array_to_mask
 from kafka_dae_control.worker_event_types import WorkerEvent
 
 logger = logging.getLogger(__name__)
@@ -210,40 +215,8 @@ def handle_frame_sync_sp_change(  # ruff:ignore[too-many-arguments, too-many-pos
     done_event.set()
 
 
-def handle_soft_vetoes_change(
-    value: int,
-    config: ControlConfig,
-    data: Data,
-    producer: Producer,
-    done_event: EventWithError,
-) -> None:
-    """Handle a soft veto configuration change.
-
-    This sends a `vc00` update with the hard and soft vetoes.
-
-    Args:
-        value: The bit mask list of hard vetoes to set.
-        config: The program's configuration.
-        data: the data class containing the state of the program.
-        producer: the Kafka producer.
-        done_event: The event to call set() on when complete
-
-    """
-    blob = serialise_vc00(time.time_ns(), vetoes=value | data.hard_vetoes_sp)
-    logger.debug("About to produce blob %s to %s", blob, config.vetoes_topic)
-    producer.produce(
-        config.vetoes_topic,
-        value=blob,
-        callback=partial(delivery_report_set_error_or_done, done_event),
-    )
-    producer.flush(timeout=config.flush_timeout_s)
-    data.soft_vetoes = value
-    logger.debug("Saving file")
-    save_file(data, state_file=config.state_file)
-
-
-def handle_hard_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
-    value: int,
+def handle_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
+    value: npt.NDArray[np.uint8],
     config: ControlConfig,
     data: Data,
     producer: Producer,
@@ -267,19 +240,23 @@ def handle_hard_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-posit
     """
     try:
         with sock_lock:
+            just_hard_vetoes_mask = array_to_mask((value == HARD_VETO_VALUE).astype(np.uint8))
             write_verify(
                 config,
                 sock,
                 address=config.register_map[Registers.VETO_CONTROL_REGISTER],
-                data=value,
-                verify=lambda x: x == value,
+                data=just_hard_vetoes_mask,
+                verify=lambda x: x == just_hard_vetoes_mask,
             )
     except Exception as e:
         logger.exception("Failed to set hard vetoes: ")
         done_event.err = e
         return
 
-    blob = serialise_vc00(time.time_ns(), vetoes=value | data.soft_vetoes)
+    all_vetoes_mask = array_to_mask(
+        ((value == SOFT_VETO_VALUE) | (value == HARD_VETO_VALUE)).astype(np.uint8)
+    )
+    blob = serialise_vc00(time.time_ns(), vetoes=all_vetoes_mask)
     logger.debug("About to produce blob %s to %s", blob, config.vetoes_topic)
     producer.produce(
         config.vetoes_topic,
@@ -287,6 +264,6 @@ def handle_hard_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-posit
         callback=partial(delivery_report_set_error_or_done, done_event),
     )
     producer.flush(timeout=config.flush_timeout_s)
-    data.hard_vetoes_sp = value
+    data.vetoes = value.tolist()
     logger.debug("Saving file")
     save_file(data, state_file=config.state_file)

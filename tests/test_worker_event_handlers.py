@@ -3,6 +3,7 @@ from queue import Queue
 from threading import RLock
 from unittest.mock import MagicMock, Mock, patch
 
+import numpy as np
 import pytest
 from confluent_kafka import KafkaError, Message
 from streaming_data_types import (
@@ -20,8 +21,7 @@ from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
-    handle_hard_vetoes_change,
-    handle_soft_vetoes_change,
+    handle_vetoes_change,
 )
 
 
@@ -238,49 +238,118 @@ def test_frame_sync_select_failed_to_write_sets_err(
     assert done_event.is_set()
 
 
-def test_soft_veto_change_sends_update_to_kafka(data: Data, conf: ControlConfig):
-    data.hard_vetoes_sp = 0b1000000
-    producer = Mock()
-    done_event = EventWithError()
-    handle_soft_vetoes_change(0b1000, conf, data, producer, done_event)
-
-    assert deserialise_vc00(producer.mock_calls[0][2]["value"]).vetoes == 0b01001000
-
-
 @patch("kafka_dae_control.worker_event_handlers.write_verify")
-def test_hard_vetoes_change_writes_to_hardware(
+def test_vetoes_change_writes_to_hardware(
     mock_write_verify: Mock,
     data: Data,
     conf: ControlConfig,
 ):
-    data.soft_vetoes = 0b10
     done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     producer = Mock()
-    handle_hard_vetoes_change(0b01001, conf, data, producer, sock, sock_lock, done_event)
+    handle_vetoes_change(
+        np.array(
+            [
+                1,
+                0,
+                2,
+                0,
+                1,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+            ]
+        ),
+        conf,
+        data,
+        producer,
+        sock,
+        sock_lock,
+        done_event,
+    )
 
-    assert deserialise_vc00(producer.mock_calls[0][2]["value"]).vetoes == 0b00001011
+    assert (
+        deserialise_vc00(producer.mock_calls[0][2]["value"]).vetoes
+        == 0b1010_1100_0000_0000_0000_0000_0000_0000
+    )
 
     assert (
         mock_write_verify.call_args[1]["address"]
         == conf.register_map[Registers.VETO_CONTROL_REGISTER]
     )
-    assert mock_write_verify.call_args[1]["data"] == 0b0001001
+    assert mock_write_verify.call_args[1]["data"] == 0b0010_0100_0000_0000_0000_0000_0000_0000
+    assert data.vetoes == [
+        1,
+        0,
+        2,
+        0,
+        1,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ]
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
-def test_hard_vetoes_change_failed_to_write_sets_err(
+def test_vetoes_change_failed_to_write_sets_err(
     mock_write_verify: Mock,
     data: Data,
     conf: ControlConfig,
 ):
-    data.soft_vetoes = 0b10
     done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     producer = Mock()
-    handle_hard_vetoes_change(0b1001, conf, data, producer, sock, sock_lock, done_event)
+    handle_vetoes_change(np.array([2, 0, 1, 2]), conf, data, producer, sock, sock_lock, done_event)
 
     assert done_event.err is not None
     assert done_event.is_set()

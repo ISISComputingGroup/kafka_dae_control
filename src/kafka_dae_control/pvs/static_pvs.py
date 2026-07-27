@@ -10,13 +10,11 @@ from p4p.server.thread import SharedPV
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import FrameSyncSelect
 from kafka_dae_control.event_with_error import EventWithError
-from kafka_dae_control.utils import array_to_mask
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     EndEvent,
     FrameSyncSelectChangeEvent,
-    HardVetoesUpdateEvent,
-    SoftVetoesUpdateEvent,
+    VetoesUpdateEvent,
     WorkerEvent,
 )
 
@@ -26,7 +24,7 @@ logger = logging.getLogger(__name__)
 class StaticPVs:
     """Static PVs for KDAECTRL."""
 
-    def __init__(self, data: "Data", queue: Queue[WorkerEvent]) -> None:  # ruff:ignore [too-many-statements]
+    def __init__(self, data: "Data", queue: Queue[WorkerEvent]) -> None:
         """Set up static PVs for KDAECTRL.
 
         Args:
@@ -68,26 +66,18 @@ class StaticPVs:
                 "value": data.veto_names_array,
             },
         )
-        self.soft_vetoes = SharedPV(
+        self.vetoes = SharedPV(
             nt=NTScalar("al", display=True, form=True),
             initial={
-                "value": data.soft_vetoes_array,
-                "display.units": "",
-                "display.precision": 0,
-            },
-        )
-        self.hard_vetoes_sp = SharedPV(
-            nt=NTScalar("al", display=True, form=True),
-            initial={
-                "value": data.hard_vetoes_sp_array,
+                "value": data.vetoes,
                 "display.units": "",
                 "display.precision": 0,
             },
         )
         self.hard_vetoes_rbv = SharedPV(
-            nt=NTScalar("al", display=True, form=True),
+            nt=NTScalar("l", display=True, form=True),
             initial={
-                "value": data.hard_vetoes_array,
+                "value": data.hard_vetoes_rbv,
                 "display.units": "",
                 "display.precision": 0,
             },
@@ -127,31 +117,18 @@ class StaticPVs:
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set frame_sync_select_sp: {e}")
 
-        @self.soft_vetoes.put
-        def soft_vetoes_put(pv: SharedPV, op: ServerOperation) -> None:
+        @self.vetoes.put
+        def vetoes_put(pv: SharedPV, op: ServerOperation) -> None:
             value = op.value()
-            logger.info("put with %s to soft_vetoes", value)
+            logger.info("put with %s to vetoes sp", value)
             ev = EventWithError()
-            queue.put(SoftVetoesUpdateEvent(value=array_to_mask(value), done_event=ev))
+            queue.put(VetoesUpdateEvent(value=value, done_event=ev))
             try:
                 ev.wait()
                 pv.post(value)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set soft_vetoes: {e}")
-
-        @self.hard_vetoes_sp.put
-        def hard_vetoes_put(pv: SharedPV, op: ServerOperation) -> None:
-            value = op.value()
-            logger.info("put with %s to hard_vetoes", value)
-            ev = EventWithError()
-            queue.put(HardVetoesUpdateEvent(value=array_to_mask(value), done_event=ev))
-            try:
-                ev.wait()
-                pv.post(value)
-                op.done()
-            except Exception as e:  # ruff:ignore[blind-except]
-                op.done(error=f"Failed to set hard_vetoes: {e}")
 
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.
@@ -164,7 +141,7 @@ class StaticPVs:
         self.i_run_number.post(data.run_number)
         self.hw_running.post(data.running)
         self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.value)
-        self.hard_vetoes_rbv.post(data.hard_vetoes_array)
+        self.hard_vetoes_rbv.post(data.hard_vetoes_rbv)
 
 
 def static_pv_provider(
@@ -194,7 +171,6 @@ def static_pv_provider(
     static_provider.add(f"{prefix}DAETIMINGSOURCE", static_pvs.frame_sync_select_rbv)
     static_provider.add(f"{prefix}DAETIMINGSOURCE:SP", static_pvs.frame_sync_select_sp)
     static_provider.add(f"{prefix}VETO:NAMES", static_pvs.veto_names_array)
-    static_provider.add(f"{prefix}VETO:HARD:SP", static_pvs.hard_vetoes_sp)
+    static_provider.add(f"{prefix}VETO:SP", static_pvs.vetoes)
     static_provider.add(f"{prefix}VETO:HARD", static_pvs.hard_vetoes_rbv)
-    static_provider.add(f"{prefix}VETO:SOFT:SP", static_pvs.soft_vetoes)
     return static_pvs, static_provider

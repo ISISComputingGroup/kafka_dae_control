@@ -14,18 +14,16 @@ from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
-    handle_hard_vetoes_change,
-    handle_soft_vetoes_change,
+    handle_vetoes_change,
 )
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     BlocksUpdateEvent,
     EndEvent,
     FrameSyncSelectChangeEvent,
-    HardVetoesUpdateEvent,
     HardwareUpdateEvent,
     SetIPEvent,
-    SoftVetoesUpdateEvent,
+    VetoesUpdateEvent,
     WorkerEvent,
 )
 
@@ -73,12 +71,8 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 handle_frame_sync_sp_change(value, config, data, sock, sock_lock, done_event)
             case SetIPEvent():
                 set_board_response_ip(config, sock, sock_lock)
-            case SoftVetoesUpdateEvent(value=value, done_event=done_event):
-                handle_soft_vetoes_change(
-                    value=value, config=config, data=data, producer=producer, done_event=done_event
-                )
-            case HardVetoesUpdateEvent(value=value, done_event=done_event):
-                handle_hard_vetoes_change(
+            case VetoesUpdateEvent(value=value, done_event=done_event):
+                handle_vetoes_change(
                     value=value,
                     config=config,
                     data=data,
