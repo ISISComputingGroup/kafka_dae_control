@@ -33,7 +33,7 @@ These are the current run number. A run stop increments these. They are read-onl
 
 ## `PERIOD` / `PERIOD:SP`
 
-The current period number.
+The current period number. This is 1-indexed, so period 1 here corresponds to `period=0` in the underlying data stream.
 
 ## `NUMPERIODS`/ `NUMPERIODS:MAX` / `NUMPERIODS:SP`
 

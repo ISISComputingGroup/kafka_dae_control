@@ -267,7 +267,7 @@ def set_current_period(  # ruff:ignore[too-many-arguments, too-many-positional-a
                 sock,
                 address=config.register_map[Registers.PERIOD_COMP_CURRENT],
                 data=value - 1,
-                verify=lambda x: x == value,
+                verify=lambda x: x == value - 1,
             )
     except Exception as e:
         logger.exception("Failed to set current period: ")

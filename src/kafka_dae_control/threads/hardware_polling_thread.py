@@ -143,18 +143,15 @@ def poll_hardware(
             else:
                 logger.warning("%s is not a valid period mode", period_mode_isolated)
                 period_mode = PeriodMode.UNKNOWN
-
-        queue.put(
-            HardwareUpdateEvent(
-                HardwareUpdate(
-                    hw_running=running_register_readback & RunRegister.STATUS_RUNNING != 0,
-                    frame_sync_select=FrameSyncSelect(frame_sync_select_readback),
-                    period_comp_current=period_comp_current_readback,
-                    period_number_limit=period_number_limit_readback,
-                    period_mode=period_mode,
-                )
-            )
+        h = HardwareUpdate(
+            hw_running=running_register_readback & RunRegister.STATUS_RUNNING != 0,
+            frame_sync_select=FrameSyncSelect(frame_sync_select_readback),
+            period_comp_current=period_comp_current_readback,
+            period_number_limit=period_number_limit_readback,
+            period_mode=period_mode,
         )
+        logger.debug("Hardware update: %s", h)
+        queue.put(HardwareUpdateEvent(h))
         return True
 
     except Exception:
