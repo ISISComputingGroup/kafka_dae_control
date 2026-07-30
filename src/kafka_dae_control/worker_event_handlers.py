@@ -17,6 +17,7 @@ from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import (
     FrameSyncSelect,
+    PeriodMode,
     Registers,
     RunRegister,
 )
@@ -200,4 +201,113 @@ def handle_frame_sync_sp_change(  # ruff:ignore[too-many-arguments, too-many-pos
         done_event.err = e
         return
     data.frame_sync_select_sp = value
+    done_event.set()
+
+
+def set_num_periods(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
+    value: int,
+    config: ControlConfig,
+    data: Data,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithValue[None],
+) -> None:
+    """Set the number of periods on the hardware.
+
+    Args:
+        value: the new value to write to hardware
+        config: The program's configuration.
+        data: the data class containing the state of the program.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+        done_event: The event to call set() on when complete
+
+
+    """
+    try:
+        with sock_lock:
+            write_verify(
+                config,
+                sock,
+                address=config.register_map[Registers.PERIOD_NUMBER_LIMIT],
+                data=value,
+                verify=lambda x: x == value,
+            )
+    except Exception as e:
+        logger.exception("Failed to set num periods: ")
+        done_event.err = e
+        return
+    data.num_periods_sp = value
+    done_event.set()
+
+
+def set_current_period(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
+    value: int,
+    config: ControlConfig,
+    data: Data,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithValue[None],
+) -> None:
+    """Set the current period number on the hardware.
+
+    Args:
+        value: the new value to write to hardware
+        config: The program's configuration.
+        data: the data class containing the state of the program.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+        done_event: The event to call set() on when complete
+
+    """
+    try:
+        with sock_lock:
+            write_verify(
+                config,
+                sock,
+                address=config.register_map[Registers.PERIOD_COMP_CURRENT],
+                data=value - 1,
+                verify=lambda x: x == value - 1,
+            )
+    except Exception as e:
+        logger.exception("Failed to set current period: ")
+        done_event.err = e
+        return
+    data.current_period_sp = value
+    done_event.set()
+
+
+def set_period_mode(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
+    value: PeriodMode,
+    config: ControlConfig,
+    data: Data,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithValue[None],
+) -> None:
+    """Set the period mode on the hardware.
+
+    Args:
+        value: the new value to write to hardware
+        config: The program's configuration.
+        data: the data class containing the state of the program.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+        done_event: The event to call set() on when complete
+
+    """
+    try:
+        with sock_lock:
+            write_verify(
+                config,
+                sock,
+                address=config.register_map[Registers.PERIOD_CONTROL],
+                data=value.value,
+                verify=lambda x: x == value,
+            )
+    except Exception as e:
+        logger.exception("Failed to set period mode: ")
+        done_event.err = e
+        return
+    data.current_period_sp = value
     done_event.set()

@@ -12,6 +12,8 @@ from kafka_dae_control.comms import read
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.defaults import (
     FrameSyncSelect,
+    PeriodControlFlags,
+    PeriodMode,
     Registers,
     RunRegister,
 )
@@ -108,14 +110,48 @@ def poll_hardware(
             else:
                 frame_sync_select_readback = FrameSyncSelect(frame_sync_select_raw_readback)
 
-        queue.put(
-            HardwareUpdateEvent(
-                HardwareUpdate(
-                    hw_running=running_register_readback & RunRegister.STATUS_RUNNING != 0,
-                    frame_sync_select=FrameSyncSelect(frame_sync_select_readback),
-                )
+            period_comp_current_readback = read(
+                sock,
+                config.board_ip,
+                address=config.register_map[Registers.PERIOD_COMP_CURRENT],
+                port=config.read_port,
             )
+
+            period_number_limit_readback = read(
+                sock,
+                config.board_ip,
+                address=config.register_map[Registers.PERIOD_NUMBER_LIMIT],
+                port=config.read_port,
+            )
+
+            period_control_readback = read(
+                sock,
+                config.board_ip,
+                address=config.register_map[Registers.PERIOD_CONTROL],
+                port=config.read_port,
+            )
+
+            period_mode_isolated = period_control_readback & ~int(
+                PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE
+                | PeriodControlFlags.END_RUN_AFTER_LAST_PERIOD_SEQUENCE
+            )
+
+            logger.debug("period mode isolated: %s", period_mode_isolated)
+
+            if period_mode_isolated in PeriodMode:
+                period_mode = PeriodMode(period_mode_isolated)
+            else:
+                logger.warning("%s is not a valid period mode", period_mode_isolated)
+                period_mode = PeriodMode.UNKNOWN
+        h = HardwareUpdate(
+            hw_running=running_register_readback & RunRegister.STATUS_RUNNING != 0,
+            frame_sync_select=FrameSyncSelect(frame_sync_select_readback),
+            period_comp_current=period_comp_current_readback,
+            period_number_limit=period_number_limit_readback,
+            period_mode=period_mode,
         )
+        logger.debug("Hardware update: %s", h)
+        queue.put(HardwareUpdateEvent(h))
         return True
 
     except Exception:

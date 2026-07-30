@@ -14,13 +14,19 @@ from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
+    set_current_period,
+    set_num_periods,
+    set_period_mode,
 )
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     BlocksUpdateEvent,
+    CurrentPeriodSetEvent,
     EndEvent,
     FrameSyncSelectChangeEvent,
     HardwareUpdateEvent,
+    NumberOfPeriodsSetEvent,
+    PeriodModeSetEvent,
     SetIPEvent,
     WorkerEvent,
 )
@@ -57,6 +63,9 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
             case HardwareUpdateEvent(value=value):
                 data.running = value.hw_running
                 data.frame_sync_select_rbv = value.frame_sync_select
+                data.num_periods_rbv = value.period_number_limit
+                data.current_period_rbv = value.period_comp_current + 1
+                data.period_mode_rbv = value.period_mode
             case BlocksUpdateEvent(value):
                 data.blocks = value
             case BeginEvent(done_event=done_event):
@@ -67,6 +76,12 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 handle_frame_sync_sp_change(value, config, data, sock, sock_lock, done_event)
             case SetIPEvent():
                 set_board_response_ip(config, sock, sock_lock)
+            case NumberOfPeriodsSetEvent(value=value, done_event=done_event):
+                set_num_periods(value, config, data, sock, sock_lock, done_event)
+            case CurrentPeriodSetEvent(value=value, done_event=done_event):
+                set_current_period(value, config, data, sock, sock_lock, done_event)
+            case PeriodModeSetEvent(value=value, done_event=done_event):
+                set_period_mode(value, config, data, sock, sock_lock, done_event)
             case _:
                 logger.error("Unknown event type: %s", worker_event)
     except Exception:

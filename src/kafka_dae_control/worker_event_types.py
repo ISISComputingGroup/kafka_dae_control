@@ -4,7 +4,7 @@ import logging
 from abc import ABC
 from dataclasses import dataclass
 
-from kafka_dae_control.defaults import FrameSyncSelect
+from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
 from kafka_dae_control.event_with_value import EventWithValue
 
 logger = logging.getLogger(__name__)
@@ -49,6 +49,9 @@ class HardwareUpdate:
 
     hw_running: bool
     frame_sync_select: FrameSyncSelect
+    period_comp_current: int
+    period_number_limit: int
+    period_mode: PeriodMode
 
 
 @dataclass
@@ -61,6 +64,27 @@ class BlocksUpdateEvent(WorkerEventWithValue[list[str]]):
     """An event signalling a blocks update."""
 
 
+@dataclass
+class CurrentPeriodSetEvent(WorkerEventWithValue[int]):
+    """An event signalling the current period was set by a user."""
+
+    done_event: EventWithValue[None]
+
+
+@dataclass
+class NumberOfPeriodsSetEvent(WorkerEventWithValue[int]):
+    """An event signalling the number of periods was set by a user."""
+
+    done_event: EventWithValue[None]
+
+
+@dataclass
+class PeriodModeSetEvent(WorkerEventWithValue[PeriodMode]):
+    """An event signalling a period mode was set by a user."""
+
+    done_event: EventWithValue[None]
+
+
 WorkerEvent = (
     SetIPEvent
     | BeginEvent
@@ -68,4 +92,7 @@ WorkerEvent = (
     | HardwareUpdateEvent
     | BlocksUpdateEvent
     | FrameSyncSelectChangeEvent
+    | CurrentPeriodSetEvent
+    | NumberOfPeriodsSetEvent
+    | PeriodModeSetEvent
 )

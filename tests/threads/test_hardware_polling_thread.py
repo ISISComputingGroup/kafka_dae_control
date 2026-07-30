@@ -8,16 +8,31 @@ import pytest
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.defaults import (
     FrameSyncSelect,
+    PeriodControlFlags,
+    PeriodMode,
     RunRegister,
 )
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread
 from kafka_dae_control.worker_event_types import HardwareUpdate, SetIPEvent
+from tests.conftest import (
+    FRAME_SYNC_SEL_ADDRESS,
+    PERIOD_COMP_CURRENT_ADDRESS,
+    PERIOD_CONTROL_ADDRESS,
+    PERIOD_NUMBER_LIMIT_ADDRESS,
+    RUNNING_REGISTER_ADDRESS,
+)
 
 
 @patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)
 @patch(
     "kafka_dae_control.threads.hardware_polling_thread.read",
-    side_effect=[RunRegister.STATUS_RUNNING, 0x1],
+    side_effect=[
+        RunRegister.STATUS_RUNNING,
+        0x1,
+        2,
+        3,
+        PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE | PeriodControlFlags.MODE_EXTERNAL,
+    ],
 )
 def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, conf: ControlConfig):
     sock = Mock()
@@ -31,28 +46,34 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
             call(
                 sock,
                 conf.board_ip,
-                address=0,
+                address=RUNNING_REGISTER_ADDRESS,
                 port=conf.read_port,
             ),
             call(
                 sock,
                 conf.board_ip,
-                address=4,
+                address=FRAME_SYNC_SEL_ADDRESS,
                 port=conf.read_port,
             ),
+            call(sock, conf.board_ip, address=PERIOD_COMP_CURRENT_ADDRESS, port=conf.read_port),
+            call(sock, conf.board_ip, address=PERIOD_NUMBER_LIMIT_ADDRESS, port=conf.read_port),
+            call(sock, conf.board_ip, address=PERIOD_CONTROL_ADDRESS, port=conf.read_port),
         ]
     )
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
-    assert queue.get().value == HardwareUpdate(
-        hw_running=True, frame_sync_select=FrameSyncSelect(1)
-    )
+    hwup: HardwareUpdate = queue.get().value
+    assert hwup.hw_running
+    assert hwup.frame_sync_select == FrameSyncSelect(1)
+    assert hwup.period_comp_current == 2
+    assert hwup.period_number_limit == 3
+    assert hwup.period_mode == PeriodMode.EXTERNAL
 
 
 @patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)
 @patch(
     "kafka_dae_control.threads.hardware_polling_thread.read",
-    side_effect=[RunRegister.STATUS_RUNNING, 1234],
+    side_effect=[RunRegister.STATUS_RUNNING, 1234, 0, 0, 0],
 )
 def test_read_frame_sync_select_invalid_sets_invalid(
     mock_read: Mock, mock_sleep: Mock, conf: ControlConfig, caplog: pytest.LogCaptureFixture
@@ -65,9 +86,26 @@ def test_read_frame_sync_select_invalid_sets_invalid(
 
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
-    assert queue.get().value == HardwareUpdate(
-        hw_running=True, frame_sync_select=FrameSyncSelect.UNKNOWN
-    )
+    assert queue.get().value.frame_sync_select == FrameSyncSelect.UNKNOWN
+
+
+@patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)
+@patch(
+    "kafka_dae_control.threads.hardware_polling_thread.read",
+    side_effect=[RunRegister.STATUS_RUNNING, 1234, 0, 0, 9999999],
+)
+def test_period_mode_invalid_sets_unknown(
+    mock_read: Mock, mock_sleep: Mock, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    queue = Queue()
+    with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
+        hardware_poll_thread(conf, queue, sock, sock_lock)
+
+    assert sock_lock.__enter__.called
+    assert queue.qsize() == 1
+    assert queue.get().value.period_mode == PeriodMode.UNKNOWN
 
 
 @patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)

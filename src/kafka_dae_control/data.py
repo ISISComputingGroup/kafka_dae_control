@@ -5,7 +5,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel, Field
 
-from kafka_dae_control.defaults import FrameSyncSelect
+from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
 
 logger = logging.getLogger(__name__)
 
@@ -37,3 +37,21 @@ class Data(BaseModel):
     blocks: list[str] = Field(default_factory=list)
     """List of blocks to be inserted in the run start nexus structure.
      These are prefixed with the instrument and block server prefixes"""
+
+    num_periods_sp: int = 1
+    """Number of periods (setpoint)."""
+
+    num_periods_rbv: int = 1
+    """Number of periods (readback)."""
+
+    current_period_sp: int = 1
+    """Current period number setpoint. This is 1-indexed for backwards compatibility reasons."""
+
+    current_period_rbv: int = 1
+    """Current period number readback. This is 1-indexed for backwards compatibility reasons."""
+
+    period_mode_sp: PeriodMode = PeriodMode.UNKNOWN
+    """The period mode setpoint."""
+
+    period_mode_rbv: PeriodMode = PeriodMode.UNKNOWN
+    """The period mode readback."""

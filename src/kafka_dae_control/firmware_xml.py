@@ -1,7 +1,6 @@
 """Utilities for parsing the register map XML file."""
 
 from pathlib import Path
-from typing import Any
 from xml.etree import ElementTree
 from xml.etree.ElementTree import Element
 
@@ -26,7 +25,7 @@ def parse_register_map(xml_path: Path) -> dict[str, int]:
     return mapping
 
 
-def _map_register_addresses(root: Element) -> dict[Any, Any]:
+def _map_register_addresses(root: Element) -> dict[str, int]:
     mapping = {}
     # iterate over nodes with a depth of 3,
     # ignoring outer (register groups) and inner (bits within registers) nodes
