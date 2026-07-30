@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 from confluent_kafka import KafkaError, Message, Producer
 from streaming_data_types import serialise_6s4t, serialise_pl72
 
-from kafka_dae_control.comms import write_and_inv_then_verify, write_or_then_verify, write_verify
+from kafka_dae_control.comms import write_and_inv_then_verify, write_verify
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import (
@@ -298,12 +298,12 @@ def set_period_mode(  # ruff:ignore[too-many-arguments, too-many-positional-argu
     """
     try:
         with sock_lock:
-            write_or_then_verify(
+            write_verify(
                 config,
                 sock,
                 address=config.register_map[Registers.PERIOD_CONTROL],
                 data=value.value,
-                verify=lambda x: x == value.value,
+                verify=lambda x: x == value,
             )
     except Exception as e:
         logger.exception("Failed to set period mode: ")

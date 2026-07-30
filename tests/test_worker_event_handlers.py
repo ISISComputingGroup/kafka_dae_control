@@ -291,7 +291,7 @@ def test_set_current_period_fails_errors(m: Mock, data: Data, conf: ControlConfi
     "period_mode",
     [PeriodMode.LOOK_UP_TABLE, PeriodMode.EXTERNAL, PeriodMode.COMPUTER, PeriodMode.NOT_USED],
 )
-@patch("kafka_dae_control.worker_event_handlers.write_or_then_verify")
+@patch("kafka_dae_control.worker_event_handlers.write_verify")
 def test_set_period_mode_writes_to_hardware(
     mock_write_verify: Mock, data: Data, conf: ControlConfig, period_mode: PeriodMode
 ):
