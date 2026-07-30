@@ -10,6 +10,7 @@ from p4p.server.thread import SharedPV
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
 from kafka_dae_control.event_with_value import EventWithValue
+from kafka_dae_control.queue_utils import QueuePriority, QueueItem
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     CurrentPeriodSetEvent,
@@ -56,6 +57,8 @@ class StaticPVs:
         )
         self.begin = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.end = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
+        self.pause = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
+        self.resume = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.run_number = SharedPV(
             nt=NTScalar("s", display=True, form=True), initial={"value": str(data.run_number)}
         )
@@ -93,7 +96,7 @@ class StaticPVs:
         def begin_put(_: SharedPV, op: ServerOperation) -> None:
             logger.info("begin")
             ev = EventWithValue()
-            queue.put(BeginEvent(done_event=ev))
+            queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(done_event=ev)))
             try:
                 ev.wait()
                 op.done()
@@ -104,7 +107,7 @@ class StaticPVs:
         def end_put(_: SharedPV, op: ServerOperation) -> None:
             logger.info("end")
             ev = EventWithValue()
-            queue.put(EndEvent(done_event=ev))
+            queue.put(QueueItem(QueuePriority.HIGH, EndEvent(done_event=ev)))
             try:
                 ev.wait()
                 op.done()
@@ -129,7 +132,9 @@ class StaticPVs:
             value = int(op.value())
             logger.info("put with %s to num_periods_sp", value)
             ev = EventWithValue()
-            queue.put(NumberOfPeriodsSetEvent(value=value, done_event=ev))
+            queue.put(
+                QueueItem(QueuePriority.HIGH, NumberOfPeriodsSetEvent(value=value, done_event=ev))
+            )
             try:
                 ev.wait()
                 pv.post(value)
@@ -145,7 +150,9 @@ class StaticPVs:
                 op.done(error="Period must be greater than 0")
                 return
             ev = EventWithValue()
-            queue.put(CurrentPeriodSetEvent(value=value, done_event=ev))
+            queue.put(
+                QueueItem(QueuePriority.HIGH, CurrentPeriodSetEvent(value=value, done_event=ev))
+            )
             try:
                 ev.wait()
                 pv.post(value)
@@ -158,13 +165,26 @@ class StaticPVs:
             value = op.value()
             logger.info("put with %s to period_sp", value)
             ev = EventWithValue()
-            queue.put(PeriodModeSetEvent(value=PeriodMode[str(value)], done_event=ev))
+            queue.put(
+                QueueItem(
+                    QueuePriority.HIGH,
+                    PeriodModeSetEvent(value=PeriodMode[str(value)], done_event=ev),
+                )
+            )
             try:
                 ev.wait()
                 pv.post(value)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set period_sp: {e}")
+
+        @self.pause.put
+        def pause_put(pv: SharedPV, op: ServerOperation) -> None:
+            pass
+
+        @self.resume.put
+        def resume_put(pv: SharedPV, op: ServerOperation) -> None:
+            pass
 
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.
@@ -204,6 +224,8 @@ def static_pv_provider(
     static_provider.add(f"{prefix}HWRUNNING", static_pvs.hw_running)
     static_provider.add(f"{prefix}BEGINRUNEX", static_pvs.begin)
     static_provider.add(f"{prefix}ENDRUN", static_pvs.end)
+    static_provider.add(f"{prefix}PAUSERUN", static_pvs.pause)
+    static_provider.add(f"{prefix}RESUMERUN", static_pvs.resume)
     static_provider.add(f"{prefix}RUNNUMBER", static_pvs.run_number)
     static_provider.add(f"{prefix}IRUNNUMBER", static_pvs.i_run_number)
     static_provider.add(f"{prefix}DAETIMINGSOURCE", static_pvs.frame_sync_select_rbv)

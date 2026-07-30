@@ -4,15 +4,16 @@ import logging
 import socket
 import threading
 from functools import partial
-from queue import Queue
+from queue import Queue, ShutDown, PriorityQueue
 
 from confluent_kafka import Producer
 from p4p.server import Server
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.process_worker_event import process_worker_event
-from kafka_dae_control.pvs.camonitor_callbacks import update_blocks
+from kafka_dae_control.pvs.camonitor_callbacks import update_blocks, run_control_update_callback
 from kafka_dae_control.pvs.static_pvs import static_pv_provider
+from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.save_restore import load_data
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread
 from kafka_dae_control.threads.update_pvs_thread import update_pvs_thread
@@ -39,8 +40,8 @@ def serve(config: ControlConfig) -> None:
 
     """
     logger.debug("Config mapping: %s", config.register_map)
-    queue = Queue(maxsize=0)
-    queue.put(SetIPEvent())
+    queue: PriorityQueue[QueueItem] = PriorityQueue(maxsize=0)
+    queue.put(QueueItem(QueuePriority.HIGH, SetIPEvent()))
 
     data = load_data(config.state_file)
     static_pvs, static_provider = static_pv_provider(config.pv_prefix, data, queue)
@@ -67,6 +68,11 @@ def serve(config: ControlConfig) -> None:
     camonitor(
         f"{config.pv_prefix}CS:BLOCKSERVER:BLOCKNAMES",
         callback=partial(update_blocks, queue, config.pv_prefix),
+    )
+
+    # Start camonitor thread for run control
+    camonitor(
+        f"{config.pv_prefix}CS:RC:INRANGE", callback=partial(run_control_update_callback, queue)
     )
 
     # Start the p4p thread pool.

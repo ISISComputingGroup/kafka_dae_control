@@ -19,6 +19,7 @@ class Registers(StrEnum):
     PERIOD_COMP_CURRENT = "period_comp_current"
     PERIOD_NUMBER_LIMIT = "period_number_limit"
     PERIOD_CONTROL = "period_control"
+    VETO_TOGGLE = "serial_number"  # todo: This is not correct.
 
 
 class FrameSyncSelect(IntEnum):

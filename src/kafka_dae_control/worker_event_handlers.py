@@ -22,6 +22,7 @@ from kafka_dae_control.defaults import (
     RunRegister,
 )
 from kafka_dae_control.event_with_value import EventWithValue
+from kafka_dae_control.queue_utils import QueuePriority
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
@@ -109,7 +110,9 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         logger.info("sent run start to %s", config.runinfo_topic)
         save_file(data, state_file=config.state_file)
         # immediately poll hardware to avoid being able to begin again before hardware is updated
-        poll_hardware(config, queue, sock, sock_lock)
+        poll_hardware(
+            config, queue, sock, sock_lock, hardware_update_queue_priority=QueuePriority.HIGH
+        )
     except Exception as e:
         logger.exception("Failed to start run: ")
         done_event.err = e
@@ -161,7 +164,9 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
         data.run_number += 1
         save_file(data, state_file=config.state_file)
         # immediately poll hardware to avoid being able to end again before hardware is updated
-        poll_hardware(config, queue, sock, sock_lock)
+        poll_hardware(
+            config, queue, sock, sock_lock, hardware_update_queue_priority=QueuePriority.HIGH
+        )
     except Exception as e:
         logger.exception("Failed to end run: ")
         done_event.err = e
