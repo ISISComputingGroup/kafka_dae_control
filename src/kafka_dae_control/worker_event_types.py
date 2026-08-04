@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 from numpy import typing as npt
 
-from kafka_dae_control.defaults import FrameSyncSelect
+from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
 from kafka_dae_control.event_with_error import EventWithError
 
 logger = logging.getLogger(__name__)
@@ -53,6 +53,9 @@ class HardwareUpdate:
     hw_running: bool
     frame_sync_select: FrameSyncSelect
     hard_vetoes: int
+    period_comp_current: int
+    period_number_limit: int
+    period_mode: PeriodMode
 
 
 @dataclass
@@ -70,6 +73,21 @@ class VetoesUpdateEvent(WorkerEventWithValue[npt.NDArray[np.uint8]], DoneEvent):
     """An event signalling the soft vetoes have been set."""
 
 
+@dataclass
+class CurrentPeriodSetEvent(WorkerEventWithValue[int], DoneEvent):
+    """An event signalling the current period was set by a user."""
+
+
+@dataclass
+class NumberOfPeriodsSetEvent(WorkerEventWithValue[int], DoneEvent):
+    """An event signalling the number of periods was set by a user."""
+
+
+@dataclass
+class PeriodModeSetEvent(WorkerEventWithValue[PeriodMode], DoneEvent):
+    """An event signalling a period mode was set by a user."""
+
+
 WorkerEvent = (
     SetIPEvent
     | BeginEvent
@@ -78,4 +96,7 @@ WorkerEvent = (
     | BlocksUpdateEvent
     | FrameSyncSelectChangeEvent
     | VetoesUpdateEvent
+    | CurrentPeriodSetEvent
+    | NumberOfPeriodsSetEvent
+    | PeriodModeSetEvent
 )

@@ -104,7 +104,7 @@ def write_verify(  # ruff:ignore[too-many-arguments]
         verify: Optionally verify against a different provided value by ORing it
         write_attempts: The number of times to retry writing and verifying.
 
-    Returns: None
+        Returns: None
 
     """
     current_val = None

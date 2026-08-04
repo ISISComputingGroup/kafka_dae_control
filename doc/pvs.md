@@ -27,15 +27,25 @@ The options are:
 
 This PV indicates whether the hardware is running or not, as determined by the status register (in particular the `0x20` bit-flag)
 
-## `TITLE` / `USERS`
-
-These are just "soft" PVs used for forming the [run starts](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/pl72_run_start.fbs) and [stops](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/6s4t_run_stop.fbs)
-
-
 ## `RUNNUMBER` / `IRUNNUMBER`
 
-These are the current run number. A run stop increments these. They are read-only from EPICS, but changing the {ref}`statefile` can update them.
+These are the current run number. A run stop increments these. They are read-only from EPICS, but changing the {ref}`statefile` can update them. 
 
+## `PERIOD` / `PERIOD:SP`
+
+The current period number. This is 1-indexed, so period 1 here corresponds to `period=0` in the underlying data stream.
+
+## `NUMPERIODS`/ `NUMPERIODS:MAX` / `NUMPERIODS:SP`
+
+The maximum period number - note that `NUMPERIODS:MAX` is just an alias to `NUMPERIODS`
+
+## `PERIODTYPE` / `PERIODTYPE:SP`
+
+The current period mode to use. Options are: 
+`0`/`COMPUTER`: Let the control PC (IBEX) set the period modes
+`1`/`LOOK_UP_TABLE`: Internal period card mode, with a look-up table 
+`2`/`NOT_USED`: Periods not used at all
+`3`/`EXTERNAL`: Use an external signal to the streaming hardware. 
 
 ## `VETO:NAMES`
 Array of veto names, corresponding to the veto bit mask. Note that this is not changeable at runtime and must be set in the program's configuration file.
@@ -47,3 +57,5 @@ Setting this will write hard vetoes to hardware and then pushes a [`vc00`](https
 ## `VETO:HARD`
 
 This is a readback for what is currently set on the streaming control board.
+
+
