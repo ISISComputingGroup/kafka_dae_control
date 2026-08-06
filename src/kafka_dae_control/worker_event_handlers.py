@@ -334,12 +334,12 @@ def handle_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional
     sock_lock: threading.RLock,
     done_event: EventWithError,
 ) -> None:
-    """Handle a hard veto configuration change.
+    """Handle a veto configuration change.
 
-    This sets the vetoes on the hardware, then sends a `vc00` update with the hard and soft vetoes.
+    This sets the hard vetoes on the hardware, then sends a `vc00` update with hard and soft vetoes.
 
     Args:
-        value: The bit mask list of hard vetoes to set.
+        value: The bit mask list of vetoes to set.
         config: The program's configuration.
         data: the data class containing the state of the program.
         producer: the Kafka producer.
@@ -349,8 +349,8 @@ def handle_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional
 
     """
     try:
+        just_hard_vetoes_mask = array_to_mask((value == HARD_VETO_VALUE).astype(np.uint8))
         with sock_lock:
-            just_hard_vetoes_mask = array_to_mask((value == HARD_VETO_VALUE).astype(np.uint8))
             write_verify(
                 config,
                 sock,

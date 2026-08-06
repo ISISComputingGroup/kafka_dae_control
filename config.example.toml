@@ -32,6 +32,44 @@ state_file = "state.json"
 # Resend IP address to streaming control board after this many comms failures in a row
 resend_ip_after_connection_failures = 10
 
+# Names of vetoes.
+# The first item in this list has bitmask (1 << 0), the last item has bitmask (1 << 31).
+# There must be exactly 32 entries in this list.
+veto_names = [
+    "FIFO",
+    "SMP",
+    "TS2 Pulse",
+    "Wrong Pulse",
+    "Unused",
+    "ISIS slow",
+    "External 0",
+    "External 1",
+    "External 2",
+    "External 3",
+    "Fast Chopper 0",
+    "Fast Chopper 1",
+    "Fast Chopper 2",
+    "Fast Chopper 3",
+    "Reserved 0",
+    "Reserved 1",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+]
+
 [kafka_producer]
 "bootstrap.servers" = "livedata.isis.cclrc.ac.uk:31092"
 "enable.idempotence" = "true"
