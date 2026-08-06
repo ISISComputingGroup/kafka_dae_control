@@ -3,35 +3,41 @@
 import logging
 import socket
 import threading
+import time
 import uuid
 from datetime import datetime
 from functools import partial
 from queue import Queue
 from zoneinfo import ZoneInfo
 
+import numpy as np
 from confluent_kafka import KafkaError, Message, Producer
-from streaming_data_types import serialise_6s4t, serialise_pl72
+from numpy import typing as npt
+from streaming_data_types import serialise_6s4t, serialise_pl72, serialise_vc00
 
 from kafka_dae_control.comms import write_and_inv_then_verify, write_verify
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import (
+    HARD_VETO_VALUE,
+    SOFT_VETO_VALUE,
     FrameSyncSelect,
     PeriodMode,
     Registers,
     RunRegister,
 )
-from kafka_dae_control.event_with_value import EventWithValue
+from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
+from kafka_dae_control.utils import array_to_mask
 from kafka_dae_control.worker_event_types import WorkerEvent
 
 logger = logging.getLogger(__name__)
 
 
-def delivery_report_run_info(
-    done_event: EventWithValue[None], err: KafkaError | None, msg: Message
+def delivery_report_set_error_or_done(
+    done_event: EventWithError, err: KafkaError | None, msg: Message
 ) -> None:
     """Act on a Kafka delivery report.
 
@@ -60,7 +66,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
     producer: Producer,
     sock: socket.SocketType,
     sock_lock: threading.RLock,
-    done_event: EventWithValue[None],
+    done_event: EventWithError,
     queue: Queue[WorkerEvent],
 ) -> None:
     """Handle a begin command.
@@ -102,8 +108,11 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
                 | RunRegister.STREAM_EMPTY_FRAMES,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
             )
+        logger.debug("About to produce blob %s to %s", blob, config.runinfo_topic)
         producer.produce(
-            config.runinfo_topic, blob, callback=partial(delivery_report_run_info, done_event)
+            config.runinfo_topic,
+            blob,
+            callback=partial(delivery_report_set_error_or_done, done_event),
         )
         producer.flush(timeout=config.flush_timeout_s)
         logger.info("sent run start to %s", config.runinfo_topic)
@@ -122,7 +131,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
     producer: Producer,
     sock: socket.SocketType,
     sock_lock: threading.RLock,
-    done_event: EventWithValue[None],
+    done_event: EventWithError,
     queue: Queue[WorkerEvent],
 ) -> None:
     """Handle an end command.
@@ -153,8 +162,11 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
                 data=RunRegister.ETHERNET_OVERRIDE,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING == 0,
             )
+        logger.debug("About to produce blob %s to %s", blob, config.runinfo_topic)
         producer.produce(
-            config.runinfo_topic, blob, callback=partial(delivery_report_run_info, done_event)
+            config.runinfo_topic,
+            blob,
+            callback=partial(delivery_report_set_error_or_done, done_event),
         )
         producer.flush(timeout=config.flush_timeout_s)
         logger.info("sent run stop to %s", config.runinfo_topic)
@@ -174,7 +186,7 @@ def handle_frame_sync_sp_change(  # ruff:ignore[too-many-arguments, too-many-pos
     data: Data,
     sock: socket.SocketType,
     sock_lock: threading.RLock,
-    done_event: EventWithValue[None],
+    done_event: EventWithError,
 ) -> None:
     """Handle a frame sync select setpoint change.
 
@@ -210,7 +222,7 @@ def set_num_periods(  # ruff:ignore[too-many-arguments, too-many-positional-argu
     data: Data,
     sock: socket.SocketType,
     sock_lock: threading.RLock,
-    done_event: EventWithValue[None],
+    done_event: EventWithError,
 ) -> None:
     """Set the number of periods on the hardware.
 
@@ -247,7 +259,7 @@ def set_current_period(  # ruff:ignore[too-many-arguments, too-many-positional-a
     data: Data,
     sock: socket.SocketType,
     sock_lock: threading.RLock,
-    done_event: EventWithValue[None],
+    done_event: EventWithError,
 ) -> None:
     """Set the current period number on the hardware.
 
@@ -283,7 +295,7 @@ def set_period_mode(  # ruff:ignore[too-many-arguments, too-many-positional-argu
     data: Data,
     sock: socket.SocketType,
     sock_lock: threading.RLock,
-    done_event: EventWithValue[None],
+    done_event: EventWithError,
 ) -> None:
     """Set the period mode on the hardware.
 
@@ -311,3 +323,57 @@ def set_period_mode(  # ruff:ignore[too-many-arguments, too-many-positional-argu
         return
     data.current_period_sp = value
     done_event.set()
+
+
+def handle_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
+    value: npt.NDArray[np.uint8],
+    config: ControlConfig,
+    data: Data,
+    producer: Producer,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithError,
+) -> None:
+    """Handle a veto configuration change.
+
+    This sets the hard vetoes on the hardware, then sends a `vc00` update with hard and soft vetoes.
+
+    Args:
+        value: The bit mask list of vetoes to set.
+        config: The program's configuration.
+        data: the data class containing the state of the program.
+        producer: the Kafka producer.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+        done_event: The event to call set() on when complete
+
+    """
+    try:
+        just_hard_vetoes_mask = array_to_mask((value == HARD_VETO_VALUE).astype(np.uint8))
+        with sock_lock:
+            write_verify(
+                config,
+                sock,
+                address=config.register_map[Registers.VETO_CONTROL_REGISTER],
+                data=just_hard_vetoes_mask,
+                verify=lambda x: x == just_hard_vetoes_mask,
+            )
+    except Exception as e:
+        logger.exception("Failed to set hard vetoes: ")
+        done_event.err = e
+        return
+
+    all_vetoes_mask = array_to_mask(
+        ((value == SOFT_VETO_VALUE) | (value == HARD_VETO_VALUE)).astype(np.uint8)
+    )
+    blob = serialise_vc00(time.time_ns(), vetoes=all_vetoes_mask)
+    logger.debug("About to produce blob %s to %s", blob, config.vetoes_topic)
+    producer.produce(
+        config.vetoes_topic,
+        value=blob,
+        callback=partial(delivery_report_set_error_or_done, done_event),
+    )
+    producer.flush(timeout=config.flush_timeout_s)
+    data.vetoes = value.tolist()
+    logger.debug("Saving file")
+    save_file(data, state_file=config.state_file)

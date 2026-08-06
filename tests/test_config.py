@@ -24,6 +24,7 @@ state_file = "./state1.json"
 
 sample_env_topic = "sample-env-topic"
 events_topic = "events-topic"
+vetoes_topic = "vetoes-topic"
 [kafka_producer]
 "bootstrap.servers" = "mybroker:9092"
 
@@ -75,6 +76,7 @@ def test_register_map_calls_parse_register_map(mock_register_map):  # pyright: i
         board_xml=Path("test1.xml"),
         sample_env_topic="sample-env-topic",
         events_topic="events-topic",
+        vetoes_topic="vetoes-topic",
     )
     assert cfg.register_map == mock_register_map.return_value
     mock_register_map.assert_called_once_with(Path("test1.xml"))

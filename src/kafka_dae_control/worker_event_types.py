@@ -4,8 +4,11 @@ import logging
 from abc import ABC
 from dataclasses import dataclass
 
+import numpy as np
+from numpy import typing as npt
+
 from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
-from kafka_dae_control.event_with_value import EventWithValue
+from kafka_dae_control.event_with_error import EventWithError
 
 logger = logging.getLogger(__name__)
 
@@ -15,25 +18,20 @@ class SetIPEvent:
 
 
 @dataclass
-class BeginEvent:
+class DoneEvent:
+    """A class containing an EventWithError instance."""
+
+    done_event: EventWithError
+
+
+@dataclass
+class BeginEvent(DoneEvent):
     """An event signalling a begin."""
 
-    done_event: EventWithValue[None]
-
 
 @dataclass
-class EndEvent:
+class EndEvent(DoneEvent):
     """An event signalling an end."""
-
-    done_event: EventWithValue[None]
-
-
-@dataclass
-class FrameSyncSelectChangeEvent:
-    """An event signalling a change in the frame sync select setpoint."""
-
-    value: FrameSyncSelect
-    done_event: EventWithValue[None]
 
 
 @dataclass
@@ -44,11 +42,17 @@ class WorkerEventWithValue[T](ABC):
 
 
 @dataclass
+class FrameSyncSelectChangeEvent(WorkerEventWithValue[FrameSyncSelect], DoneEvent):
+    """An event signalling a change in the frame sync select setpoint."""
+
+
+@dataclass
 class HardwareUpdate:
     """a dataclass which contains the updated state of the hardware."""
 
     hw_running: bool
     frame_sync_select: FrameSyncSelect
+    hard_vetoes: int
     period_comp_current: int
     period_number_limit: int
     period_mode: PeriodMode
@@ -65,24 +69,23 @@ class BlocksUpdateEvent(WorkerEventWithValue[list[str]]):
 
 
 @dataclass
-class CurrentPeriodSetEvent(WorkerEventWithValue[int]):
+class VetoesUpdateEvent(WorkerEventWithValue[npt.NDArray[np.uint8]], DoneEvent):
+    """An event signalling the soft vetoes have been set."""
+
+
+@dataclass
+class CurrentPeriodSetEvent(WorkerEventWithValue[int], DoneEvent):
     """An event signalling the current period was set by a user."""
 
-    done_event: EventWithValue[None]
-
 
 @dataclass
-class NumberOfPeriodsSetEvent(WorkerEventWithValue[int]):
+class NumberOfPeriodsSetEvent(WorkerEventWithValue[int], DoneEvent):
     """An event signalling the number of periods was set by a user."""
 
-    done_event: EventWithValue[None]
-
 
 @dataclass
-class PeriodModeSetEvent(WorkerEventWithValue[PeriodMode]):
+class PeriodModeSetEvent(WorkerEventWithValue[PeriodMode], DoneEvent):
     """An event signalling a period mode was set by a user."""
-
-    done_event: EventWithValue[None]
 
 
 WorkerEvent = (
@@ -92,6 +95,7 @@ WorkerEvent = (
     | HardwareUpdateEvent
     | BlocksUpdateEvent
     | FrameSyncSelectChangeEvent
+    | VetoesUpdateEvent
     | CurrentPeriodSetEvent
     | NumberOfPeriodsSetEvent
     | PeriodModeSetEvent

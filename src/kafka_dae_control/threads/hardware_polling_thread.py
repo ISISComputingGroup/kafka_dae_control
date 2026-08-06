@@ -110,6 +110,13 @@ def poll_hardware(
             else:
                 frame_sync_select_readback = FrameSyncSelect(frame_sync_select_raw_readback)
 
+            veto_control_raw_readback = read(
+                sock,
+                config.board_ip,
+                address=config.register_map[Registers.VETO_CONTROL_REGISTER],
+                port=config.read_port,
+            )
+
             period_comp_current_readback = read(
                 sock,
                 config.board_ip,
@@ -149,6 +156,7 @@ def poll_hardware(
             period_comp_current=period_comp_current_readback,
             period_number_limit=period_number_limit_readback,
             period_mode=period_mode,
+            hard_vetoes=veto_control_raw_readback,
         )
         logger.debug("Hardware update: %s", h)
         queue.put(HardwareUpdateEvent(h))

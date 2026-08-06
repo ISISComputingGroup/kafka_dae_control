@@ -5,7 +5,7 @@ board_ip = "192.168.1.250"
 instrument_name = "TESTMACHINE"
 
 # The firmware-generated xml file containing addresses of registers etc.
-board_xml = "./example_xml/vxiscb_supermusr_ic_memory_map_output.xml"
+board_xml = "./example_xml/vxiscb_SP_streaming_ic_memory_map_output.xml"
 
 # PV prefix of all PVs in this IOC
 pv_prefix = "TE:TESTMACHINE:KDAECTRL:"
@@ -20,6 +20,9 @@ sample_env_topic = "TESTMACHINE_sampleEnv"
 # Kafka topic to use when putting event placeholders in the run start message's nexus_structure
 events_topic = "TESTMACHINE_events"
 
+# Kafka topic to use when pushing veto configuration updates to
+vetoes_topic = "TESTMACHINE_vetoConfig"
+
 # Local IP to send to the streaming board so it responds thereafter
 local_ip = "192.168.1.17"
 
@@ -28,6 +31,44 @@ state_file = "state.json"
 
 # Resend IP address to streaming control board after this many comms failures in a row
 resend_ip_after_connection_failures = 10
+
+# Names of vetoes.
+# The first item in this list has bitmask (1 << 0), the last item has bitmask (1 << 31).
+# There must be exactly 32 entries in this list.
+veto_names = [
+    "FIFO",
+    "SMP",
+    "TS2 Pulse",
+    "Wrong Pulse",
+    "Unused",
+    "ISIS slow",
+    "External 0",
+    "External 1",
+    "External 2",
+    "External 3",
+    "Fast Chopper 0",
+    "Fast Chopper 1",
+    "Fast Chopper 2",
+    "Fast Chopper 3",
+    "Reserved 0",
+    "Reserved 1",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+]
 
 [kafka_producer]
 "bootstrap.servers" = "livedata.isis.cclrc.ac.uk:31092"

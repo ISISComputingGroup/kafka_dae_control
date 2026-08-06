@@ -4,10 +4,11 @@ import ipaddress
 import tomllib
 from functools import cached_property
 from pathlib import Path
+from typing import Annotated
 
-from pydantic import BaseModel, PositiveInt, ValidationError
+from pydantic import BaseModel, Field, PositiveInt, ValidationError
 
-from kafka_dae_control.defaults import FLUSH_TIMEOUT_S, READ_PORT, WRITE_PORT
+from kafka_dae_control.defaults import FLUSH_TIMEOUT_S, NUM_VETOES, READ_PORT, WRITE_PORT
 from kafka_dae_control.firmware_xml import parse_register_map
 
 
@@ -35,6 +36,9 @@ class ControlConfig(BaseModel):
     runinfo_topic: str
     """Run info topic to push run starts/stops to"""
 
+    vetoes_topic: str
+    """Veto configuration topic to push veto configuration updates to"""
+
     local_ip: ipaddress.IPv4Address
     """Local IP to set the control board IP register to"""
 
@@ -58,6 +62,15 @@ class ControlConfig(BaseModel):
 
     flush_timeout_s: int = FLUSH_TIMEOUT_S
     """The timeout for a flush after producing run info messages"""
+
+    veto_names: Annotated[list[str] | None, Field(min_length=NUM_VETOES, max_length=NUM_VETOES)] = (
+        None
+    )
+    """Veto names, as a list of strings.
+
+    The first item in this list has bit mask (1 << 0), the last item has bit mask (1 << 31).
+    There must be exactly 32 entries in this list.
+    """
 
     resend_ip_after_connection_failures: PositiveInt = 10
     """
