@@ -5,7 +5,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel, Field
 
-from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
+from kafka_dae_control.defaults import NUM_VETOES, FrameSyncSelect, PeriodMode
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,17 @@ class Data(BaseModel):
     """List of blocks to be inserted in the run start nexus structure.
      These are prefixed with the instrument and block server prefixes"""
 
+    veto_names_array: list[str] = Field(default=[f"veto_{n}" for n in range(NUM_VETOES)])
+    """
+    Veto names, as a numpy array of strings. This is indexed so that 0 is veto 0.
+    """
+
+    vetoes: list[int] = Field(default=[0] * NUM_VETOES)
+    """Vetoes array containing 0 for disabled, 1 for soft, 2 for hard.
+     This is indexed so that item 0 is veto 0."""
+
+    hard_vetoes_rbv: int = 0xFFFF
+    """Hard vetoes readback bit mask"""
     num_periods_sp: int = 1
     """Number of periods (setpoint)."""
 

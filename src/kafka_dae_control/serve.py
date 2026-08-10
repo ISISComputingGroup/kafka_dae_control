@@ -44,6 +44,8 @@ def serve(config: ControlConfig) -> None:
     queue.put(QueueItem(QueuePriority.HIGH, SetIPEvent()))
 
     data = load_data(config.state_file)
+    if config.veto_names is not None:
+        data.veto_names_array = config.veto_names
     static_pvs, static_provider = static_pv_provider(config.pv_prefix, data, queue)
 
     server = Server(providers=[static_provider])

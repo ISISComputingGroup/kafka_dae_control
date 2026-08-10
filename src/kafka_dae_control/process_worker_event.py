@@ -14,6 +14,7 @@ from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
+    handle_vetoes_change,
     set_current_period,
     set_num_periods,
     set_period_mode,
@@ -28,6 +29,7 @@ from kafka_dae_control.worker_event_types import (
     NumberOfPeriodsSetEvent,
     PeriodModeSetEvent,
     SetIPEvent,
+    VetoesUpdateEvent,
     WorkerEvent,
 )
 
@@ -58,11 +60,13 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
         sock_lock: the lock to use when using the socket instance
 
     """
+    logger.debug("Processing worker event: %s", worker_event)
     try:
         match worker_event:
             case HardwareUpdateEvent(value=value):
                 data.running = value.hw_running
                 data.frame_sync_select_rbv = value.frame_sync_select
+                data.hard_vetoes_rbv = value.hard_vetoes
                 data.num_periods_rbv = value.period_number_limit
                 data.current_period_rbv = value.period_comp_current + 1
                 data.period_mode_rbv = value.period_mode
@@ -76,6 +80,16 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 handle_frame_sync_sp_change(value, config, data, sock, sock_lock, done_event)
             case SetIPEvent():
                 set_board_response_ip(config, sock, sock_lock)
+            case VetoesUpdateEvent(value=value, done_event=done_event):
+                handle_vetoes_change(
+                    value=value,
+                    config=config,
+                    data=data,
+                    producer=producer,
+                    sock=sock,
+                    sock_lock=sock_lock,
+                    done_event=done_event,
+                )
             case NumberOfPeriodsSetEvent(value=value, done_event=done_event):
                 set_num_periods(value, config, data, sock, sock_lock, done_event)
             case CurrentPeriodSetEvent(value=value, done_event=done_event):

@@ -46,3 +46,16 @@ The current period mode to use. Options are:
 `1`/`LOOK_UP_TABLE`: Internal period card mode, with a look-up table 
 `2`/`NOT_USED`: Periods not used at all
 `3`/`EXTERNAL`: Use an external signal to the streaming hardware. 
+
+## `VETO:NAMES`
+Array of veto names, corresponding to the veto bit mask. Note that this is not changeable at runtime and must be set in the program's configuration file.
+
+## `VETO:SP`
+Veto configuration array. This corresponds to the veto names array. The values in this array are `0` for a disabled veto, `1` for a soft veto and `2` for a hard veto.
+Setting this will write hard vetoes to hardware and then pushes a [`vc00`](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/vc00_veto_configuration.fbs) blob, containing a bit-wise `OR` of both soft and hard vetoes into the veto configuration topic.
+
+## `VETO:HARD`
+
+This is a readback for what is currently set on the streaming control board.
+
+

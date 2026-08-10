@@ -3,19 +3,25 @@ from queue import Queue
 from threading import RLock
 from unittest.mock import MagicMock, Mock, patch
 
+import numpy as np
 import pytest
 from confluent_kafka import KafkaError, Message
-from streaming_data_types import deserialise_6s4t, deserialise_pl72
+from streaming_data_types import (
+    deserialise_6s4t,
+    deserialise_pl72,
+    deserialise_vc00,
+)
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
-from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode, RunRegister
-from kafka_dae_control.event_with_value import EventWithValue
+from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode, Registers, RunRegister
+from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.worker_event_handlers import (
-    delivery_report_run_info,
+    delivery_report_set_error_or_done,
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
+    handle_vetoes_change,
     set_current_period,
     set_num_periods,
     set_period_mode,
@@ -194,18 +200,18 @@ def test_exception_during_end_if_not_running(
 
 
 def test_delivery_report_cb_sets_error_if_error():
-    done_event = EventWithValue()
+    done_event = EventWithError()
     error = KafkaError(error=KafkaError.KAFKA_STORAGE_ERROR)  # pyright: ignore[reportCallIssue]
-    delivery_report_run_info(done_event, error, Message())
+    delivery_report_set_error_or_done(done_event, error, Message())
     assert "Error with kafka delivery: KAFKA_STORAGE_ERROR" in str(done_event.err)
-    assert done_event._ev.is_set()
+    assert done_event.is_set()
 
 
 def test_delivery_report_cb_calls_set_if_no_error():
-    done_event = EventWithValue()
+    done_event = EventWithError()
     msg = Message(topic="mytopic123", value=b"myvalue234")
-    delivery_report_run_info(done_event, None, msg)
-    assert done_event._ev.is_set()
+    delivery_report_set_error_or_done(done_event, None, msg)
+    assert done_event.is_set()
 
 
 @pytest.mark.parametrize(
@@ -216,13 +222,13 @@ def test_delivery_report_cb_calls_set_if_no_error():
 def test_frame_sync_select_change_writes_to_hardware(
     mock_write_verify: Mock, data: Data, conf: ControlConfig, frame_sync_select: FrameSyncSelect
 ):
-    done_event = EventWithValue()
+    done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     handle_frame_sync_sp_change(frame_sync_select, conf, data, sock, sock_lock, done_event)
     assert mock_write_verify.call_args[1]["address"] == FRAME_SYNC_SEL_ADDRESS
     assert mock_write_verify.call_args[1]["data"] == frame_sync_select.value
-    assert done_event._ev.is_set()
+    assert done_event.is_set()
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
@@ -231,60 +237,177 @@ def test_frame_sync_select_failed_to_write_sets_err(
     data: Data,
     conf: ControlConfig,
 ):
-    done_event = EventWithValue()
+    done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     handle_frame_sync_sp_change(
         FrameSyncSelect.INTERNAL_TEST_CLOCK, conf, data, sock, sock_lock, done_event
     )
     assert done_event.err is not None
-    assert done_event._ev.is_set()
+    assert done_event.is_set()
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_verify")
+def test_vetoes_change_writes_to_hardware(
+    mock_write_verify: Mock,
+    data: Data,
+    conf: ControlConfig,
+):
+    done_event = EventWithError()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    producer = Mock()
+    handle_vetoes_change(
+        np.array(
+            [
+                1,
+                0,
+                2,
+                0,
+                1,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+            ]
+        ),
+        conf,
+        data,
+        producer,
+        sock,
+        sock_lock,
+        done_event,
+    )
+
+    assert (
+        deserialise_vc00(producer.mock_calls[0][2]["value"]).vetoes
+        == 0b1010_1100_0000_0000_0000_0000_0000_0000
+    )
+
+    assert (
+        mock_write_verify.call_args[1]["address"]
+        == conf.register_map[Registers.VETO_CONTROL_REGISTER]
+    )
+    assert mock_write_verify.call_args[1]["data"] == 0b0010_0100_0000_0000_0000_0000_0000_0000
+    assert data.vetoes == [
+        1,
+        0,
+        2,
+        0,
+        1,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ]
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
+def test_vetoes_change_failed_to_write_sets_err(
+    mock_write_verify: Mock,
+    data: Data,
+    conf: ControlConfig,
+):
+    done_event = EventWithError()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    producer = Mock()
+    handle_vetoes_change(np.array([2, 0, 1, 2]), conf, data, producer, sock, sock_lock, done_event)
+
+    assert done_event.err is not None
+    assert done_event.is_set()
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify")
 def test_set_num_periods_writes_to_hardware(
     mock_write_verify: Mock, data: Data, conf: ControlConfig
 ):
-    done_event = EventWithValue()
+    done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     set_num_periods(123, conf, data, sock, sock_lock, done_event)
     assert mock_write_verify.call_args[1]["address"] == PERIOD_NUMBER_LIMIT_ADDRESS
     assert mock_write_verify.call_args[1]["data"] == 123
-    assert done_event._ev.is_set()
+    assert done_event.is_set()
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
 def test_set_num_periods_fails_errors(m: Mock, data: Data, conf: ControlConfig):
-    done_event = EventWithValue()
+    done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     set_num_periods(1, conf, data, sock, sock_lock, done_event)
     assert done_event.err is not None
-    assert done_event._ev.is_set()
+    assert done_event.is_set()
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify")
 def test_set_current_period_writes_zero_indexed_to_hardware(
     mock_write_verify: Mock, data: Data, conf: ControlConfig
 ):
-    done_event = EventWithValue()
+    done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     set_current_period(234, conf, data, sock, sock_lock, done_event)
     assert mock_write_verify.call_args[1]["address"] == PERIOD_COMP_CURRENT_ADDRESS
     assert mock_write_verify.call_args[1]["data"] == 233
-    assert done_event._ev.is_set()
+    assert done_event.is_set()
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
 def test_set_current_period_fails_errors(m: Mock, data: Data, conf: ControlConfig):
-    done_event = EventWithValue()
+    done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     set_current_period(2, conf, data, sock, sock_lock, done_event)
     assert done_event.err is not None
-    assert done_event._ev.is_set()
+    assert done_event.is_set()
 
 
 @pytest.mark.parametrize(
@@ -295,20 +418,19 @@ def test_set_current_period_fails_errors(m: Mock, data: Data, conf: ControlConfi
 def test_set_period_mode_writes_to_hardware(
     mock_write_verify: Mock, data: Data, conf: ControlConfig, period_mode: PeriodMode
 ):
-    done_event = EventWithValue()
+    done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     set_period_mode(period_mode, conf, data, sock, sock_lock, done_event)
     assert mock_write_verify.call_args[1]["address"] == PERIOD_CONTROL_ADDRESS
     assert mock_write_verify.call_args[1]["data"] == period_mode.value
-    assert done_event._ev.is_set()
+    assert done_event.is_set()
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
 def test_set_period_mode_fails_errors(m: Mock, data: Data, conf: ControlConfig):
-    done_event = EventWithValue()
+    done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
     set_period_mode(PeriodMode.LOOK_UP_TABLE, conf, data, sock, sock_lock, done_event)
     assert done_event.err is not None
-    assert done_event._ev.is_set()

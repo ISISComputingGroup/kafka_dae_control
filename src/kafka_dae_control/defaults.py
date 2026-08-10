@@ -7,6 +7,11 @@ READ_PORT = 10000
 RECEIVE_BUFFER_SIZE = 1024
 FLUSH_TIMEOUT_S = 1
 REGISTER_SIZE_WORDS = 1
+NUM_VETOES = 32
+
+DISABLED_VETO_VALUE = 0
+SOFT_VETO_VALUE = 1
+HARD_VETO_VALUE = 2
 
 
 class Registers(StrEnum):
@@ -14,6 +19,7 @@ class Registers(StrEnum):
 
     RUNNING_REGISTER = "run_register"
     FRAME_SYNC_SEL_REGISTER = "frame_sync_sel"
+    VETO_CONTROL_REGISTER = "veto_mask"
 
     COMMS_REGISTER = "udp_core_control_0_dst_ip_addr"
     PERIOD_COMP_CURRENT = "period_comp_current"
