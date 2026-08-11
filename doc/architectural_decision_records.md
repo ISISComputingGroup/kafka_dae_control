@@ -6,5 +6,3 @@
 
 architectural_decision_records/*
 ```
-
-todo: priority queue justification
