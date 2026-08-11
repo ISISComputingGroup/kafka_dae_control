@@ -3,10 +3,10 @@
 import logging
 import socket
 import threading
-from queue import Queue
+from queue import PriorityQueue
 from threading import RLock
 from time import sleep
-from typing import Any, Never
+from typing import Never
 
 from kafka_dae_control.comms import read
 from kafka_dae_control.config import ControlConfig
@@ -17,12 +17,11 @@ from kafka_dae_control.defaults import (
     Registers,
     RunRegister,
 )
-from kafka_dae_control.queue_utils import QueuePriority, QueueItem
+from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.worker_event_types import (
     HardwareUpdate,
     HardwareUpdateEvent,
     SetIPEvent,
-    WorkerEvent,
 )
 
 logger = logging.getLogger(__name__)
@@ -30,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 def hardware_poll_thread(
     config: ControlConfig,
-    queue: Queue[WorkerEvent],
+    queue: PriorityQueue[QueueItem],
     sock: socket.SocketType,
     sock_lock: threading.RLock,
 ) -> Never:
@@ -74,7 +73,7 @@ def hardware_poll_thread(
 
 def poll_hardware(
     config: ControlConfig,
-    queue: Queue[Any],
+    queue: PriorityQueue[QueueItem],
     sock: socket.SocketType,
     sock_lock: RLock,
     hardware_update_queue_priority: QueuePriority = QueuePriority.LOW,

@@ -4,14 +4,14 @@ import logging
 import socket
 import threading
 from functools import partial
-from queue import Queue, ShutDown, PriorityQueue
+from queue import PriorityQueue
 
 from confluent_kafka import Producer
 from p4p.server import Server
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.process_worker_event import process_worker_event
-from kafka_dae_control.pvs.camonitor_callbacks import update_blocks, run_control_update_callback
+from kafka_dae_control.pvs.camonitor_callbacks import run_control_update_callback, update_blocks
 from kafka_dae_control.pvs.static_pvs import static_pv_provider
 from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.save_restore import load_data

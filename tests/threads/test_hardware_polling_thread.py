@@ -68,7 +68,7 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
     )
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
-    assert queue.get().value == HardwareUpdate(
+    assert queue.get().item.value == HardwareUpdate(
         hw_running=True,
         frame_sync_select=FrameSyncSelect(1),
         hard_vetoes=1,
@@ -101,7 +101,7 @@ def test_read_frame_sync_select_invalid_sets_invalid(
 
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
-    assert queue.get().value == HardwareUpdate(
+    assert queue.get().item.value == HardwareUpdate(
         hw_running=True,
         frame_sync_select=FrameSyncSelect.UNKNOWN,
         hard_vetoes=1,
@@ -127,7 +127,7 @@ def test_period_mode_invalid_sets_unknown(
 
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
-    assert queue.get().value.period_mode == PeriodMode.UNKNOWN
+    assert queue.get().item.value.period_mode == PeriodMode.UNKNOWN
 
 
 @patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)
@@ -169,4 +169,4 @@ def test_many_comms_errors_in_a_row_cause_ip_to_be_resent(
     assert "3 comms errors in a row while polling hardware" in caplog.text
     assert "Attempting to resend local IP to streaming control board to recover" in caplog.text
 
-    assert isinstance(queue.get(), SetIPEvent)
+    assert isinstance(queue.get().item, SetIPEvent)

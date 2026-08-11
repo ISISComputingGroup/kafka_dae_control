@@ -1,3 +1,5 @@
+"""Types for queue items and priorities."""
+
 import time
 from dataclasses import dataclass, field
 from enum import IntEnum

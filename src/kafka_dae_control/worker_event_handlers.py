@@ -7,7 +7,7 @@ import time
 import uuid
 from datetime import datetime
 from functools import partial
-from queue import Queue
+from queue import PriorityQueue
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -15,7 +15,11 @@ from confluent_kafka import KafkaError, Message, Producer
 from numpy import typing as npt
 from streaming_data_types import serialise_6s4t, serialise_pl72, serialise_vc00
 
-from kafka_dae_control.comms import write_and_inv_then_verify, write_verify
+from kafka_dae_control.comms import (
+    write_AND_INV_then_verify,
+    write_OR_then_verify,
+    write_verify,
+)
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import (
@@ -26,13 +30,12 @@ from kafka_dae_control.defaults import (
     Registers,
     RunRegister,
 )
-from kafka_dae_control.queue_utils import QueuePriority
 from kafka_dae_control.event_with_error import EventWithError
+from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
 from kafka_dae_control.utils import array_to_mask
-from kafka_dae_control.worker_event_types import WorkerEvent
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +71,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithError,
-    queue: Queue[WorkerEvent],
+    queue: PriorityQueue[QueueItem],
 ) -> None:
     """Handle a begin command.
 
@@ -135,7 +138,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithError,
-    queue: Queue[WorkerEvent],
+    queue: PriorityQueue[QueueItem],
 ) -> None:
     """Handle an end command.
 
@@ -158,7 +161,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
     try:
         with sock_lock:
             # clear the ethernet override bit.
-            write_and_inv_then_verify(
+            write_AND_INV_then_verify(
                 config,
                 sock,
                 address=config.register_map[Registers.RUNNING_REGISTER],
@@ -382,3 +385,83 @@ def handle_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional
     data.vetoes = value.tolist()
     logger.debug("Saving file")
     save_file(data, state_file=config.state_file)
+
+
+def _update_software_veto_bit(
+    bit_to_change: int, config: ControlConfig, sock: socket.SocketType, value: bool
+) -> None:
+    if value:
+        # pause - set the bit
+        write_OR_then_verify(
+            config,
+            sock,
+            address=config.register_map[Registers.VETO_TOGGLE],
+            data=bit_to_change,
+            verify=lambda x: x & bit_to_change == 1,
+        )
+    else:
+        # resume - clear the bit
+        write_AND_INV_then_verify(
+            config,
+            sock,
+            address=config.register_map[Registers.VETO_TOGGLE],
+            data=bit_to_change,
+            verify=lambda x: x & bit_to_change == 0,
+        )
+
+
+def handle_pause_or_resume(
+    value: bool,
+    config: ControlConfig,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithError,
+) -> None:
+    """Handle a pause or resume.
+
+    Args:
+        value: The bit mask list of vetoes to set.
+        config: The program's configuration.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+        done_event: The event to call set() on when complete
+
+    """
+    veto_toggle_bit = 5
+    bit_to_change = 1 << veto_toggle_bit
+
+    try:
+        with sock_lock:
+            _update_software_veto_bit(bit_to_change, config, sock, value)
+    except Exception as e:
+        logger.exception("Failed to pause/resume: ")
+        done_event.err = e
+        return
+
+
+def handle_run_control_update(
+    value: bool,
+    config: ControlConfig,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+) -> None:
+    """Handle a run control update.
+
+    Args:
+        value: The bit mask list of vetoes to set.
+        config: The program's configuration.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+
+    """
+    veto_toggle_bit = 6
+    bit_to_change = 1 << veto_toggle_bit
+
+    try:
+        with sock_lock:
+            _update_software_veto_bit(bit_to_change, config, sock, value)
+    except Exception:
+        logger.exception("Failed to pause/resume: ")
+        # todo: there's no done event here because this is triggered by the run control PV updating.
+        #  what happens if we can't set it on the hardware? is just logging acceptable?
+        return

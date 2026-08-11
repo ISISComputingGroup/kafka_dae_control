@@ -107,7 +107,7 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
     conf.runinfo_topic = "run-info-topic"
 
     with patch(
-        "kafka_dae_control.worker_event_handlers.write_and_inv_then_verify"
+        "kafka_dae_control.worker_event_handlers.write_AND_INV_then_verify"
     ) as write_and_inv_then_verify:
         producer.flush.side_effect = done_event.set()
         handle_end(

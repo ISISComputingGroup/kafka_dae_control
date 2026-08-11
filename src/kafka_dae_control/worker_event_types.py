@@ -69,6 +69,11 @@ class BlocksUpdateEvent(WorkerEventWithValue[list[str]]):
 
 
 @dataclass
+class RunControlUpdateEvent(WorkerEventWithValue[bool]):
+    """An event signalling a run control update. 1 is to stop collection, 0 is to resume."""
+
+
+@dataclass
 class VetoesUpdateEvent(WorkerEventWithValue[npt.NDArray[np.uint8]], DoneEvent):
     """An event signalling the soft vetoes have been set."""
 
@@ -88,6 +93,14 @@ class PeriodModeSetEvent(WorkerEventWithValue[PeriodMode], DoneEvent):
     """An event signalling a period mode was set by a user."""
 
 
+@dataclass
+class PauseResumeEvent(WorkerEventWithValue[bool], DoneEvent):
+    """An event signalling a pause or resume has been requested.
+
+    `value` here corresponds to "to pause" - 1 is to pause, 0 is to resume.
+    """
+
+
 WorkerEvent = (
     SetIPEvent
     | BeginEvent
@@ -99,4 +112,5 @@ WorkerEvent = (
     | CurrentPeriodSetEvent
     | NumberOfPeriodsSetEvent
     | PeriodModeSetEvent
+    | PauseResumeEvent
 )

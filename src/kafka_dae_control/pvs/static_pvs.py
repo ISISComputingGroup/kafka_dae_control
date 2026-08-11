@@ -1,7 +1,7 @@
 """Static PVs for KDAECTRL."""
 
 import logging
-from queue import Queue
+from queue import PriorityQueue, Queue
 
 from p4p.nt import NTEnum, NTScalar
 from p4p.server import ServerOperation, StaticProvider
@@ -9,14 +9,15 @@ from p4p.server.thread import SharedPV
 
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
-from kafka_dae_control.queue_utils import QueuePriority, QueueItem
 from kafka_dae_control.event_with_error import EventWithError
+from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     CurrentPeriodSetEvent,
     EndEvent,
     FrameSyncSelectChangeEvent,
     NumberOfPeriodsSetEvent,
+    PauseResumeEvent,
     PeriodModeSetEvent,
     VetoesUpdateEvent,
     WorkerEvent,
@@ -28,7 +29,7 @@ logger = logging.getLogger(__name__)
 class StaticPVs:
     """Static PVs for KDAECTRL."""
 
-    def __init__(self, data: "Data", queue: Queue[WorkerEvent]) -> None:  # ruff:ignore[too-many-statements]
+    def __init__(self, data: "Data", queue: PriorityQueue[QueueItem]) -> None:  # ruff:ignore[too-many-statements]
         """Set up static PVs for KDAECTRL.
 
         Args:
@@ -143,7 +144,12 @@ class StaticPVs:
             value = op.value()
             logger.info("put with %s to frame_sync_select_sp", value)
             ev = EventWithError()
-            queue.put(FrameSyncSelectChangeEvent(value=FrameSyncSelect[str(value)], done_event=ev))
+            queue.put(
+                QueueItem(
+                    QueuePriority.HIGH,
+                    FrameSyncSelectChangeEvent(value=FrameSyncSelect[str(value)], done_event=ev),
+                )
+            )
             try:
                 ev.wait()
                 pv.post(value)
@@ -156,7 +162,7 @@ class StaticPVs:
             value = op.value()
             logger.info("put with %s to vetoes sp", value)
             ev = EventWithError()
-            queue.put(VetoesUpdateEvent(value=value, done_event=ev))
+            queue.put(QueueItem(QueuePriority.HIGH, VetoesUpdateEvent(value=value, done_event=ev)))
             try:
                 ev.wait()
                 pv.post(value)
@@ -217,11 +223,39 @@ class StaticPVs:
 
         @self.pause.put
         def pause_put(pv: SharedPV, op: ServerOperation) -> None:
-            pass
+            value = op.value()
+            logger.info("put with %s to pause", value)
+            ev = EventWithError()
+            queue.put(
+                QueueItem(
+                    QueuePriority.HIGH,
+                    PauseResumeEvent(value=True, done_event=ev),
+                )
+            )
+            try:
+                ev.wait()
+                pv.post(value)
+                op.done()
+            except Exception as e:  # ruff:ignore[blind-except]
+                op.done(error=f"Failed to pause: {e}")
 
         @self.resume.put
         def resume_put(pv: SharedPV, op: ServerOperation) -> None:
-            pass
+            value = op.value()
+            logger.info("put with %s to resume", value)
+            ev = EventWithError()
+            queue.put(
+                QueueItem(
+                    QueuePriority.HIGH,
+                    PauseResumeEvent(value=False, done_event=ev),
+                )
+            )
+            try:
+                ev.wait()
+                pv.post(value)
+                op.done()
+            except Exception as e:  # ruff:ignore[blind-except]
+                op.done(error=f"Failed to resume: {e}")
 
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.

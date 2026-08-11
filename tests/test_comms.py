@@ -12,7 +12,7 @@ from kafka_dae_control.comms import (
     read,
     set_board_response_ip,
     write,
-    write_and_inv_then_verify,
+    write_AND_INV_then_verify,
     write_verify,
 )
 from kafka_dae_control.config import ControlConfig
@@ -183,7 +183,7 @@ def test_write_and_inv_then_verify_clears_bit(
     sock = Mock()
     verify = Mock()
 
-    write_and_inv_then_verify(
+    write_AND_INV_then_verify(
         conf,
         sock,
         address=0,
@@ -257,7 +257,7 @@ def test_inv_write_verify_retries(
 ):
 
     with pytest.raises(OSError, match="Could not write"):
-        write_and_inv_then_verify(
+        write_AND_INV_then_verify(
             conf,
             Mock(),
             address=0,

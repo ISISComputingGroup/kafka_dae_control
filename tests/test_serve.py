@@ -19,7 +19,7 @@ board_ip = ipaddress.IPv4Address("192.168.1.102")
 @patch("kafka_dae_control.serve.process_worker_event", side_effect=Exception)
 @patch("kafka_dae_control.serve.camonitor")
 @patch("kafka_dae_control.serve.threading")
-@patch("kafka_dae_control.serve.Queue")
+@patch("kafka_dae_control.serve.PriorityQueue")
 def test_handshake_added_to_queue(
     mock_queue,  # pyright: ignore reportMissingParameterType
     mock_thread,  # pyright: ignore reportMissingParameterType
@@ -71,9 +71,10 @@ def test_handshake_added_to_queue(
     with pytest.raises(Exception):
         serve(conf)
 
-    assert isinstance(mock_queue.return_value.put.call_args[0][0], SetIPEvent)
+    assert isinstance(mock_queue.return_value.put.call_args[0][0].item, SetIPEvent)
     assert mock_thread.Thread.call_count == 2
-    assert mock_camonitor.call_args.args == ("IN:TEST:CS:BLOCKSERVER:BLOCKNAMES",)
+    assert mock_camonitor.call_args_list[0].args == ("IN:TEST:CS:BLOCKSERVER:BLOCKNAMES",)
+    assert mock_camonitor.call_args_list[1].args == ("IN:TEST:CS:RC:INRANGE",)
     assert mock_load_data.return_value.veto_names_array == vn
 
 
@@ -83,7 +84,7 @@ def test_handshake_added_to_queue(
 @patch("kafka_dae_control.serve.process_worker_event", side_effect=Exception)
 @patch("kafka_dae_control.serve.camonitor")
 @patch("kafka_dae_control.serve.threading")
-@patch("kafka_dae_control.serve.Queue")
+@patch("kafka_dae_control.serve.PriorityQueue")
 def test_veto_names_defaulted_if_not_specified(
     _mock_queue,  # pyright: ignore reportMissingParameterType
     _mock_thread,  # pyright: ignore reportMissingParameterType
