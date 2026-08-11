@@ -14,6 +14,10 @@ SOFT_VETO_VALUE = 1
 HARD_VETO_VALUE = 2
 
 
+PAUSE_VETO_TOGGLE_BIT = 5
+RC_VETO_TOGGLE_BIT = 6
+
+
 class Registers(StrEnum):
     """Register IDs on the streaming control board."""
 

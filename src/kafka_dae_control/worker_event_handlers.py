@@ -24,6 +24,8 @@ from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import (
     HARD_VETO_VALUE,
+    PAUSE_VETO_TOGGLE_BIT,
+    RC_VETO_TOGGLE_BIT,
     SOFT_VETO_VALUE,
     FrameSyncSelect,
     PeriodMode,
@@ -427,7 +429,7 @@ def handle_pause_or_resume(
         done_event: The event to call set() on when complete
 
     """
-    veto_toggle_bit = 5
+    veto_toggle_bit = PAUSE_VETO_TOGGLE_BIT
     bit_to_change = 1 << veto_toggle_bit
 
     try:
@@ -454,7 +456,7 @@ def handle_run_control_update(
         sock_lock: the lock to acquire when using the socket instance.
 
     """
-    veto_toggle_bit = 6
+    veto_toggle_bit = RC_VETO_TOGGLE_BIT
     bit_to_change = 1 << veto_toggle_bit
 
     try:
