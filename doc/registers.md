@@ -181,3 +181,5 @@ These are internal registers used to monitor parameters on the FPGA such as temp
 
 ## `udp_core` prefixed registers
 These are mostly related to networking and internal device state. The only one `kdaectrl` uses currently is `udp_core_control_0_dst_ip_addr` which is a big-endian representation of the `IPv4` address for the "client", which in the case of `kdaectrl` is the host running it.
+
+# todo: software veto register

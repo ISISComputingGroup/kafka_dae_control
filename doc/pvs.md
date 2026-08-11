@@ -14,6 +14,9 @@ This is used for ending a run.
 
 Setting this PV to `1` triggers an event which firstly stops the hardware by setting the run status register's lowest bit to 0, then sends a [run stop](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/6s4t_run_stop.fbs) to Kafka. If either of those two fail, the put will error.
 
+
+# todo: pause/resume
+
 ## `DAETIMINGSOURCE` / `DAETIMINGSOURCE:SP`
 
 These PVs respectively display the status of and set the streaming control board's timing source (or `frame_sync_select` as named by its register)
