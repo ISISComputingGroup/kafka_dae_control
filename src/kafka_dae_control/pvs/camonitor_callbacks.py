@@ -37,4 +37,5 @@ def run_control_update_callback(queue: PriorityQueue[QueueItem], *, value: int, 
 
     """
     logger.debug("run_control_update_callback: %s", value)
-    queue.put(QueueItem(QueuePriority.HIGH, RunControlUpdateEvent(value=bool(value))))
+    out_of_range = not bool(value)
+    queue.put(QueueItem(QueuePriority.HIGH, RunControlUpdateEvent(value=out_of_range)))

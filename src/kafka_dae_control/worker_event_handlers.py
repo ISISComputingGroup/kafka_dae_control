@@ -429,8 +429,7 @@ def handle_pause_or_resume(
         done_event: The event to call set() on when complete
 
     """
-    veto_toggle_bit = PAUSE_VETO_TOGGLE_BIT
-    bit_to_change = 1 << veto_toggle_bit
+    bit_to_change = 1 << PAUSE_VETO_TOGGLE_BIT
 
     try:
         with sock_lock:
@@ -457,8 +456,7 @@ def handle_run_control_update(
         sock_lock: the lock to acquire when using the socket instance.
 
     """
-    veto_toggle_bit = RC_VETO_TOGGLE_BIT
-    bit_to_change = 1 << veto_toggle_bit
+    bit_to_change = 1 << RC_VETO_TOGGLE_BIT
 
     try:
         with sock_lock:
