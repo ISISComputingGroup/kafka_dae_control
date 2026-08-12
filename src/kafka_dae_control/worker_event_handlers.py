@@ -399,7 +399,7 @@ def _update_software_veto_bit(
             sock,
             address=config.register_map[Registers.VETO_TOGGLE],
             data=bit_to_change,
-            verify=lambda x: x & bit_to_change == 1,
+            verify=lambda x: x & bit_to_change == x,
         )
     else:
         # resume - clear the bit
@@ -408,7 +408,7 @@ def _update_software_veto_bit(
             sock,
             address=config.register_map[Registers.VETO_TOGGLE],
             data=bit_to_change,
-            verify=lambda x: x & bit_to_change == 0,
+            verify=lambda x: (x & bit_to_change) == 0,
         )
 
 
@@ -435,6 +435,7 @@ def handle_pause_or_resume(
     try:
         with sock_lock:
             _update_software_veto_bit(bit_to_change, config, sock, value)
+            done_event.set()
     except Exception as e:
         logger.exception("Failed to pause/resume: ")
         done_event.err = e

@@ -160,6 +160,7 @@ def write_verify(  # ruff:ignore[too-many-arguments]
             )
             logger.debug("Current value is %s", current_val)
             if verify(current_val):
+                logger.debug("write verified")
                 return
 
             sleep(SLEEP_BETWEEN_VERIFY_ATTEMPTS_S)
