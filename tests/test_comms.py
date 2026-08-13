@@ -13,6 +13,7 @@ from kafka_dae_control.comms import (
     set_board_response_ip,
     write,
     write_AND_INV_then_verify,
+    write_OR_then_verify,
     write_verify,
 )
 from kafka_dae_control.config import ControlConfig
@@ -268,3 +269,27 @@ def test_inv_write_verify_retries(
         )
 
     assert mock_write.call_count == 2
+
+
+@patch("kafka_dae_control.comms.sleep")
+@patch("kafka_dae_control.comms.read", return_value=0b100001)
+@patch("kafka_dae_control.comms.write")
+def test_write_OR_and_verify_sets_bit(
+    mock_write,  # pyright: ignore reportMissingParameterType
+    mock_read,  # pyright: ignore reportMissingParameterType
+    mock_sleep,  # pyright: ignore reportMissingParameterType
+    conf: ControlConfig,
+):
+    sock = Mock()
+    write_OR_then_verify(
+        conf,
+        sock,
+        address=12345,
+        data=0b10000,
+        verify=Mock(),
+        write_attempts=1,
+    )
+
+    mock_write.assert_called_once_with(
+        sock, conf.board_ip, address=12345, count=1, data=0b100001 | 0b10000, port=conf.write_port
+    )

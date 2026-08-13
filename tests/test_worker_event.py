@@ -18,7 +18,9 @@ from kafka_dae_control.worker_event_types import (
     HardwareUpdate,
     HardwareUpdateEvent,
     NumberOfPeriodsSetEvent,
+    PauseResumeEvent,
     PeriodModeSetEvent,
+    RunControlUpdateEvent,
     SetIPEvent,
     VetoesUpdateEvent,
 )
@@ -192,3 +194,35 @@ def test_soft_vetoes_change_calls_handle_soft_vetoes_change(
         Mock(),
     )
     assert mock_handle_vetoes_change.called
+
+
+@patch("kafka_dae_control.process_worker_event.handle_run_control_update")
+def test_run_control_change_calls_handle_run_control_update(
+    mock_handle_run_control_update: Mock, conf: ControlConfig, data: Data
+):
+    process_worker_event(
+        Queue(),
+        RunControlUpdateEvent(value=False),
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        Mock(),
+    )
+    assert mock_handle_run_control_update.called
+
+
+@patch("kafka_dae_control.process_worker_event.handle_pause_or_resume")
+def test_pause_resume_calls_handle_pause_or_resume(
+    mock_handle_pause_or_resume: Mock, conf: ControlConfig, data: Data
+):
+    process_worker_event(
+        Queue(),
+        PauseResumeEvent(value=False, done_event=Mock()),
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        Mock(),
+    )
+    assert mock_handle_pause_or_resume.called

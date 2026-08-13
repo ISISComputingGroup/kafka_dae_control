@@ -14,13 +14,22 @@ from streaming_data_types import (
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
-from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode, Registers, RunRegister
+from kafka_dae_control.defaults import (
+    PAUSE_VETO_TOGGLE_BIT,
+    RC_VETO_TOGGLE_BIT,
+    FrameSyncSelect,
+    PeriodMode,
+    Registers,
+    RunRegister,
+)
 from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.worker_event_handlers import (
     delivery_report_set_error_or_done,
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
+    handle_pause_or_resume,
+    handle_run_control_update,
     handle_vetoes_change,
     set_current_period,
     set_num_periods,
@@ -31,6 +40,7 @@ from tests.conftest import (
     PERIOD_COMP_CURRENT_ADDRESS,
     PERIOD_CONTROL_ADDRESS,
     PERIOD_NUMBER_LIMIT_ADDRESS,
+    VETO_TOGGLE_ADDRESS,
 )
 
 
@@ -434,3 +444,63 @@ def test_set_period_mode_fails_errors(m: Mock, data: Data, conf: ControlConfig):
     sock_lock = MagicMock(spec=RLock())
     set_period_mode(PeriodMode.LOOK_UP_TABLE, conf, data, sock, sock_lock, done_event)
     assert done_event.err is not None
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_OR_then_verify")
+def test_run_control_update_out_of_range_writes_to_hardware(
+    mock_write_verify: Mock, data: Data, conf: ControlConfig
+):
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_run_control_update(True, conf, sock, sock_lock)
+    assert mock_write_verify.call_args[1]["address"] == VETO_TOGGLE_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == 1 << RC_VETO_TOGGLE_BIT
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_AND_INV_then_verify")
+def test_run_control_in_range_writes_to_hardware(
+    mock_write_verify: Mock, data: Data, conf: ControlConfig
+):
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_run_control_update(False, conf, sock, sock_lock)
+    assert mock_write_verify.call_args[1]["address"] == VETO_TOGGLE_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == 1 << RC_VETO_TOGGLE_BIT
+
+
+@patch("kafka_dae_control.worker_event_handlers._update_software_veto_bit", side_effect=Exception)
+def test_run_control_errors_logs(
+    m: Mock, data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    handle_run_control_update(False, conf, Mock(), MagicMock(spec=RLock()))
+    assert "Failed to handle run control update" in caplog.text
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_OR_then_verify")
+def test_pause_writes_to_hardware(mock_write_verify: Mock, data: Data, conf: ControlConfig):
+    done_event = EventWithError()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_pause_or_resume(True, conf, sock, sock_lock, done_event)
+    assert mock_write_verify.call_args[1]["address"] == VETO_TOGGLE_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == 1 << PAUSE_VETO_TOGGLE_BIT
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_AND_INV_then_verify")
+def test_resume_writes_to_hardware(mock_write_verify: Mock, data: Data, conf: ControlConfig):
+    done_event = EventWithError()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_pause_or_resume(False, conf, sock, sock_lock, done_event)
+    assert mock_write_verify.call_args[1]["address"] == VETO_TOGGLE_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == 1 << PAUSE_VETO_TOGGLE_BIT
+
+
+@patch("kafka_dae_control.worker_event_handlers._update_software_veto_bit", side_effect=Exception)
+def test_resume_fails_to_write_errors(
+    m: Mock, data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    done_event = EventWithError()
+    handle_pause_or_resume(False, conf, Mock(), MagicMock(spec=RLock()), done_event)
+    assert done_event.err is not None
+    assert "Failed to pause/resume" in caplog.text
