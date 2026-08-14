@@ -482,7 +482,7 @@ def test_pause_writes_to_hardware(mock_write_verify: Mock, data: Data, conf: Con
     done_event = EventWithError()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
-    handle_pause_or_resume(True, conf, sock, sock_lock, done_event)
+    handle_pause_or_resume(True, conf, data, sock, sock_lock, done_event)
     assert mock_write_verify.call_args[1]["address"] == VETO_TOGGLE_ADDRESS
     assert mock_write_verify.call_args[1]["data"] == 1 << PAUSE_VETO_TOGGLE_BIT
 
@@ -490,9 +490,10 @@ def test_pause_writes_to_hardware(mock_write_verify: Mock, data: Data, conf: Con
 @patch("kafka_dae_control.worker_event_handlers.write_AND_INV_then_verify")
 def test_resume_writes_to_hardware(mock_write_verify: Mock, data: Data, conf: ControlConfig):
     done_event = EventWithError()
+    data.paused = True
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
-    handle_pause_or_resume(False, conf, sock, sock_lock, done_event)
+    handle_pause_or_resume(False, conf, data, sock, sock_lock, done_event)
     assert mock_write_verify.call_args[1]["address"] == VETO_TOGGLE_ADDRESS
     assert mock_write_verify.call_args[1]["data"] == 1 << PAUSE_VETO_TOGGLE_BIT
 
@@ -501,7 +502,28 @@ def test_resume_writes_to_hardware(mock_write_verify: Mock, data: Data, conf: Co
 def test_resume_fails_to_write_errors(
     m: Mock, data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
 ):
+    data.paused = True
     done_event = EventWithError()
-    handle_pause_or_resume(False, conf, Mock(), MagicMock(spec=RLock()), done_event)
+    handle_pause_or_resume(False, conf, data, Mock(), MagicMock(spec=RLock()), done_event)
     assert done_event.err is not None
     assert "Failed to pause/resume" in caplog.text
+
+
+def test_cannot_pause_if_already_paused(
+    data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    data.paused = True
+    done_event = EventWithError()
+    handle_pause_or_resume(True, conf, data, Mock(), MagicMock(spec=RLock()), done_event)
+    assert done_event.err is not None
+    assert "Cannot pause if already paused" in caplog.text
+
+
+def test_cannot_resume_if_already_running(
+    data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    data.paused = False
+    done_event = EventWithError()
+    handle_pause_or_resume(False, conf, data, Mock(), MagicMock(spec=RLock()), done_event)
+    assert done_event.err is not None
+    assert "Cannot resume if already running" in caplog.text

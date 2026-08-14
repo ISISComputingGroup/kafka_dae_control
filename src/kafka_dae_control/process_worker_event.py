@@ -102,7 +102,7 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
             case PeriodModeSetEvent(value=value, done_event=done_event):
                 set_period_mode(value, config, data, sock, sock_lock, done_event)
             case PauseResumeEvent(value=value, done_event=done_event):
-                handle_pause_or_resume(value, config, sock, sock_lock, done_event)
+                handle_pause_or_resume(value, config, data, sock, sock_lock, done_event)
             case RunControlUpdateEvent(value=value):
                 handle_run_control_update(value, config, sock, sock_lock)
             case _:

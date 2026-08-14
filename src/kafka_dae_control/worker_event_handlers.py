@@ -412,9 +412,10 @@ def _update_software_veto_bit(
         )
 
 
-def handle_pause_or_resume(
+def handle_pause_or_resume(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
     value: bool,
     config: ControlConfig,
+    data: Data,
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithError,
@@ -424,6 +425,7 @@ def handle_pause_or_resume(
     Args:
         value: The bit mask list of vetoes to set.
         config: The program's configuration.
+        data: the program's data class.
         sock: the socket instance.
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete
@@ -431,9 +433,19 @@ def handle_pause_or_resume(
     """
     bit_to_change = 1 << PAUSE_VETO_TOGGLE_BIT
 
+    if data.paused == value:
+        error_message = (
+            f"Cannot {'pause' if value else 'resume'} "
+            f"if already {'paused' if value else 'running'}."
+        )
+        logger.error(error_message)
+        done_event.err = Exception(error_message)
+        return
+
     try:
         with sock_lock:
             _update_software_veto_bit(bit_to_change, config, sock, value)
+            data.paused = value
             done_event.set()
     except Exception as e:
         logger.exception("Failed to pause/resume: ")
