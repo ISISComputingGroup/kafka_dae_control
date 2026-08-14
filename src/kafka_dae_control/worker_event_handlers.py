@@ -366,7 +366,9 @@ def handle_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional
     all_vetoes_mask = array_to_mask(
         ((value == SOFT_VETO_VALUE) | (value == HARD_VETO_VALUE)).astype(np.uint8)
     )
-    blob = serialise_vc00(time.time_ns(), vetoes=all_vetoes_mask)
+    blob = serialise_vc00(
+        time.time_ns(), vetoes=all_vetoes_mask, veto_names=[x.encode() for x in config.veto_names]
+    )
     logger.debug("About to produce blob %s to %s", blob, config.vetoes_topic)
     producer.produce(
         config.vetoes_topic,

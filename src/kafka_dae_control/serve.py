@@ -6,17 +6,19 @@ import threading
 from functools import partial
 from queue import Queue
 
+import numpy as np
 from confluent_kafka import Producer
 from p4p.server import Server
 
 from kafka_dae_control.config import ControlConfig
+from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.process_worker_event import process_worker_event
 from kafka_dae_control.pvs.camonitor_callbacks import update_blocks
 from kafka_dae_control.pvs.static_pvs import static_pv_provider
 from kafka_dae_control.save_restore import load_data
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread
 from kafka_dae_control.threads.update_pvs_thread import update_pvs_thread
-from kafka_dae_control.worker_event_types import SetIPEvent
+from kafka_dae_control.worker_event_types import SetIPEvent, VetoesUpdateEvent
 
 # needed for p4p and pyepics to work together
 try:
@@ -43,8 +45,15 @@ def serve(config: ControlConfig) -> None:
     queue.put(SetIPEvent())
 
     data = load_data(config.state_file)
-    if config.veto_names is not None:
-        data.veto_names_array = config.veto_names
+
+    # put veto update event on the queue immediately so that vc00 is emitted
+    # for downstream consumers even if vetoes don't change
+    queue.put(
+        VetoesUpdateEvent(
+            done_event=EventWithError(), value=np.asarray(data.vetoes, dtype=np.uint8)
+        )
+    )
+
     static_pvs, static_provider = static_pv_provider(config.pv_prefix, data, queue)
 
     server = Server(providers=[static_provider])
