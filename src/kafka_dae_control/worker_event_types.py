@@ -113,4 +113,5 @@ WorkerEvent = (
     | NumberOfPeriodsSetEvent
     | PeriodModeSetEvent
     | PauseResumeEvent
+    | RunControlUpdateEvent
 )

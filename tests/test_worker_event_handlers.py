@@ -1,5 +1,5 @@
 import ipaddress
-from queue import Queue
+from queue import PriorityQueue
 from threading import RLock
 from unittest.mock import MagicMock, Mock, patch
 
@@ -23,6 +23,7 @@ from kafka_dae_control.defaults import (
     RunRegister,
 )
 from kafka_dae_control.event_with_error import EventWithError
+from kafka_dae_control.queue_utils import QueueItem
 from kafka_dae_control.worker_event_handlers import (
     delivery_report_set_error_or_done,
     handle_begin,
@@ -76,7 +77,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
             sock=sock,
             sock_lock=sock_lock,
             done_event=done_event,
-            queue=Queue(),
+            queue=PriorityQueue[QueueItem](),
         )
 
         write_verify.assert_called_once()
@@ -127,7 +128,7 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
             sock=sock,
             sock_lock=sock_lock,
             done_event=done_event,
-            queue=Queue(),
+            queue=PriorityQueue[QueueItem](),
         )
 
         write_and_inv_then_verify.assert_called_once()
@@ -160,7 +161,7 @@ def test_exception_during_begin_logs(
         Mock(),
         sock_lock,
         Mock(),
-        Queue(),
+        PriorityQueue[QueueItem](),
     )
     assert "Failed to start run:" in caplog.text
 
@@ -178,7 +179,7 @@ def test_exception_during_end_logs(
         Mock(),
         sock_lock,
         Mock(),
-        Queue(),
+        PriorityQueue[QueueItem](),
     )
     assert "Failed to end run:" in caplog.text
 
@@ -188,7 +189,7 @@ def test_exception_during_begin_if_already_running(
 ):
     data.running = True
     sock_lock = MagicMock(spec=RLock())
-    handle_begin(conf, data, Mock(), Mock(), sock_lock, Mock(), Queue())
+    handle_begin(conf, data, Mock(), Mock(), sock_lock, Mock(), PriorityQueue[QueueItem]())
     assert "The hardware is already running - doing nothing" in caplog.text
 
 
@@ -204,7 +205,7 @@ def test_exception_during_end_if_not_running(
         Mock(),
         sock_lock,
         Mock(),
-        Queue(),
+        PriorityQueue[QueueItem](),
     )
     assert "The hardware is already not running - doing nothing" in caplog.text
 

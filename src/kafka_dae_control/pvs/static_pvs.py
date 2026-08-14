@@ -1,7 +1,7 @@
 """Static PVs for KDAECTRL."""
 
 import logging
-from queue import PriorityQueue, Queue
+from queue import PriorityQueue
 
 from p4p.nt import NTEnum, NTScalar
 from p4p.server import ServerOperation, StaticProvider
@@ -20,7 +20,6 @@ from kafka_dae_control.worker_event_types import (
     PauseResumeEvent,
     PeriodModeSetEvent,
     VetoesUpdateEvent,
-    WorkerEvent,
 )
 
 logger = logging.getLogger(__name__)
@@ -276,7 +275,7 @@ class StaticPVs:
 
 
 def static_pv_provider(
-    pv_prefix: str, data: "Data", queue: Queue[WorkerEvent]
+    pv_prefix: str, data: "Data", queue: PriorityQueue[QueueItem]
 ) -> tuple[StaticPVs, StaticProvider]:
     """Generate a static pv provider containing all the static PVs.
 
