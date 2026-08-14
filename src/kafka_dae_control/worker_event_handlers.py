@@ -475,6 +475,4 @@ def handle_run_control_update(
             _update_software_veto_bit(bit_to_change, config, sock, value)
     except Exception:
         logger.exception("Failed to handle run control update: ")
-        # todo: there's no done event here because this is triggered by the run control PV updating.
-        #  what happens if we can't set it on the hardware? is just logging acceptable?
         return
