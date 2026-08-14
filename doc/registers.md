@@ -146,9 +146,14 @@ Value: The current period number.
 
 Value: The current veto number.
 
-### `veto_mask`
+### `vetoes_mask`
 
 Bits (mask) (`rw`): The vetos to ignore. 
+
+{#softwarevetoesregister}
+### `software_vetoes`
+
+This is a manual overwrite of a veto control. It is currently used for pausing/resuming and run control.
 
 ### `good_frame_count`
 
@@ -181,5 +186,3 @@ These are internal registers used to monitor parameters on the FPGA such as temp
 
 ## `udp_core` prefixed registers
 These are mostly related to networking and internal device state. The only one `kdaectrl` uses currently is `udp_core_control_0_dst_ip_addr` which is a big-endian representation of the `IPv4` address for the "client", which in the case of `kdaectrl` is the host running it.
-
-# todo: software veto register

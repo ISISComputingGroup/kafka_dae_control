@@ -19,13 +19,13 @@ Setting this PV to `1` triggers an event which firstly stops the hardware by set
 
 This is used for pausing a run. 
 
-Setting this PV to `1` triggers an event which sets the `software_vetoes` (todo: link this) bit `5` to 1.
+Setting this PV to `1` triggers an event which sets the {ref}`softwarevetoesregister` bit `5` to 1.
 
 ## `RESUMERUN`
 
 This is used for resuming a run. 
 
-Setting this PV to `1` triggers an event which sets the `software_vetoes` (todo: link this) bit `5` to 0.
+Setting this PV to `1` triggers an event which sets the {ref}`softwarevetoesregister` bit `5` to 0.
 
 ## `DAETIMINGSOURCE` / `DAETIMINGSOURCE:SP`
 
