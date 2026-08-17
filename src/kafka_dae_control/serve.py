@@ -50,7 +50,7 @@ def serve(config: ControlConfig) -> None:
     # for downstream consumers even if vetoes don't change
     queue.put(
         VetoesUpdateEvent(
-            done_event=EventWithError(), value=np.asarray(data.vetoes, dtype=np.uint8)
+            value=np.asarray(data.vetoes, dtype=np.uint8), done_event=EventWithError()
         )
     )
 
