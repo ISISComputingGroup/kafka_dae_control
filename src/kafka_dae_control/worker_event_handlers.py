@@ -31,7 +31,7 @@ from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
 from kafka_dae_control.utils import array_to_mask
-from kafka_dae_control.worker_event_types import WorkerEvent
+from kafka_dae_control.worker_event_types import WorkerEvent, VetoesUpdateEvent
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +119,12 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         save_file(data, state_file=config.state_file)
         # immediately poll hardware to avoid being able to begin again before hardware is updated
         poll_hardware(config, queue, sock, sock_lock)
+        # send veto update so that it doesn't fall out of retention for anything downstream
+        queue.put(
+            VetoesUpdateEvent(
+                value=np.asarray(data.vetoes, dtype=np.uint8), done_event=EventWithError()
+            )
+        )
     except Exception as e:
         logger.exception("Failed to start run: ")
         done_event.err = e
