@@ -63,9 +63,14 @@ class ControlConfig(BaseModel):
     flush_timeout_s: int = FLUSH_TIMEOUT_S
     """The timeout for a flush after producing run info messages"""
 
-    veto_names: Annotated[list[str] | None, Field(min_length=NUM_VETOES, max_length=NUM_VETOES)] = (
-        None
-    )
+    veto_names: Annotated[
+        list[str],
+        Field(
+            min_length=NUM_VETOES,
+            max_length=NUM_VETOES,
+            default=[f"veto_{n}" for n in range(NUM_VETOES)],
+        ),
+    ]
     """Veto names, as a list of strings.
 
     The first item in this list has bit mask (1 << 0), the last item has bit mask (1 << 31).
