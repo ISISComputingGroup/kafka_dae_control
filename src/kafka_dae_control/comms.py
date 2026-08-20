@@ -57,7 +57,7 @@ def write_OR_then_verify(  # ruff:ignore[too-many-arguments, invalid-function-na
     """
     # read current value
     current_val = read(sock, config.board_ip, address=address, count=count, port=config.read_port)
-    # AND it with new value
+    # OR it with new value
     new_value = current_val | data
     logger.debug("OR of current value (%s) and %s is %s", current_val, data, new_value)
     # write the new value and verify
