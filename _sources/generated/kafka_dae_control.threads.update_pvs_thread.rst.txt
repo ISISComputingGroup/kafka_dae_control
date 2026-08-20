@@ -1,0 +1,24 @@
+
+
+``kafka_dae_control.threads.update_pvs_thread``
+===============================================
+        
+
+.. automodule:: kafka_dae_control.threads.update_pvs_thread
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        update_pvs_thread
+    
+    

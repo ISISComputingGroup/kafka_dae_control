@@ -1,0 +1,26 @@
+
+
+``kafka_dae_control.firmware_xml``
+==================================
+        
+        
+
+.. automodule:: kafka_dae_control.firmware_xml
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        BadFirmwareXMLError
+        parse_register_map
+    
+    
