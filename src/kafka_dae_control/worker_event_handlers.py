@@ -7,7 +7,7 @@ import time
 import uuid
 from datetime import datetime
 from functools import partial
-from queue import Queue
+from queue import PriorityQueue
 from zoneinfo import ZoneInfo
 
 import numpy as np
@@ -15,11 +15,17 @@ from confluent_kafka import KafkaError, Message, Producer
 from numpy import typing as npt
 from streaming_data_types import serialise_6s4t, serialise_pl72, serialise_vc00
 
-from kafka_dae_control.comms import write_and_inv_then_verify, write_verify
+from kafka_dae_control.comms import (
+    write_AND_INV_then_verify,
+    write_OR_then_verify,
+    write_verify,
+)
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.defaults import (
     HARD_VETO_VALUE,
+    PAUSE_VETO_TOGGLE_BIT,
+    RC_VETO_TOGGLE_BIT,
     SOFT_VETO_VALUE,
     FrameSyncSelect,
     PeriodMode,
@@ -27,11 +33,11 @@ from kafka_dae_control.defaults import (
     RunRegister,
 )
 from kafka_dae_control.event_with_error import EventWithError
+from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
 from kafka_dae_control.utils import array_to_mask
-from kafka_dae_control.worker_event_types import WorkerEvent
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +73,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithError,
-    queue: Queue[WorkerEvent],
+    queue: PriorityQueue[QueueItem],
 ) -> None:
     """Handle a begin command.
 
@@ -118,7 +124,9 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         logger.info("sent run start to %s", config.runinfo_topic)
         save_file(data, state_file=config.state_file)
         # immediately poll hardware to avoid being able to begin again before hardware is updated
-        poll_hardware(config, queue, sock, sock_lock)
+        poll_hardware(
+            config, queue, sock, sock_lock, hardware_update_queue_priority=QueuePriority.HIGH
+        )
     except Exception as e:
         logger.exception("Failed to start run: ")
         done_event.err = e
@@ -132,7 +140,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithError,
-    queue: Queue[WorkerEvent],
+    queue: PriorityQueue[QueueItem],
 ) -> None:
     """Handle an end command.
 
@@ -155,7 +163,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
     try:
         with sock_lock:
             # clear the ethernet override bit.
-            write_and_inv_then_verify(
+            write_AND_INV_then_verify(
                 config,
                 sock,
                 address=config.register_map[Registers.RUNNING_REGISTER],
@@ -173,7 +181,9 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
         data.run_number += 1
         save_file(data, state_file=config.state_file)
         # immediately poll hardware to avoid being able to end again before hardware is updated
-        poll_hardware(config, queue, sock, sock_lock)
+        poll_hardware(
+            config, queue, sock, sock_lock, hardware_update_queue_priority=QueuePriority.HIGH
+        )
     except Exception as e:
         logger.exception("Failed to end run: ")
         done_event.err = e
@@ -377,3 +387,92 @@ def handle_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional
     data.vetoes = value.tolist()
     logger.debug("Saving file")
     save_file(data, state_file=config.state_file)
+
+
+def _update_software_veto_bit(
+    bit_to_change: int, config: ControlConfig, sock: socket.SocketType, value: bool
+) -> None:
+    if value:
+        # pause - set the bit
+        write_OR_then_verify(
+            config,
+            sock,
+            address=config.register_map[Registers.VETO_TOGGLE],
+            data=bit_to_change,
+            verify=lambda x: x & bit_to_change == x,
+        )
+    else:
+        # resume - clear the bit
+        write_AND_INV_then_verify(
+            config,
+            sock,
+            address=config.register_map[Registers.VETO_TOGGLE],
+            data=bit_to_change,
+            verify=lambda x: (x & bit_to_change) == 0,
+        )
+
+
+def handle_pause_or_resume(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
+    value: bool,
+    config: ControlConfig,
+    data: Data,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithError,
+) -> None:
+    """Handle a pause or resume.
+
+    Args:
+        value: The bit mask list of vetoes to set.
+        config: The program's configuration.
+        data: the program's data class.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+        done_event: The event to call set() on when complete
+
+    """
+    bit_to_change = 1 << PAUSE_VETO_TOGGLE_BIT
+
+    if data.paused == value:
+        error_message = (
+            f"Cannot {'pause' if value else 'resume'} "
+            f"if already {'paused' if value else 'running'}."
+        )
+        logger.error(error_message)
+        done_event.err = Exception(error_message)
+        return
+
+    try:
+        with sock_lock:
+            _update_software_veto_bit(bit_to_change, config, sock, value)
+            data.paused = value
+            done_event.set()
+    except Exception as e:
+        logger.exception("Failed to pause/resume: ")
+        done_event.err = e
+        return
+
+
+def handle_run_control_update(
+    value: bool,
+    config: ControlConfig,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+) -> None:
+    """Handle a run control update.
+
+    Args:
+        value: The bit mask list of vetoes to set.
+        config: The program's configuration.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+
+    """
+    bit_to_change = 1 << RC_VETO_TOGGLE_BIT
+
+    try:
+        with sock_lock:
+            _update_software_veto_bit(bit_to_change, config, sock, value)
+    except Exception:
+        logger.exception("Failed to handle run control update: ")
+        return

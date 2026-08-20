@@ -1,5 +1,5 @@
 import logging
-from queue import Queue
+from queue import PriorityQueue
 from threading import RLock
 from unittest.mock import MagicMock, Mock, call, patch
 
@@ -13,6 +13,7 @@ from kafka_dae_control.defaults import (
     Registers,
     RunRegister,
 )
+from kafka_dae_control.queue_utils import QueueItem
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread
 from kafka_dae_control.worker_event_types import HardwareUpdate, SetIPEvent
 from tests.conftest import (
@@ -37,7 +38,7 @@ from tests.conftest import (
 def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, conf: ControlConfig):
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
-    queue = Queue()
+    queue = PriorityQueue[QueueItem]()
     with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
         hardware_poll_thread(conf, queue, sock, sock_lock)
 
@@ -68,7 +69,7 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
     )
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
-    assert queue.get().value == HardwareUpdate(
+    assert queue.get().item.value == HardwareUpdate(  # pyright: ignore reportAttributeAccessIssue
         hw_running=True,
         frame_sync_select=FrameSyncSelect(1),
         hard_vetoes=1,
@@ -95,13 +96,13 @@ def test_read_frame_sync_select_invalid_sets_invalid(
 ):
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
-    queue = Queue()
+    queue = PriorityQueue[QueueItem]()
     with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
         hardware_poll_thread(conf, queue, sock, sock_lock)
 
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
-    assert queue.get().value == HardwareUpdate(
+    assert queue.get().item.value == HardwareUpdate(  # pyright: ignore reportAttributeAccessIssue
         hw_running=True,
         frame_sync_select=FrameSyncSelect.UNKNOWN,
         hard_vetoes=1,
@@ -121,13 +122,13 @@ def test_period_mode_invalid_sets_unknown(
 ):
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
-    queue = Queue()
+    queue = PriorityQueue[QueueItem]()
     with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
         hardware_poll_thread(conf, queue, sock, sock_lock)
 
     assert sock_lock.__enter__.called
     assert queue.qsize() == 1
-    assert queue.get().value.period_mode == PeriodMode.UNKNOWN
+    assert queue.get().item.value.period_mode == PeriodMode.UNKNOWN  # pyright: ignore reportAttributeAccessIssue
 
 
 @patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)
@@ -137,7 +138,7 @@ def test_read_throws_exception_logs(
 ):
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
-    queue = Queue()
+    queue = PriorityQueue[QueueItem]()
 
     with pytest.raises(Exception):  # ruff:ignore[assert-raises-exception, pytest-raises-too-broad]
         hardware_poll_thread(conf, queue, sock, sock_lock)
@@ -155,7 +156,7 @@ def test_many_comms_errors_in_a_row_cause_ip_to_be_resent(
 ):
     conf.resend_ip_after_connection_failures = 3
 
-    queue = Queue()
+    queue = PriorityQueue[QueueItem]()
     sock = MagicMock()
     sock_lock = MagicMock(spec=RLock())
 
@@ -169,4 +170,4 @@ def test_many_comms_errors_in_a_row_cause_ip_to_be_resent(
     assert "3 comms errors in a row while polling hardware" in caplog.text
     assert "Attempting to resend local IP to streaming control board to recover" in caplog.text
 
-    assert isinstance(queue.get(), SetIPEvent)
+    assert isinstance(queue.get().item, SetIPEvent)
