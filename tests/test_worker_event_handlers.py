@@ -1,5 +1,5 @@
 import ipaddress
-from queue import Queue
+from queue import PriorityQueue
 from threading import RLock
 from unittest.mock import MagicMock, Mock, patch
 
@@ -14,13 +14,23 @@ from streaming_data_types import (
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
-from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode, Registers, RunRegister
+from kafka_dae_control.defaults import (
+    PAUSE_VETO_TOGGLE_BIT,
+    RC_VETO_TOGGLE_BIT,
+    FrameSyncSelect,
+    PeriodMode,
+    Registers,
+    RunRegister,
+)
 from kafka_dae_control.event_with_error import EventWithError
+from kafka_dae_control.queue_utils import QueueItem
 from kafka_dae_control.worker_event_handlers import (
     delivery_report_set_error_or_done,
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
+    handle_pause_or_resume,
+    handle_run_control_update,
     handle_vetoes_change,
     set_current_period,
     set_num_periods,
@@ -31,6 +41,7 @@ from tests.conftest import (
     PERIOD_COMP_CURRENT_ADDRESS,
     PERIOD_CONTROL_ADDRESS,
     PERIOD_NUMBER_LIMIT_ADDRESS,
+    VETO_TOGGLE_ADDRESS,
 )
 
 
@@ -66,7 +77,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
             sock=sock,
             sock_lock=sock_lock,
             done_event=done_event,
-            queue=Queue(),
+            queue=PriorityQueue[QueueItem](),
         )
 
         write_verify.assert_called_once()
@@ -107,7 +118,7 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
     conf.runinfo_topic = "run-info-topic"
 
     with patch(
-        "kafka_dae_control.worker_event_handlers.write_and_inv_then_verify"
+        "kafka_dae_control.worker_event_handlers.write_AND_INV_then_verify"
     ) as write_and_inv_then_verify:
         producer.flush.side_effect = done_event.set()
         handle_end(
@@ -117,7 +128,7 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
             sock=sock,
             sock_lock=sock_lock,
             done_event=done_event,
-            queue=Queue(),
+            queue=PriorityQueue[QueueItem](),
         )
 
         write_and_inv_then_verify.assert_called_once()
@@ -150,7 +161,7 @@ def test_exception_during_begin_logs(
         Mock(),
         sock_lock,
         Mock(),
-        Queue(),
+        PriorityQueue[QueueItem](),
     )
     assert "Failed to start run:" in caplog.text
 
@@ -168,7 +179,7 @@ def test_exception_during_end_logs(
         Mock(),
         sock_lock,
         Mock(),
-        Queue(),
+        PriorityQueue[QueueItem](),
     )
     assert "Failed to end run:" in caplog.text
 
@@ -178,7 +189,7 @@ def test_exception_during_begin_if_already_running(
 ):
     data.running = True
     sock_lock = MagicMock(spec=RLock())
-    handle_begin(conf, data, Mock(), Mock(), sock_lock, Mock(), Queue())
+    handle_begin(conf, data, Mock(), Mock(), sock_lock, Mock(), PriorityQueue[QueueItem]())
     assert "The hardware is already running - doing nothing" in caplog.text
 
 
@@ -194,7 +205,7 @@ def test_exception_during_end_if_not_running(
         Mock(),
         sock_lock,
         Mock(),
-        Queue(),
+        PriorityQueue[QueueItem](),
     )
     assert "The hardware is already not running - doing nothing" in caplog.text
 
@@ -434,3 +445,85 @@ def test_set_period_mode_fails_errors(m: Mock, data: Data, conf: ControlConfig):
     sock_lock = MagicMock(spec=RLock())
     set_period_mode(PeriodMode.LOOK_UP_TABLE, conf, data, sock, sock_lock, done_event)
     assert done_event.err is not None
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_OR_then_verify")
+def test_run_control_update_out_of_range_writes_to_hardware(
+    mock_write_verify: Mock, data: Data, conf: ControlConfig
+):
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_run_control_update(True, conf, sock, sock_lock)
+    assert mock_write_verify.call_args[1]["address"] == VETO_TOGGLE_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == 1 << RC_VETO_TOGGLE_BIT
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_AND_INV_then_verify")
+def test_run_control_in_range_writes_to_hardware(
+    mock_write_verify: Mock, data: Data, conf: ControlConfig
+):
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_run_control_update(False, conf, sock, sock_lock)
+    assert mock_write_verify.call_args[1]["address"] == VETO_TOGGLE_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == 1 << RC_VETO_TOGGLE_BIT
+
+
+@patch("kafka_dae_control.worker_event_handlers._update_software_veto_bit", side_effect=Exception)
+def test_run_control_errors_logs(
+    m: Mock, data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    handle_run_control_update(False, conf, Mock(), MagicMock(spec=RLock()))
+    assert "Failed to handle run control update" in caplog.text
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_OR_then_verify")
+def test_pause_writes_to_hardware(mock_write_verify: Mock, data: Data, conf: ControlConfig):
+    done_event = EventWithError()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_pause_or_resume(True, conf, data, sock, sock_lock, done_event)
+    assert mock_write_verify.call_args[1]["address"] == VETO_TOGGLE_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == 1 << PAUSE_VETO_TOGGLE_BIT
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_AND_INV_then_verify")
+def test_resume_writes_to_hardware(mock_write_verify: Mock, data: Data, conf: ControlConfig):
+    done_event = EventWithError()
+    data.paused = True
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_pause_or_resume(False, conf, data, sock, sock_lock, done_event)
+    assert mock_write_verify.call_args[1]["address"] == VETO_TOGGLE_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == 1 << PAUSE_VETO_TOGGLE_BIT
+
+
+@patch("kafka_dae_control.worker_event_handlers._update_software_veto_bit", side_effect=Exception)
+def test_resume_fails_to_write_errors(
+    m: Mock, data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    data.paused = True
+    done_event = EventWithError()
+    handle_pause_or_resume(False, conf, data, Mock(), MagicMock(spec=RLock()), done_event)
+    assert done_event.err is not None
+    assert "Failed to pause/resume" in caplog.text
+
+
+def test_cannot_pause_if_already_paused(
+    data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    data.paused = True
+    done_event = EventWithError()
+    handle_pause_or_resume(True, conf, data, Mock(), MagicMock(spec=RLock()), done_event)
+    assert done_event.err is not None
+    assert "Cannot pause if already paused" in caplog.text
+
+
+def test_cannot_resume_if_already_running(
+    data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    data.paused = False
+    done_event = EventWithError()
+    handle_pause_or_resume(False, conf, data, Mock(), MagicMock(spec=RLock()), done_event)
+    assert done_event.err is not None
+    assert "Cannot resume if already running" in caplog.text

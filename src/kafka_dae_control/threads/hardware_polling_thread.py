@@ -3,10 +3,10 @@
 import logging
 import socket
 import threading
-from queue import Queue
+from queue import PriorityQueue
 from threading import RLock
 from time import sleep
-from typing import Any, Never
+from typing import Never
 
 from kafka_dae_control.comms import read
 from kafka_dae_control.config import ControlConfig
@@ -17,11 +17,11 @@ from kafka_dae_control.defaults import (
     Registers,
     RunRegister,
 )
+from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.worker_event_types import (
     HardwareUpdate,
     HardwareUpdateEvent,
     SetIPEvent,
-    WorkerEvent,
 )
 
 logger = logging.getLogger(__name__)
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 def hardware_poll_thread(
     config: ControlConfig,
-    queue: Queue[WorkerEvent],
+    queue: PriorityQueue[QueueItem],
     sock: socket.SocketType,
     sock_lock: threading.RLock,
 ) -> Never:
@@ -66,13 +66,17 @@ def hardware_poll_thread(
                 "If the connection does not recover, the streaming control board may be offline.",
                 consecutive_comms_errors,
             )
-            queue.put(SetIPEvent())
+            queue.put(QueueItem(QueuePriority.HIGH, SetIPEvent()))
 
         sleep(config.poll_interval_s)
 
 
 def poll_hardware(
-    config: ControlConfig, queue: Queue[Any], sock: socket.SocketType, sock_lock: RLock
+    config: ControlConfig,
+    queue: PriorityQueue[QueueItem],
+    sock: socket.SocketType,
+    sock_lock: RLock,
+    hardware_update_queue_priority: QueuePriority = QueuePriority.LOW,
 ) -> bool:
     """Poll the hardware and send updates to the worker thread's queue.
 
@@ -81,6 +85,8 @@ def poll_hardware(
         queue: the worker thread queue to add updates to after polling hardware
         sock: the socket instance
         sock_lock: the lock to use when using the socket instance
+        hardware_update_queue_priority: the priority to use when adding hardware update events
+          to the queue
 
     Returns:
         True if the hardware poll was successful, False otherwise
@@ -159,7 +165,7 @@ def poll_hardware(
             hard_vetoes=veto_control_raw_readback,
         )
         logger.debug("Hardware update: %s", h)
-        queue.put(HardwareUpdateEvent(h))
+        queue.put(QueueItem(hardware_update_queue_priority, HardwareUpdateEvent(h)))
         return True
 
     except Exception:

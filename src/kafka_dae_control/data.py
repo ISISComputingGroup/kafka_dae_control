@@ -22,6 +22,9 @@ class Data(BaseModel):
     running: bool = False
     """Whether the hardware is running or not"""
 
+    paused: bool = False
+    """Whether the hardware is paused or not"""
+
     frame_sync_select_rbv: FrameSyncSelect = FrameSyncSelect.UNKNOWN
     """The frame sync select value on the hardware"""
 

@@ -14,17 +14,22 @@ SOFT_VETO_VALUE = 1
 HARD_VETO_VALUE = 2
 
 
+PAUSE_VETO_TOGGLE_BIT = 5
+RC_VETO_TOGGLE_BIT = 6
+
+
 class Registers(StrEnum):
     """Register IDs on the streaming control board."""
 
     RUNNING_REGISTER = "run_register"
     FRAME_SYNC_SEL_REGISTER = "frame_sync_sel"
-    VETO_CONTROL_REGISTER = "veto_mask"
+    VETO_CONTROL_REGISTER = "vetoes_mask"
 
     COMMS_REGISTER = "udp_core_control_0_dst_ip_addr"
     PERIOD_COMP_CURRENT = "period_comp_current"
     PERIOD_NUMBER_LIMIT = "period_number_limit"
     PERIOD_CONTROL = "period_control"
+    VETO_TOGGLE = "vetoes_software"
 
 
 class FrameSyncSelect(IntEnum):

@@ -146,9 +146,14 @@ Value: The current period number.
 
 Value: The current veto number.
 
-### `veto_mask`
+### `vetoes_mask`
 
 Bits (mask) (`rw`): The vetos to ignore. 
+
+{#softwarevetoesregister}
+### `software_vetoes`
+
+This is a manual overwrite of a veto control. It is currently used for pausing/resuming and run control.
 
 ### `good_frame_count`
 

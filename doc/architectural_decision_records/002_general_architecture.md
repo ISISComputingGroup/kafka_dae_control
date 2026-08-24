@@ -20,7 +20,10 @@ One worker thread will respond to these events by popping them off the queue, th
 
 An asynchronous approach seemed overkill for this task and added a layer of complexity, so a threaded model was chosen. 
 
+Additionally, the queue will be a two-level priority queue, so that events that need to be acted on quickly can get "bumped" up the queue. As an example, a user beginning a run should take precedence over a routine operation such as updating the readbacks from the hardware or list of blocks. In this case the run beginning is of high priority and the other tasks are of low priority.
+
 ## Consequences
 
 - We will need to use thread-safe communication methods to the streaming control boards.
 - A refactor will be needed, but it should de-tangle logic and make it easier to add features to `kdaectrl` in the future.
+- We will be able to act on some types of actions quicker than others, but care needs to be taken to ensure that all actions aren't just treated as high priority. As well as this we need to ensure that low priority items being acted on less quickly won't cause any undesired behaviour.

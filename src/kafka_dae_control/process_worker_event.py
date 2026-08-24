@@ -3,17 +3,20 @@
 import logging
 import socket
 import threading
-from queue import Queue
+from queue import PriorityQueue
 
 from confluent_kafka import Producer
 
 from kafka_dae_control.comms import set_board_response_ip
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
+from kafka_dae_control.queue_utils import QueueItem
 from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
     handle_frame_sync_sp_change,
+    handle_pause_or_resume,
+    handle_run_control_update,
     handle_vetoes_change,
     set_current_period,
     set_num_periods,
@@ -27,7 +30,9 @@ from kafka_dae_control.worker_event_types import (
     FrameSyncSelectChangeEvent,
     HardwareUpdateEvent,
     NumberOfPeriodsSetEvent,
+    PauseResumeEvent,
     PeriodModeSetEvent,
+    RunControlUpdateEvent,
     SetIPEvent,
     VetoesUpdateEvent,
     WorkerEvent,
@@ -36,8 +41,8 @@ from kafka_dae_control.worker_event_types import (
 logger = logging.getLogger(__name__)
 
 
-def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many-arguments]
-    queue: Queue[WorkerEvent],
+def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many-arguments, too-many-branches]
+    queue: PriorityQueue[QueueItem],
     worker_event: WorkerEvent,
     config: ControlConfig,
     data: Data,
@@ -96,6 +101,10 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 set_current_period(value, config, data, sock, sock_lock, done_event)
             case PeriodModeSetEvent(value=value, done_event=done_event):
                 set_period_mode(value, config, data, sock, sock_lock, done_event)
+            case PauseResumeEvent(value=value, done_event=done_event):
+                handle_pause_or_resume(value, config, data, sock, sock_lock, done_event)
+            case RunControlUpdateEvent(value=value):
+                handle_run_control_update(value, config, sock, sock_lock)
             case _:
                 logger.error("Unknown event type: %s", worker_event)
     except Exception:
