@@ -107,7 +107,9 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
     )
     try:
         pause_or_resume_done_event = EventWithError()
-        handle_pause_or_resume(to_pause, config, data, sock, sock_lock, pause_or_resume_done_event, force=True)
+        handle_pause_or_resume(
+            to_pause, config, data, sock, sock_lock, pause_or_resume_done_event, force=True
+        )
         if pause_or_resume_done_event.err:
             raise OSError(pause_or_resume_done_event.err)
         if not pause_or_resume_done_event.is_set():
@@ -427,7 +429,7 @@ def handle_pause_or_resume(  # ruff:ignore[too-many-arguments, too-many-position
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithError,
-    force: bool = False
+    force: bool = False,
 ) -> None:
     """Handle a pause or resume.
 
