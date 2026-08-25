@@ -107,7 +107,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
     )
     try:
         pause_or_resume_done_event = EventWithError()
-        handle_pause_or_resume(to_pause, config, data, sock, sock_lock, pause_or_resume_done_event)
+        handle_pause_or_resume(to_pause, config, data, sock, sock_lock, pause_or_resume_done_event, force=True)
         if pause_or_resume_done_event.err:
             raise OSError(pause_or_resume_done_event.err)
         if not pause_or_resume_done_event.is_set():
@@ -427,6 +427,7 @@ def handle_pause_or_resume(  # ruff:ignore[too-many-arguments, too-many-position
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithError,
+    force: bool = False
 ) -> None:
     """Handle a pause or resume.
 
@@ -437,11 +438,13 @@ def handle_pause_or_resume(  # ruff:ignore[too-many-arguments, too-many-position
         sock: the socket instance.
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete
+        force: Whether to set the hardware even if already in the desired state (paused/resumed)
+         instead of erroring.
 
     """
     bit_to_change = 1 << PAUSE_VETO_TOGGLE_BIT
 
-    if data.paused == value:
+    if not force and data.paused == value:
         error_message = (
             f"Cannot {'pause' if value else 'resume'} "
             f"if already {'paused' if value else 'running'}."
