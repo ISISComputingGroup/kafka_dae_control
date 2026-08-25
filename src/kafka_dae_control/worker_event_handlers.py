@@ -74,6 +74,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
     sock_lock: threading.RLock,
     done_event: EventWithError,
     queue: PriorityQueue[QueueItem],
+    to_pause: bool,
 ) -> None:
     """Handle a begin command.
 
@@ -85,6 +86,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete
         queue: The queue to put hardware polling updates on after beginning
+        to_pause: Whether to pause or resume just before beginning.
 
     """
     if data.running:
@@ -104,6 +106,12 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         control_topic=config.runinfo_topic,
     )
     try:
+        pause_or_resume_done_event = EventWithError()
+        handle_pause_or_resume(to_pause, config, data, sock, sock_lock, pause_or_resume_done_event)
+        if pause_or_resume_done_event.err:
+            raise OSError(pause_or_resume_done_event.err)
+        if not pause_or_resume_done_event.is_set():
+            raise OSError("Could not pause or resume before beginning, not trying to begin")
         with sock_lock:
             write_verify(
                 config,

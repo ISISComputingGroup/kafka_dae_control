@@ -77,8 +77,8 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 data.period_mode_rbv = value.period_mode
             case BlocksUpdateEvent(value):
                 data.blocks = value
-            case BeginEvent(done_event=done_event):
-                handle_begin(config, data, producer, sock, sock_lock, done_event, queue)
+            case BeginEvent(value=value, done_event=done_event):
+                handle_begin(config, data, producer, sock, sock_lock, done_event, queue, value)
             case EndEvent(done_event=done_event):
                 handle_end(config, data, producer, sock, sock_lock, done_event, queue)
             case FrameSyncSelectChangeEvent(value=value, done_event=done_event):
