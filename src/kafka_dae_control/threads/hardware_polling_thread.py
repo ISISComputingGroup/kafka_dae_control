@@ -92,21 +92,18 @@ def poll_hardware(
         True if the hardware poll was successful, False otherwise
 
     """
+
+    def _read(register: str) -> int:
+        logger.debug("Reading register %s", register)
+        return read(
+            sock, config.board_ip, address=config.register_map[register], port=config.read_port
+        )
+
     try:
         with sock_lock:
-            running_register_readback = read(
-                sock,
-                config.board_ip,
-                address=config.register_map[Registers.RUNNING_REGISTER],
-                port=config.read_port,
-            )
+            running_register_readback = _read(Registers.RUNNING_REGISTER)
 
-            frame_sync_select_raw_readback = read(
-                sock,
-                config.board_ip,
-                address=config.register_map[Registers.FRAME_SYNC_SEL_REGISTER],
-                port=config.read_port,
-            )
+            frame_sync_select_raw_readback = _read(Registers.FRAME_SYNC_SEL_REGISTER)
             if frame_sync_select_raw_readback not in FrameSyncSelect:
                 logger.error(
                     "Frame sync select not valid (%s), setting to unknown",
@@ -116,33 +113,13 @@ def poll_hardware(
             else:
                 frame_sync_select_readback = FrameSyncSelect(frame_sync_select_raw_readback)
 
-            veto_control_raw_readback = read(
-                sock,
-                config.board_ip,
-                address=config.register_map[Registers.VETO_CONTROL_REGISTER],
-                port=config.read_port,
-            )
+            veto_control_raw_readback = _read(Registers.VETO_CONTROL_REGISTER)
 
-            period_comp_current_readback = read(
-                sock,
-                config.board_ip,
-                address=config.register_map[Registers.PERIOD_COMP_CURRENT],
-                port=config.read_port,
-            )
+            period_comp_current_readback = _read(Registers.PERIOD_COMP_CURRENT)
 
-            period_number_limit_readback = read(
-                sock,
-                config.board_ip,
-                address=config.register_map[Registers.PERIOD_NUMBER_LIMIT],
-                port=config.read_port,
-            )
+            period_number_limit_readback = _read(Registers.PERIOD_NUMBER_LIMIT)
 
-            period_control_readback = read(
-                sock,
-                config.board_ip,
-                address=config.register_map[Registers.PERIOD_CONTROL],
-                port=config.read_port,
-            )
+            period_control_readback = _read(Registers.PERIOD_CONTROL)
 
             period_mode_isolated = period_control_readback & ~int(
                 PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE
