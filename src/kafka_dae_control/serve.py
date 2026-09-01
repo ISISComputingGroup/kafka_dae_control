@@ -51,8 +51,11 @@ def serve(config: ControlConfig) -> None:
     # put veto update event on the queue immediately so that vc00 is emitted
     # for downstream consumers even if vetoes don't change
     queue.put(
-        VetoesUpdateEvent(
-            value=np.asarray(data.vetoes, dtype=np.uint8), done_event=EventWithError()
+        QueueItem(
+            QueuePriority.HIGH,
+            VetoesUpdateEvent(
+                value=np.asarray(data.vetoes, dtype=np.uint8), done_event=EventWithError()
+            ),
         )
     )
 
