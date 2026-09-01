@@ -1,6 +1,7 @@
 """Main loop of the running IOC."""
 
 import logging
+import pprint
 import socket
 import threading
 from functools import partial
@@ -41,7 +42,7 @@ def serve(config: ControlConfig) -> None:
     Returns: None
 
     """
-    logger.debug("Config mapping: %s", config.register_map)
+    logger.debug("Config mapping: %s", pprint.pformat(config.register_map))
     queue: PriorityQueue[QueueItem] = PriorityQueue(maxsize=0)
     queue.put(QueueItem(QueuePriority.HIGH, SetIPEvent()))
 
