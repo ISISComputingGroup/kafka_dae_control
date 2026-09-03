@@ -38,6 +38,7 @@ from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.threads.hardware_polling_thread import poll_hardware
 from kafka_dae_control.utils import array_to_mask
+from kafka_dae_control.worker_event_types import VetoesUpdateEvent
 
 logger = logging.getLogger(__name__)
 
@@ -127,6 +128,16 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         poll_hardware(
             config, queue, sock, sock_lock, hardware_update_queue_priority=QueuePriority.HIGH
         )
+        # send veto update so that it doesn't fall out of retention for anything downstream
+        queue.put(
+            QueueItem(
+                item=VetoesUpdateEvent(
+                    value=np.asarray(data.vetoes, dtype=np.uint8), done_event=EventWithError()
+                ),
+                priority=QueuePriority.HIGH,
+            )
+        )
+
     except Exception as e:
         logger.exception("Failed to start run: ")
         done_event.err = e
@@ -376,7 +387,9 @@ def handle_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional
     all_vetoes_mask = array_to_mask(
         ((value == SOFT_VETO_VALUE) | (value == HARD_VETO_VALUE)).astype(np.uint8)
     )
-    blob = serialise_vc00(time.time_ns(), vetoes=all_vetoes_mask)
+    blob = serialise_vc00(
+        time.time_ns(), vetoes=all_vetoes_mask, veto_names=[x.encode() for x in config.veto_names]
+    )
     logger.debug("About to produce blob %s to %s", blob, config.vetoes_topic)
     producer.produce(
         config.vetoes_topic,

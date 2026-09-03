@@ -25,6 +25,42 @@ state_file = "./state1.json"
 sample_env_topic = "sample-env-topic"
 events_topic = "events-topic"
 vetoes_topic = "vetoes-topic"
+
+veto_names = [
+    "FIFO",
+    "SMP",
+    "TS2 Pulse",
+    "Wrong Pulse",
+    "ISIS slow",
+    "Run control",
+    "Pause",
+    "External 1",
+    "External 2",
+    "External 3",
+    "Fast Chopper 0",
+    "Fast Chopper 1",
+    "Fast Chopper 2",
+    "Fast Chopper 3",
+    "Reserved 0",
+    "Reserved 1",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+]
+
 [kafka_producer]
 "bootstrap.servers" = "mybroker:9092"
 
@@ -43,6 +79,40 @@ vetoes_topic = "vetoes-topic"
     assert config.state_file == Path("./state1.json")
     assert config.sample_env_topic == "sample-env-topic"
     assert config.events_topic == "events-topic"
+    assert config.veto_names == [
+        "FIFO",
+        "SMP",
+        "TS2 Pulse",
+        "Wrong Pulse",
+        "ISIS slow",
+        "Run control",
+        "Pause",
+        "External 1",
+        "External 2",
+        "External 3",
+        "Fast Chopper 0",
+        "Fast Chopper 1",
+        "Fast Chopper 2",
+        "Fast Chopper 3",
+        "Reserved 0",
+        "Reserved 1",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+        "Unused",
+    ]
 
 
 def test_invalid_config_loading():
@@ -77,6 +147,7 @@ def test_register_map_calls_parse_register_map(mock_register_map):  # pyright: i
         sample_env_topic="sample-env-topic",
         events_topic="events-topic",
         vetoes_topic="vetoes-topic",
+        veto_names=["test"] * 32,
     )
     assert cfg.register_map == mock_register_map.return_value
     mock_register_map.assert_called_once_with(Path("test1.xml"))
