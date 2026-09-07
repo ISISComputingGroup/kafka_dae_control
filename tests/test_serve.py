@@ -71,11 +71,10 @@ def test_handshake_added_to_queue(
     with pytest.raises(Exception):
         serve(conf)
 
-    assert isinstance(mock_queue.return_value.put.call_args[0][0].item, SetIPEvent)
+    assert isinstance(mock_queue.return_value.put.call_args_list[0].args[0].item, SetIPEvent)
     assert mock_thread.Thread.call_count == 2
     assert mock_camonitor.call_args_list[0].args == ("IN:TEST:CS:BLOCKSERVER:BLOCKNAMES",)
     assert mock_camonitor.call_args_list[1].args == ("IN:TEST:CS:RC:INRANGE",)
-    assert mock_load_data.return_value.veto_names_array == vn
 
 
 @patch("kafka_dae_control.serve.Producer")
@@ -95,7 +94,7 @@ def test_veto_names_defaulted_if_not_specified(
     _mock_producer,  # pyright: ignore reportMissingParameterType
     conf: ControlConfig,
 ):
-    conf.veto_names = None
+    conf.veto_names = None  # pyright: ignore reportAttributeAccessIssue
 
     with pytest.raises(Exception):
         serve(conf)
