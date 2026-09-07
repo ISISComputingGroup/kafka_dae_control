@@ -57,7 +57,7 @@ def test_process_worker_event_with_basic_value_update(
 @patch("kafka_dae_control.process_worker_event.handle_begin")
 def test_process_begin_calls_handle_begin(mock_handle_begin: Mock, conf: ControlConfig, data: Data):
     process_worker_event(
-        PriorityQueue[QueueItem](), BeginEvent(Mock()), conf, data, Mock(), Mock(), Mock()
+        PriorityQueue[QueueItem](), BeginEvent(value=True, done_event=Mock()), conf, data, Mock(), Mock(), Mock()
     )
     assert mock_handle_begin.called
 
