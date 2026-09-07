@@ -110,10 +110,25 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         handle_pause_or_resume(
             to_pause, config, data, sock, sock_lock, pause_or_resume_done_event, force=True
         )
-        if pause_or_resume_done_event.err:
-            raise OSError(pause_or_resume_done_event.err)
+        if pause_or_resume_done_event.err is not None:
+            raise OSError(
+                f"Could not pause or resume before beginning, not trying to begin."
+                f" Error: {pause_or_resume_done_event.err}"
+            )
         if not pause_or_resume_done_event.is_set():
             raise OSError("Could not pause or resume before beginning, not trying to begin")
+        if data.period_mode_sp == PeriodMode.COMPUTER:
+            set_period_num_done_event = EventWithError()
+            set_current_period(1, config, data, sock, sock_lock, set_period_num_done_event)
+            if set_period_num_done_event.err is not None:
+                raise OSError(
+                    f"Could not set current period back to 1 before beginning, not trying to begin."
+                    f" Error: {set_period_num_done_event.err}"
+                )
+            if not set_period_num_done_event.is_set():
+                raise OSError(
+                    "Could not set current period back to 1 before beginning, not trying to begin"
+                )
         with sock_lock:
             write_verify(
                 config,
