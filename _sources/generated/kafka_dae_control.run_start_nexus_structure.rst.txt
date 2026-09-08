@@ -1,0 +1,24 @@
+
+
+``kafka_dae_control.run_start_nexus_structure``
+===============================================
+        
+
+.. automodule:: kafka_dae_control.run_start_nexus_structure
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        generate_nexus_structure
+    
+    
