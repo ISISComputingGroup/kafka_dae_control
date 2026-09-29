@@ -79,7 +79,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
             sock_lock=sock_lock,
             done_event=done_event,
             queue=PriorityQueue[QueueItem](),
-            to_pause=False
+            to_pause=False,
         )
 
         write_verify.assert_called_once()
@@ -157,14 +157,7 @@ def test_exception_during_begin_logs(
     sock_lock = MagicMock(spec=RLock())
     sock_lock.__enter__.side_effect = Exception
     handle_begin(
-        conf,
-        data,
-        Mock(),
-        Mock(),
-        sock_lock,
-        Mock(),
-        PriorityQueue[QueueItem](),
-        to_pause=False
+        conf, data, Mock(), Mock(), sock_lock, Mock(), PriorityQueue[QueueItem](), to_pause=False
     )
     assert "Failed to start run:" in caplog.text
 
@@ -192,7 +185,9 @@ def test_exception_during_begin_if_already_running(
 ):
     data.running = True
     sock_lock = MagicMock(spec=RLock())
-    handle_begin(conf, data, Mock(), Mock(), sock_lock, Mock(), PriorityQueue[QueueItem](), to_pause=False)
+    handle_begin(
+        conf, data, Mock(), Mock(), sock_lock, Mock(), PriorityQueue[QueueItem](), to_pause=False
+    )
     assert "The hardware is already running - doing nothing" in caplog.text
 
 
