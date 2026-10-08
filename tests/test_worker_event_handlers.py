@@ -436,6 +436,7 @@ def test_set_period_mode_writes_to_hardware(
     assert mock_write_verify.call_args[1]["address"] == PERIOD_CONTROL_ADDRESS
     assert mock_write_verify.call_args[1]["data"] == period_mode.value
     assert done_event.is_set()
+    assert data.period_mode_sp == period_mode
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)

@@ -342,7 +342,7 @@ def set_period_mode(  # ruff:ignore[too-many-arguments, too-many-positional-argu
         logger.exception("Failed to set period mode: ")
         done_event.err = e
         return
-    data.current_period_sp = value
+    data.period_mode_sp = value
     done_event.set()
 
 
@@ -412,7 +412,7 @@ def _update_software_veto_bit(
             sock,
             address=config.register_map[Registers.VETO_TOGGLE],
             data=bit_to_change,
-            verify=lambda x: x & bit_to_change == x,
+            verify=lambda x: (x & bit_to_change) == x,
         )
     else:
         # resume - clear the bit
