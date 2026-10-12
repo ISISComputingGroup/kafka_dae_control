@@ -62,12 +62,19 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
 
     nexus_structure = '{"this_is_some_valid": "json"}'
 
+    def pause_or_resume_side_effect(to_pause, config, data, sock, sock_lock, done_event, force):  # ruff: ignore [too-many-arguments, too-many-positional-arguments]
+        done_event.set()
+
     with (
         patch("kafka_dae_control.worker_event_handlers.write_verify") as write_verify,
         patch(
             "kafka_dae_control.worker_event_handlers.generate_nexus_structure",
             return_value=nexus_structure,
         ),
+        patch(
+            "kafka_dae_control.worker_event_handlers.handle_pause_or_resume",
+            side_effect=pause_or_resume_side_effect,
+        ) as mock_handle_pause_or_resume,
     ):
         producer.flush.side_effect = done_event.set()
 
@@ -81,6 +88,8 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
             queue=PriorityQueue[QueueItem](),
             to_pause=False,
         )
+
+        assert not mock_handle_pause_or_resume.call_args[0][0]
 
         write_verify.assert_called_once()
         assert write_verify.call_args.kwargs["data"] == (
