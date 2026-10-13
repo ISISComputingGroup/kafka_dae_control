@@ -51,6 +51,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
     conf.instrument_name = "TESTINST"
     data.run_number = 123
     data.running = False
+    data.num_periods_sp = 69
     producer = Mock()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
@@ -97,6 +98,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
         assert run_start.control_topic == "run-info-topic"
         assert run_start.run_name == "TESTINST123"
         assert run_start.nexus_structure == nexus_structure
+        assert run_start.n_periods == 69
 
         producer.flush.assert_called_once()
         assert sock_lock.__enter__.called
