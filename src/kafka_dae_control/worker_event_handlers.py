@@ -103,6 +103,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         nexus_structure=generate_nexus_structure(config, data),
         instrument_name=config.instrument_name,
         control_topic=config.runinfo_topic,
+        n_periods=data.num_periods_sp,
     )
     try:
         with sock_lock:
