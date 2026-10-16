@@ -6,8 +6,9 @@ from queue import PriorityQueue
 from p4p.nt import NTEnum, NTScalar
 from p4p.server import ServerOperation, StaticProvider
 from p4p.server.thread import SharedPV
+from pydantic import ValidationError
 
-from kafka_dae_control.data import Data
+from kafka_dae_control.data import Data, DetectorSpectraMapping
 from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
 from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.queue_utils import QueueItem, QueuePriority
@@ -19,7 +20,7 @@ from kafka_dae_control.worker_event_types import (
     NumberOfPeriodsSetEvent,
     PauseResumeEvent,
     PeriodModeSetEvent,
-    VetoesUpdateEvent,
+    VetoesUpdateEvent, DetSpecMapChangeEvent,
 )
 
 logger = logging.getLogger(__name__)
@@ -114,6 +115,9 @@ class StaticPVs:
                 "choices": [x.name for x in PeriodMode],
                 "index": data.period_mode_sp,
             },
+        )
+        self.detectra_spectrum_mapping = SharedPV(
+            nt=NTScalar(display=True, form=True), initial={"value": data.detector_spectrum_mapping.model_dump_json()}
         )
 
         @self.begin.put  # pragma: no cover
@@ -256,6 +260,24 @@ class StaticPVs:
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to resume: {e}")
 
+        @self.detectra_spectrum_mapping.put
+        def detectra_spectrum_mapping_put(pv: SharedPV, op: ServerOperation) -> None:
+            value = op.value()
+            try:
+                d = DetectorSpectraMapping.model_validate(value)
+                queue.put(QueueItem(
+                    QueuePriority.HIGH,
+                    DetSpecMapChangeEvent(value=d),
+                ))
+                pv.post(value)
+                op.done()
+
+            except ValidationError as e:
+                logger.exception(e)
+                op.done(error=f"Failed to validate new detector spectrum mapping: {e}")
+            except Exception as e:
+                op.done(error=f"Failed to set detectra spectrum mapping: {e}")
+
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.
 
@@ -310,4 +332,5 @@ def static_pv_provider(
     static_provider.add(f"{pv_prefix}PERIOD:SP", static_pvs.period_sp)
     static_provider.add(f"{pv_prefix}PERIODTYPE", static_pvs.period_type_rbv)
     static_provider.add(f"{pv_prefix}PERIODTYPE:SP", static_pvs.period_type_sp)
+    static_provider.add(f"{pv_prefix}DETSPECMAP", static_pvs.detectra_spectrum_mapping)
     return static_pvs, static_provider

@@ -1,15 +1,24 @@
 """Data class containing the state of the program."""
 
 import logging
-from typing import TypeVar
+from typing import TypeVar, Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel, StringConstraints, StrictInt
+from streaming_data_types.run_start_pl72 import DetectorSpectrumMap
 
 from kafka_dae_control.defaults import NUM_VETOES, FrameSyncSelect, PeriodMode
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+class DetectorSpectraMapping(RootModel[dict[
+    Annotated[str, StringConstraints(pattern=r"^[0-9]*$")],
+    Annotated[StrictInt, Field(ge=0)],
+]]):
+    def to_df12_blob(self) -> DetectorSpectrumMap:
+        # todo: make a func here which returns a df12 blob
+        return NotImplementedError
 
 
 class Data(BaseModel):
@@ -69,3 +78,7 @@ class Data(BaseModel):
 
     period_mode_rbv: PeriodMode = PeriodMode.UNKNOWN
     """The period mode readback."""
+
+    detector_spectrum_mapping: DetectorSpectraMapping = DetectorSpectraMapping()
+
+

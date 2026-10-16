@@ -7,6 +7,7 @@ from dataclasses import dataclass
 import numpy as np
 from numpy import typing as npt
 
+from kafka_dae_control.data import DetectorSpectraMapping
 from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
 from kafka_dae_control.event_with_error import EventWithError
 
@@ -99,6 +100,9 @@ class PauseResumeEvent(WorkerEventWithValue[bool], DoneEvent):
 
     `value` here corresponds to "to pause" - 1 is to pause, 0 is to resume.
     """
+@dataclass
+class DetSpecMapChangeEvent(WorkerEventWithValue[DetectorSpectraMapping]):
+    """An event signalling a det spec map change."""
 
 
 WorkerEvent = (
@@ -114,4 +118,5 @@ WorkerEvent = (
     | PeriodModeSetEvent
     | PauseResumeEvent
     | RunControlUpdateEvent
+    | DetSpecMapChangeEvent
 )

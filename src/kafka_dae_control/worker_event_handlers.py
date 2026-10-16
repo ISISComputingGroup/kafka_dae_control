@@ -14,6 +14,7 @@ import numpy as np
 from confluent_kafka import KafkaError, Message, Producer
 from numpy import typing as npt
 from streaming_data_types import serialise_6s4t, serialise_pl72, serialise_vc00
+from streaming_data_types.run_start_pl72 import DetectorSpectrumMap
 
 from kafka_dae_control.comms import (
     write_AND_INV_then_verify,
@@ -104,6 +105,9 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         instrument_name=config.instrument_name,
         control_topic=config.runinfo_topic,
         n_periods=data.num_periods_sp,
+        detector_spectrum_map=DetectorSpectrumMap(
+
+        )
     )
     try:
         with sock_lock:

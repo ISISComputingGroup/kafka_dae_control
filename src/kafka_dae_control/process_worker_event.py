@@ -11,6 +11,7 @@ from kafka_dae_control.comms import set_board_response_ip
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
 from kafka_dae_control.queue_utils import QueueItem
+from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
@@ -35,7 +36,7 @@ from kafka_dae_control.worker_event_types import (
     RunControlUpdateEvent,
     SetIPEvent,
     VetoesUpdateEvent,
-    WorkerEvent,
+    WorkerEvent, DetSpecMapChangeEvent,
 )
 
 logger = logging.getLogger(__name__)
@@ -105,6 +106,9 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 handle_pause_or_resume(value, config, data, sock, sock_lock, done_event)
             case RunControlUpdateEvent(value=value):
                 handle_run_control_update(value, config, sock, sock_lock)
+            case DetSpecMapChangeEvent(value=value):
+                data.detector_spectrum_mapping = value
+                save_file(data, state_file=config.state_file)
             case _:
                 logger.error("Unknown event type: %s", worker_event)
     except Exception:
