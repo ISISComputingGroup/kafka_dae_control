@@ -17,6 +17,7 @@ from kafka_dae_control.queue_utils import QueueItem
 from kafka_dae_control.threads.hardware_polling_thread import hardware_poll_thread
 from kafka_dae_control.worker_event_types import HardwareUpdate, SetIPEvent
 from tests.conftest import (
+    FRAME_SYNC_DELAY_ADDRESS,
     PERIOD_COMP_CURRENT_ADDRESS,
     PERIOD_CONTROL_ADDRESS,
     PERIOD_NUMBER_LIMIT_ADDRESS,
@@ -33,6 +34,7 @@ from tests.conftest import (
         2,
         3,
         PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE | PeriodControlFlags.MODE_EXTERNAL,
+        123456,
     ],
 )
 def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, conf: ControlConfig):
@@ -65,6 +67,7 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
             call(sock, conf.board_ip, address=PERIOD_COMP_CURRENT_ADDRESS, port=conf.read_port),
             call(sock, conf.board_ip, address=PERIOD_NUMBER_LIMIT_ADDRESS, port=conf.read_port),
             call(sock, conf.board_ip, address=PERIOD_CONTROL_ADDRESS, port=conf.read_port),
+            call(sock, conf.board_ip, address=FRAME_SYNC_DELAY_ADDRESS, port=conf.read_port),
         ]
     )
     assert sock_lock.__enter__.called
@@ -76,6 +79,7 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
         period_comp_current=2,
         period_number_limit=3,
         period_mode=PeriodMode.EXTERNAL,
+        frame_sync_delay=123456,
     )
 
 
@@ -86,6 +90,7 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
         RunRegister.STATUS_RUNNING,
         1234,
         0b0001,
+        0,
         0,
         0,
         0,
@@ -109,6 +114,7 @@ def test_read_frame_sync_select_invalid_sets_invalid(
         period_comp_current=0,
         period_mode=PeriodMode.COMPUTER,
         period_number_limit=0,
+        frame_sync_delay=0,
     )
 
 
