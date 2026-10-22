@@ -31,6 +31,8 @@ class Registers(StrEnum):
     PERIOD_CONTROL = "period_control"
     VETO_TOGGLE = "vetoes_software"
 
+    FRAME_SYNC_DELAY_REGISTER = "frame_sync_delay"
+
 
 class FrameSyncSelect(IntEnum):
     """Options for the `frame_sync_sel` register."""

@@ -14,6 +14,7 @@ from kafka_dae_control.queue_utils import QueueItem
 from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
+    handle_frame_sync_delay_setpoint_change,
     handle_frame_sync_sp_change,
     handle_pause_or_resume,
     handle_run_control_update,
@@ -27,6 +28,7 @@ from kafka_dae_control.worker_event_types import (
     BlocksUpdateEvent,
     CurrentPeriodSetEvent,
     EndEvent,
+    FrameSyncDelaySetpointEvent,
     FrameSyncSelectChangeEvent,
     HardwareUpdateEvent,
     NumberOfPeriodsSetEvent,
@@ -75,6 +77,7 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 data.num_periods_rbv = value.period_number_limit
                 data.current_period_rbv = value.period_comp_current + 1
                 data.period_mode_rbv = value.period_mode
+                data.frame_sync_delay_rbv = value.frame_sync_delay
             case BlocksUpdateEvent(value):
                 data.blocks = value
             case BeginEvent(done_event=done_event):
@@ -105,6 +108,10 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 handle_pause_or_resume(value, config, data, sock, sock_lock, done_event)
             case RunControlUpdateEvent(value=value):
                 handle_run_control_update(value, config, sock, sock_lock)
+            case FrameSyncDelaySetpointEvent(value=value, done_event=done_event):
+                handle_frame_sync_delay_setpoint_change(
+                    value, config, data, sock, sock_lock, done_event
+                )
             case _:
                 logger.error("Unknown event type: %s", worker_event)
     except Exception:
