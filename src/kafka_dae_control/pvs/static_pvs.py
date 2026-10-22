@@ -139,23 +139,25 @@ class StaticPVs:
         )
 
         @self.begin.put  # pragma: no cover
-        def begin_put(_: SharedPV, op: ServerOperation) -> None:
+        def begin_put(pv: SharedPV, op: ServerOperation) -> None:
             logger.info("begin")
             ev = EventWithError()
             queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(done_event=ev)))
             try:
                 ev.wait()
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to begin: {e}")
 
         @self.end.put  # pragma: no cover
-        def end_put(_: SharedPV, op: ServerOperation) -> None:
+        def end_put(pv: SharedPV, op: ServerOperation) -> None:
             logger.info("end")
             ev = EventWithError()
             queue.put(QueueItem(QueuePriority.HIGH, EndEvent(done_event=ev)))
             try:
                 ev.wait()
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to end: {e}")
@@ -255,7 +257,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to pause: {e}")
@@ -273,7 +275,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to resume: {e}")
