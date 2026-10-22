@@ -14,8 +14,8 @@ SOFT_VETO_VALUE = 1
 HARD_VETO_VALUE = 2
 
 
-PAUSE_VETO_TOGGLE_BIT = 5
-RC_VETO_TOGGLE_BIT = 6
+PAUSE_VETO_TOGGLE_BIT = 6
+RC_VETO_TOGGLE_BIT = 5
 
 
 class Registers(StrEnum):
@@ -30,6 +30,8 @@ class Registers(StrEnum):
     PERIOD_NUMBER_LIMIT = "period_number_limit"
     PERIOD_CONTROL = "period_control"
     VETO_TOGGLE = "vetoes_software"
+
+    FRAME_SYNC_DELAY_REGISTER = "frame_sync_delay"
 
 
 class FrameSyncSelect(IntEnum):

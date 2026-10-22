@@ -15,6 +15,7 @@ from kafka_dae_control.worker_event_types import (
     BeginEvent,
     CurrentPeriodSetEvent,
     EndEvent,
+    FrameSyncDelaySetpointEvent,
     FrameSyncSelectChangeEvent,
     NumberOfPeriodsSetEvent,
     PauseResumeEvent,
@@ -23,6 +24,11 @@ from kafka_dae_control.worker_event_types import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Event time-of-flights must fit into an i32 number of nanoseconds
+# That puts the upper limit of ToF at 2.147 seconds.
+# Put the limit here at 2 seconds, to also account for an 100ms frame length.
+MAX_FRAME_SYNC_DELAY_US = 2000000
 
 
 class StaticPVs:
@@ -115,25 +121,43 @@ class StaticPVs:
                 "index": data.period_mode_sp,
             },
         )
+        self.frame_sync_delay_rbv = SharedPV(
+            nt=NTScalar(display=True, form=True),
+            initial={
+                "value": data.frame_sync_delay_rbv,
+                "display.units": "us",
+                "display.precision": 0,
+            },
+        )
+        self.frame_sync_delay_sp = SharedPV(
+            nt=NTScalar(display=True, form=True),
+            initial={
+                "value": data.frame_sync_delay_rbv,
+                "display.units": "us",
+                "display.precision": 0,
+            },
+        )
 
         @self.begin.put  # pragma: no cover
-        def begin_put(_: SharedPV, op: ServerOperation) -> None:
+        def begin_put(pv: SharedPV, op: ServerOperation) -> None:
             logger.info("begin")
             ev = EventWithError()
             queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(done_event=ev)))
             try:
                 ev.wait()
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to begin: {e}")
 
         @self.end.put  # pragma: no cover
-        def end_put(_: SharedPV, op: ServerOperation) -> None:
+        def end_put(pv: SharedPV, op: ServerOperation) -> None:
             logger.info("end")
             ev = EventWithError()
             queue.put(QueueItem(QueuePriority.HIGH, EndEvent(done_event=ev)))
             try:
                 ev.wait()
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to end: {e}")
@@ -233,7 +257,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to pause: {e}")
@@ -251,10 +275,46 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to resume: {e}")
+
+        @self.frame_sync_delay_sp.put
+        def frame_sync_delay_sp_put(pv: SharedPV, op: ServerOperation) -> None:
+            value = int(op.value())
+            logger.info("put with %s to frame_sync_delay_sp", value)
+            if value < 0:
+                # The hardware won't accept a negative delay number, and even if it did
+                # it would be meaningless...
+                logger.warning(
+                    "Invalid frame_sync_delay value %s attempted; cannot delay by "
+                    "a negative amount. Not setting frame_sync_delay.",
+                    value,
+                )
+                op.done(error="frame_sync_delay must be greater or equal to 0")
+                return
+            elif value > MAX_FRAME_SYNC_DELAY_US:
+                logger.warning(
+                    "Invalid frame_sync_delay value %s attempted; may cause event times "
+                    "to exceed i32 number of nanoseconds. Not setting frame_sync_delay.",
+                    value,
+                )
+                op.done(error="frame_sync_delay must be less than or equal to 200000 us")
+                return
+            ev = EventWithError()
+            queue.put(
+                QueueItem(
+                    QueuePriority.HIGH,
+                    FrameSyncDelaySetpointEvent(value=value, done_event=ev),
+                )
+            )
+            try:
+                ev.wait()
+                pv.post(value)
+                op.done()
+            except Exception as e:  # ruff:ignore[blind-except]
+                op.done(error=f"Failed to set frame sync delay: {e}")
 
     def update_all(self, data: Data) -> None:
         """Post updates to all PVs using the data class values.
@@ -266,12 +326,12 @@ class StaticPVs:
         self.run_number.post(str(data.run_number))
         self.i_run_number.post(data.run_number)
         self.hw_running.post(data.running)
-        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.value)
+        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.name)
         self.hard_vetoes_rbv.post(data.hard_vetoes_rbv)
-        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv)
         self.num_periods_rbv.post(data.num_periods_rbv)
         self.period_rbv.post(data.current_period_rbv)
         self.period_type_rbv.post(data.period_mode_rbv.name)
+        self.frame_sync_delay_rbv.post(data.frame_sync_delay_rbv)
 
 
 def static_pv_provider(
@@ -310,4 +370,6 @@ def static_pv_provider(
     static_provider.add(f"{pv_prefix}PERIOD:SP", static_pvs.period_sp)
     static_provider.add(f"{pv_prefix}PERIODTYPE", static_pvs.period_type_rbv)
     static_provider.add(f"{pv_prefix}PERIODTYPE:SP", static_pvs.period_type_sp)
+    static_provider.add(f"{pv_prefix}FRAME_SYNC_DELAY", static_pvs.frame_sync_delay_rbv)
+    static_provider.add(f"{pv_prefix}FRAME_SYNC_DELAY:SP", static_pvs.frame_sync_delay_sp)
     return static_pvs, static_provider
