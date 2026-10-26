@@ -28,6 +28,7 @@ from kafka_dae_control.worker_event_handlers import (
     delivery_report_set_error_or_done,
     handle_begin,
     handle_end,
+    handle_frame_sync_delay_setpoint_change,
     handle_frame_sync_sp_change,
     handle_pause_or_resume,
     handle_run_control_update,
@@ -37,6 +38,7 @@ from kafka_dae_control.worker_event_handlers import (
     set_period_mode,
 )
 from tests.conftest import (
+    FRAME_SYNC_DELAY_ADDRESS,
     FRAME_SYNC_SEL_ADDRESS,
     PERIOD_COMP_CURRENT_ADDRESS,
     PERIOD_CONTROL_ADDRESS,
@@ -52,6 +54,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
     data.run_number = 123
     data.running = False
     data.period_mode_sp = PeriodMode.EXTERNAL
+    data.num_periods_sp = 69
     producer = Mock()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
@@ -108,6 +111,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
         assert run_start.control_topic == "run-info-topic"
         assert run_start.run_name == "TESTINST123"
         assert run_start.nexus_structure == nexus_structure
+        assert run_start.n_periods == 69
 
         producer.flush.assert_called_once()
         assert sock_lock.__enter__.called
@@ -535,3 +539,29 @@ def test_cannot_resume_if_already_running(
     handle_pause_or_resume(False, conf, data, Mock(), MagicMock(spec=RLock()), done_event)
     assert done_event.err is not None
     assert "Cannot resume if already running" in caplog.text
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_verify")
+def test_change_frame_sync_delay_writes_to_hardware(
+    mock_write_verify: Mock, data: Data, conf: ControlConfig
+):
+    done_event = EventWithError()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_frame_sync_delay_setpoint_change(123456, conf, data, sock, sock_lock, done_event)
+    assert mock_write_verify.call_args[1]["address"] == FRAME_SYNC_DELAY_ADDRESS
+    assert mock_write_verify.call_args[1]["data"] == 123456
+    assert done_event.is_set()
+
+
+@patch("kafka_dae_control.worker_event_handlers.write_verify", side_effect=Exception)
+def test_change_frame_sync_delay_fails_to_write_to_hardware(
+    mock_write_verify: Mock, data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    done_event = EventWithError()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    handle_frame_sync_delay_setpoint_change(123456, conf, data, sock, sock_lock, done_event)
+    assert "Failed to set frame_sync_delay" in caplog.text
+    assert done_event.is_set()
+    assert done_event.err is not None
