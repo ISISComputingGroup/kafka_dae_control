@@ -69,3 +69,9 @@ class Data(BaseModel):
 
     period_mode_rbv: PeriodMode = PeriodMode.UNKNOWN
     """The period mode readback."""
+
+    frame_sync_delay_sp: int = 0
+    """The frame sync delay setpoint (us)."""
+
+    frame_sync_delay_rbv: int = 0
+    """The frame sync delay readback (us)."""

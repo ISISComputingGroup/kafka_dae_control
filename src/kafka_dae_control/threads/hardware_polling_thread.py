@@ -121,6 +121,8 @@ def poll_hardware(
 
             period_control_readback = _read(Registers.PERIOD_CONTROL)
 
+            frame_sync_delay_readback = _read(Registers.FRAME_SYNC_DELAY_REGISTER)
+
             period_mode_isolated = period_control_readback & ~int(
                 PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE
                 | PeriodControlFlags.END_RUN_AFTER_LAST_PERIOD_SEQUENCE
@@ -140,6 +142,7 @@ def poll_hardware(
             period_number_limit=period_number_limit_readback,
             period_mode=period_mode,
             hard_vetoes=veto_control_raw_readback,
+            frame_sync_delay=frame_sync_delay_readback,
         )
         logger.debug("Hardware update: %s", h)
         queue.put(QueueItem(hardware_update_queue_priority, HardwareUpdateEvent(h)))
