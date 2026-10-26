@@ -139,23 +139,25 @@ class StaticPVs:
         )
 
         @self.begin.put  # pragma: no cover
-        def begin_put(_: SharedPV, op: ServerOperation) -> None:
+        def begin_put(pv: SharedPV, op: ServerOperation) -> None:
             logger.info("begin")
             ev = EventWithError()
             queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(done_event=ev)))
             try:
                 ev.wait()
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to begin: {e}")
 
         @self.end.put  # pragma: no cover
-        def end_put(_: SharedPV, op: ServerOperation) -> None:
+        def end_put(pv: SharedPV, op: ServerOperation) -> None:
             logger.info("end")
             ev = EventWithError()
             queue.put(QueueItem(QueuePriority.HIGH, EndEvent(done_event=ev)))
             try:
                 ev.wait()
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to end: {e}")
@@ -255,7 +257,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to pause: {e}")
@@ -273,7 +275,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to resume: {e}")
@@ -324,9 +326,8 @@ class StaticPVs:
         self.run_number.post(str(data.run_number))
         self.i_run_number.post(data.run_number)
         self.hw_running.post(data.running)
-        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.value)
+        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.name)
         self.hard_vetoes_rbv.post(data.hard_vetoes_rbv)
-        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv)
         self.num_periods_rbv.post(data.num_periods_rbv)
         self.period_rbv.post(data.current_period_rbv)
         self.period_type_rbv.post(data.period_mode_rbv.name)
