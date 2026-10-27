@@ -64,6 +64,9 @@ class PeriodMode(IntEnum):
     UNKNOWN = -1
 
 
+NOT_SETTABLE_PERIOD_MODES = [PeriodMode.UNKNOWN, PeriodMode.NOT_USED]
+
+
 class RunRegister(IntFlag):
     """Enum for bits in the run register."""
 

@@ -8,7 +8,7 @@ from p4p.server import ServerOperation, StaticProvider
 from p4p.server.thread import SharedPV
 
 from kafka_dae_control.data import Data
-from kafka_dae_control.defaults import FrameSyncSelect, PeriodMode
+from kafka_dae_control.defaults import NOT_SETTABLE_PERIOD_MODES, FrameSyncSelect, PeriodMode
 from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.worker_event_types import (
@@ -117,7 +117,7 @@ class StaticPVs:
         self.period_type_sp = SharedPV(
             nt=NTEnum(),
             initial={
-                "choices": [x.name for x in PeriodMode],
+                "choices": [x.name for x in PeriodMode if x not in NOT_SETTABLE_PERIOD_MODES],
                 "index": data.period_mode_sp,
             },
         )
