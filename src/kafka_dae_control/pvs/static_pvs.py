@@ -58,7 +58,7 @@ class StaticPVs:
         self.frame_sync_select_sp = SharedPV(
             nt=NTEnum(),
             initial={
-                "choices": [x.name for x in FrameSyncSelect],
+                "choices": [x.name for x in FrameSyncSelect if x != FrameSyncSelect.UNKNOWN],
                 "index": data.frame_sync_select_sp,
             },
         )
