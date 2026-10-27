@@ -94,7 +94,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         done_event.err = e
         return
     data.job_id = str(uuid.uuid4())
-    run_name = f"{config.instrument_name}{data.run_number}"
+    run_name = f"{config.instrument_name}{data.run_number:08d}"
     blob = serialise_pl72(
         job_id=data.job_id,
         filename=f"{run_name}.nxs",
