@@ -15,6 +15,7 @@ from kafka_dae_control.worker_event_types import (
     BlocksUpdateEvent,
     CurrentPeriodSetEvent,
     EndEvent,
+    FrameSyncDelaySetpointEvent,
     FrameSyncSelectChangeEvent,
     HardwareUpdate,
     HardwareUpdateEvent,
@@ -70,6 +71,22 @@ def test_process_end_calls_handle_end(mock_handle_end: Mock, conf: ControlConfig
     assert mock_handle_end.called
 
 
+@patch("kafka_dae_control.process_worker_event.handle_frame_sync_delay_setpoint_change")
+def test_process_frame_sync_delay_sp_calls_handle_frame_sync_delay_sp_change(
+    mock_handle_frame_sync_delay_setpoint_change: Mock, conf: ControlConfig, data: Data
+):
+    process_worker_event(
+        PriorityQueue[QueueItem](),
+        FrameSyncDelaySetpointEvent(Mock(), 123456),
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        Mock(),
+    )
+    assert mock_handle_frame_sync_delay_setpoint_change.called
+
+
 @patch("kafka_dae_control.process_worker_event.set_board_response_ip")
 def test_process_set_ip_calls_set_board_response_ip(
     mock_set_board_response_ip: Mock, conf: ControlConfig, data: Data
@@ -107,6 +124,7 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
                 period_comp_current=12,
                 period_number_limit=13,
                 period_mode=PeriodMode.COMPUTER,
+                frame_sync_delay=123456,
             )
         ),
         conf,
@@ -121,6 +139,7 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
     assert data.period_mode_rbv == PeriodMode.COMPUTER
     assert data.current_period_rbv == 13
     assert data.num_periods_rbv == 13
+    assert data.frame_sync_delay_rbv == 123456
 
 
 @patch("kafka_dae_control.process_worker_event.set_num_periods")

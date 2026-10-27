@@ -1,9 +1,9 @@
 """Data class containing the state of the program."""
 
 import logging
-from typing import TypeVar, Annotated
+from typing import Annotated, TypeVar
 
-from pydantic import BaseModel, Field, RootModel, StringConstraints, StrictInt
+from pydantic import BaseModel, Field, RootModel, StrictInt, StringConstraints
 from streaming_data_types.run_start_pl72 import DetectorSpectrumMap
 
 from kafka_dae_control.defaults import NUM_VETOES, FrameSyncSelect, PeriodMode
@@ -12,10 +12,15 @@ logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 
-class DetectorSpectraMapping(RootModel[dict[
-    Annotated[str, StringConstraints(pattern=r"^[0-9]*$")],
-    Annotated[StrictInt, Field(ge=0)],
-]]):
+
+class DetectorSpectraMapping(
+    RootModel[
+        dict[
+            Annotated[str, StringConstraints(pattern=r"^[0-9]*$")],
+            Annotated[StrictInt, Field(ge=0)],
+        ]
+    ]
+):
     def to_df12_blob(self) -> DetectorSpectrumMap:
         # todo: make a func here which returns a df12 blob
         return NotImplementedError
@@ -81,4 +86,8 @@ class Data(BaseModel):
 
     detector_spectrum_mapping: DetectorSpectraMapping = DetectorSpectraMapping()
 
+    frame_sync_delay_sp: int = 0
+    """The frame sync delay setpoint (us)."""
 
+    frame_sync_delay_rbv: int = 0
+    """The frame sync delay readback (us)."""

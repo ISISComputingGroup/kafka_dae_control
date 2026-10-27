@@ -57,6 +57,7 @@ class HardwareUpdate:
     period_comp_current: int
     period_number_limit: int
     period_mode: PeriodMode
+    frame_sync_delay: int
 
 
 @dataclass
@@ -100,9 +101,16 @@ class PauseResumeEvent(WorkerEventWithValue[bool], DoneEvent):
 
     `value` here corresponds to "to pause" - 1 is to pause, 0 is to resume.
     """
+
+
 @dataclass
 class DetSpecMapChangeEvent(WorkerEventWithValue[DetectorSpectraMapping]):
     """An event signalling a det spec map change."""
+
+
+@dataclass
+class FrameSyncDelaySetpointEvent(WorkerEventWithValue[int], DoneEvent):
+    """An event signalling a frame sync delay setpoint."""
 
 
 WorkerEvent = (
@@ -119,4 +127,5 @@ WorkerEvent = (
     | PauseResumeEvent
     | RunControlUpdateEvent
     | DetSpecMapChangeEvent
+    | FrameSyncDelaySetpointEvent
 )

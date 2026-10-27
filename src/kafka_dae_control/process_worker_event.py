@@ -15,6 +15,7 @@ from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
+    handle_frame_sync_delay_setpoint_change,
     handle_frame_sync_sp_change,
     handle_pause_or_resume,
     handle_run_control_update,
@@ -27,7 +28,9 @@ from kafka_dae_control.worker_event_types import (
     BeginEvent,
     BlocksUpdateEvent,
     CurrentPeriodSetEvent,
+    DetSpecMapChangeEvent,
     EndEvent,
+    FrameSyncDelaySetpointEvent,
     FrameSyncSelectChangeEvent,
     HardwareUpdateEvent,
     NumberOfPeriodsSetEvent,
@@ -36,7 +39,7 @@ from kafka_dae_control.worker_event_types import (
     RunControlUpdateEvent,
     SetIPEvent,
     VetoesUpdateEvent,
-    WorkerEvent, DetSpecMapChangeEvent,
+    WorkerEvent,
 )
 
 logger = logging.getLogger(__name__)
@@ -76,6 +79,7 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 data.num_periods_rbv = value.period_number_limit
                 data.current_period_rbv = value.period_comp_current + 1
                 data.period_mode_rbv = value.period_mode
+                data.frame_sync_delay_rbv = value.frame_sync_delay
             case BlocksUpdateEvent(value):
                 data.blocks = value
             case BeginEvent(done_event=done_event):
@@ -109,6 +113,10 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
             case DetSpecMapChangeEvent(value=value):
                 data.detector_spectrum_mapping = value
                 save_file(data, state_file=config.state_file)
+            case FrameSyncDelaySetpointEvent(value=value, done_event=done_event):
+                handle_frame_sync_delay_setpoint_change(
+                    value, config, data, sock, sock_lock, done_event
+                )
             case _:
                 logger.error("Unknown event type: %s", worker_event)
     except Exception:

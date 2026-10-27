@@ -14,8 +14,8 @@ SOFT_VETO_VALUE = 1
 HARD_VETO_VALUE = 2
 
 
-PAUSE_VETO_TOGGLE_BIT = 5
-RC_VETO_TOGGLE_BIT = 6
+PAUSE_VETO_TOGGLE_BIT = 6
+RC_VETO_TOGGLE_BIT = 5
 
 
 class Registers(StrEnum):
@@ -30,6 +30,8 @@ class Registers(StrEnum):
     PERIOD_NUMBER_LIMIT = "period_number_limit"
     PERIOD_CONTROL = "period_control"
     VETO_TOGGLE = "vetoes_software"
+
+    FRAME_SYNC_DELAY_REGISTER = "frame_sync_delay"
 
 
 class FrameSyncSelect(IntEnum):
@@ -60,6 +62,9 @@ class PeriodMode(IntEnum):
     NOT_USED = PeriodControlFlags.MODE_NOT_USED
     EXTERNAL = PeriodControlFlags.MODE_EXTERNAL
     UNKNOWN = -1
+
+
+NOT_SETTABLE_PERIOD_MODES = [PeriodMode.UNKNOWN, PeriodMode.NOT_USED]
 
 
 class RunRegister(IntFlag):

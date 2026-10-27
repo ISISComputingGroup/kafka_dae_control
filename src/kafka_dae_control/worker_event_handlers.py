@@ -95,7 +95,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         done_event.err = e
         return
     data.job_id = str(uuid.uuid4())
-    run_name = f"{config.instrument_name}{data.run_number}"
+    run_name = f"{config.instrument_name}{data.run_number:08d}"
     blob = serialise_pl72(
         job_id=data.job_id,
         filename=f"{run_name}.nxs",
@@ -105,9 +105,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         instrument_name=config.instrument_name,
         control_topic=config.runinfo_topic,
         n_periods=data.num_periods_sp,
-        detector_spectrum_map=DetectorSpectrumMap(
-
-        )
+        detector_spectrum_map=DetectorSpectrumMap(),
     )
     try:
         with sock_lock:
@@ -408,25 +406,23 @@ def handle_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional
 
 
 def _update_software_veto_bit(
-    bit_to_change: int, config: ControlConfig, sock: socket.SocketType, value: bool
+    bitmask_to_change: int, config: ControlConfig, sock: socket.SocketType, value: bool
 ) -> None:
     if value:
-        # pause - set the bit
         write_OR_then_verify(
             config,
             sock,
             address=config.register_map[Registers.VETO_TOGGLE],
-            data=bit_to_change,
-            verify=lambda x: (x & bit_to_change) == x,
+            data=bitmask_to_change,
+            verify=lambda x: (x & bitmask_to_change) == bitmask_to_change,
         )
     else:
-        # resume - clear the bit
         write_AND_INV_then_verify(
             config,
             sock,
             address=config.register_map[Registers.VETO_TOGGLE],
-            data=bit_to_change,
-            verify=lambda x: (x & bit_to_change) == 0,
+            data=bitmask_to_change,
+            verify=lambda x: (x & bitmask_to_change) == 0,
         )
 
 
@@ -494,3 +490,39 @@ def handle_run_control_update(
     except Exception:
         logger.exception("Failed to handle run control update: ")
         return
+
+
+def handle_frame_sync_delay_setpoint_change(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
+    value: int,
+    config: ControlConfig,
+    data: Data,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithError,
+) -> None:
+    """Handle a frame sync delay setpoint change.
+
+    Args:
+        value: The frame sync delay setpoint to set, in us.
+        config: The program's configuration.
+        data: the program's data class.
+        sock: the socket instance.
+        sock_lock: the lock to acquire when using the socket instance.
+        done_event: The event to call set() on when complete
+
+    """
+    try:
+        with sock_lock:
+            write_verify(
+                config,
+                sock,
+                address=config.register_map[Registers.FRAME_SYNC_DELAY_REGISTER],
+                data=value,
+                verify=lambda x: x == value,
+            )
+    except Exception as e:
+        logger.exception("Failed to set frame_sync_delay: ")
+        done_event.err = e
+        return
+    data.frame_sync_delay_sp = value
+    done_event.set()

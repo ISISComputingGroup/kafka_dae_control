@@ -71,4 +71,12 @@ Setting this will write hard vetoes to hardware and then pushes a [`vc00`](https
 
 This is a readback for what is currently set on the streaming control board.
 
+## `FRAME_SYNC_DELAY` / `FRAME_SYNC_DELAY:SP`
 
+These PVs control the delay between the streaming control board receiving the timing pulse from the ISIS timing
+system or a chopper, and the 'frame' of data acquisition starting.
+
+These PVs are in units of μs and must be set to a non-negative integer.
+
+See {external+ibex_developers_manual:doc}`specific_iocs/datastreaming/ADRs/009_frame_sync_delay` for further details
+about frame-sync delays.
