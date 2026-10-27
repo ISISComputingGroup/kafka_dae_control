@@ -21,9 +21,22 @@ class DetectorSpectraMapping(
         ]
     ]
 ):
+    """Pydantic model for validating detector-spectra mapping."""
+
     def to_df12_blob(self) -> DetectorSpectrumMap:
-        # todo: make a func here which returns a df12 blob
-        return NotImplementedError
+        """Construct a DetectorSpectrumMap object from this pydantic model.
+
+        This works out the n_spectra field by finding the maximum spectrum number and adding 1.
+
+        Returns: A mapping object which can be used when serialising a run-start.
+        """
+        detector_ids = [int(det) for det in self.root]
+        spectra = list(self.root.values())
+        return DetectorSpectrumMap(
+            detector_ids,
+            spectra,
+            max(spectra) + 1 if spectra else 0,
+        )
 
 
 class Data(BaseModel):
