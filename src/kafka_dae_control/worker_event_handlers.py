@@ -468,7 +468,7 @@ def handle_pause_or_resume(  # ruff:ignore[too-many-arguments, too-many-position
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete
         force: Whether to set the hardware even if already in the desired state (paused/resumed)
-         instead of erroring.
+         instead of raising an error.
 
     """
     bit_to_change = 1 << PAUSE_VETO_TOGGLE_BIT
