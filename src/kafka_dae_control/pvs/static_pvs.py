@@ -66,6 +66,8 @@ class StaticPVs:
         self.end = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.pause = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.resume = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
+        self.abort = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
+        self.cancel_abort = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.run_number = SharedPV(
             nt=NTScalar("s", display=True, form=True), initial={"value": str(data.run_number)}
         )
@@ -154,13 +156,33 @@ class StaticPVs:
         def end_put(pv: SharedPV, op: ServerOperation) -> None:
             logger.info("end")
             ev = EventWithError()
-            queue.put(QueueItem(QueuePriority.HIGH, EndEvent(done_event=ev)))
+            queue.put(QueueItem(QueuePriority.HIGH, EndEvent(value=False, done_event=ev)))
             try:
                 ev.wait()
                 pv.post(0)
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to end: {e}")
+
+
+        @self.abort.put
+        def abort_put(pv: SharedPV, op: ServerOperation) -> None:
+            logger.info("abort")
+            ev = EventWithError()
+            # todo change EndEvent to have abort field
+            queue.put(QueueItem(QueuePriority.HIGH, EndEvent(value=True, done_event=ev)))
+            try:
+                ev.wait()
+                pv.post(0)
+                op.done()
+            except Exception as e:  # ruff:ignore[blind-except]
+                op.done(error=f"Failed to abort: {e}")
+
+
+        @self.cancel_abort.put
+        def cancel_abort_put(pv: SharedPV, op: ServerOperation) -> None:
+            logger.info("cancel abort")
+            # todo send a new run start, without sending anything to hardware, with last timestamp.
 
         @self.frame_sync_select_sp.put
         def frame_sync_select_sp_put(pv: SharedPV, op: ServerOperation) -> None:

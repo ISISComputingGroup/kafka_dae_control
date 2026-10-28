@@ -153,6 +153,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
     sock_lock: threading.RLock,
     done_event: EventWithError,
     queue: PriorityQueue[QueueItem],
+    abort: bool
 ) -> None:
     """Handle an end command.
 
@@ -164,6 +165,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete
         queue: The queue to put hardware polling updates on after ending
+        abort: Whether to abort the current run.
 
     """
     if not data.running:
@@ -171,7 +173,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
         logger.error(e)
         done_event.err = e
         return
-    blob = serialise_6s4t(job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London")))
+    blob = serialise_6s4t(job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London"), abort=abort))
     try:
         with sock_lock:
             # clear the ethernet override bit.
@@ -190,7 +192,8 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
         )
         producer.flush(timeout=config.flush_timeout_s)
         logger.info("sent run stop to %s", config.runinfo_topic)
-        data.run_number += 1
+        if not abort:
+            data.run_number += 1
         save_file(data, state_file=config.state_file)
         # immediately poll hardware to avoid being able to end again before hardware is updated
         poll_hardware(

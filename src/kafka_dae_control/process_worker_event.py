@@ -82,8 +82,8 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 data.blocks = value
             case BeginEvent(done_event=done_event):
                 handle_begin(config, data, producer, sock, sock_lock, done_event, queue)
-            case EndEvent(done_event=done_event):
-                handle_end(config, data, producer, sock, sock_lock, done_event, queue)
+            case EndEvent(value=value, done_event=done_event):
+                handle_end(config, data, producer, sock, sock_lock, done_event, queue, abort=value)
             case FrameSyncSelectChangeEvent(value=value, done_event=done_event):
                 handle_frame_sync_sp_change(value, config, data, sock, sock_lock, done_event)
             case SetIPEvent():

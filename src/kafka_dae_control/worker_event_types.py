@@ -30,15 +30,15 @@ class BeginEvent(DoneEvent):
 
 
 @dataclass
-class EndEvent(DoneEvent):
-    """An event signalling an end."""
-
-
-@dataclass
 class WorkerEventWithValue[T](ABC):
     """A worker event with a value field."""
 
     value: T
+
+@dataclass
+class EndEvent(WorkerEventWithValue[bool], DoneEvent):
+    """An event signalling an end. Has a bool which is set to True for aborting."""
+
 
 
 @dataclass
