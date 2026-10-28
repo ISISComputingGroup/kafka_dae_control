@@ -35,10 +35,10 @@ class WorkerEventWithValue[T](ABC):
 
     value: T
 
+
 @dataclass
 class EndEvent(WorkerEventWithValue[bool], DoneEvent):
     """An event signalling an end. Has a bool which is set to True for aborting."""
-
 
 
 @dataclass

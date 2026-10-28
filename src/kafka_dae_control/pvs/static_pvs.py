@@ -164,7 +164,6 @@ class StaticPVs:
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to end: {e}")
 
-
         @self.abort.put
         def abort_put(pv: SharedPV, op: ServerOperation) -> None:
             logger.info("abort")
@@ -177,7 +176,6 @@ class StaticPVs:
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to abort: {e}")
-
 
         @self.cancel_abort.put
         def cancel_abort_put(pv: SharedPV, op: ServerOperation) -> None:

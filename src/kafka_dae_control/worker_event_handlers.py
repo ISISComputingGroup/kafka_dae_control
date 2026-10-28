@@ -67,6 +67,24 @@ def delivery_report_set_error_or_done(
         done_event.set()
 
 
+def handle_cancel_abort(
+    config: ControlConfig,
+    data: Data,
+    producer: Producer,
+    done_event: EventWithError,
+):
+    blob = _create_run_start(config, data, data.most_recent_run_start_timestamp)
+    # todo: send this, set event etc.
+    logger.debug("About to produce blob %s to %s", blob, config.runinfo_topic)
+    producer.produce(
+        config.runinfo_topic,
+        blob,
+        callback=partial(delivery_report_set_error_or_done, done_event),
+    )
+    producer.flush(timeout=config.flush_timeout_s)
+    logger.info("resent run start to %s", config.runinfo_topic)
+
+
 def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
     config: ControlConfig,
     data: Data,
@@ -94,17 +112,9 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         done_event.err = e
         return
     data.job_id = str(uuid.uuid4())
-    run_name = f"{config.instrument_name}{data.run_number:08d}"
-    blob = serialise_pl72(
-        job_id=data.job_id,
-        filename=f"{run_name}.nxs",
-        start_time=datetime.now(ZoneInfo("Europe/London")),
-        run_name=run_name,
-        nexus_structure=generate_nexus_structure(config, data),
-        instrument_name=config.instrument_name,
-        control_topic=config.runinfo_topic,
-        n_periods=data.num_periods_sp,
-    )
+    start_time = datetime.now(ZoneInfo("Europe/London"))
+    data.most_recent_run_start_timestamp = start_time
+    blob = _create_run_start(config, data, start_time)
     try:
         with sock_lock:
             write_verify(
@@ -145,6 +155,21 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         return
 
 
+def _create_run_start(config: ControlConfig, data: Data, start_time: datetime) -> bytes:
+    run_name = f"{config.instrument_name}{data.run_number:08d}"
+    blob = serialise_pl72(
+        job_id=data.job_id,
+        filename=f"{run_name}.nxs",
+        start_time=start_time,
+        run_name=run_name,
+        nexus_structure=generate_nexus_structure(config, data),
+        instrument_name=config.instrument_name,
+        control_topic=config.runinfo_topic,
+        n_periods=data.num_periods_sp,
+    )
+    return blob
+
+
 def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
     config: ControlConfig,
     data: Data,
@@ -153,7 +178,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
     sock_lock: threading.RLock,
     done_event: EventWithError,
     queue: PriorityQueue[QueueItem],
-    abort: bool
+    abort: bool,
 ) -> None:
     """Handle an end command.
 
@@ -173,7 +198,9 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
         logger.error(e)
         done_event.err = e
         return
-    blob = serialise_6s4t(job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London"), abort=abort))
+    blob = serialise_6s4t(
+        job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London"), abort=abort)
+    )
     try:
         with sock_lock:
             # clear the ethernet override bit.
