@@ -73,16 +73,16 @@ def handle_cancel_abort(
     producer: Producer,
     done_event: EventWithError,
 ):
+    data.job_id = str(uuid.uuid4())
     blob = _create_run_start(config, data, data.most_recent_run_start_timestamp)
-    # todo: send this, set event etc.
-    logger.debug("About to produce blob %s to %s", blob, config.runinfo_topic)
+    logger.debug("Cancel abort: about to produce blob %s to %s", blob, config.runinfo_topic)
     producer.produce(
         config.runinfo_topic,
         blob,
         callback=partial(delivery_report_set_error_or_done, done_event),
     )
     producer.flush(timeout=config.flush_timeout_s)
-    logger.info("resent run start to %s", config.runinfo_topic)
+    logger.info("Re-sent run start to %s", config.runinfo_topic)
 
 
 def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
