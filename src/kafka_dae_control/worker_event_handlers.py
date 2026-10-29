@@ -82,6 +82,10 @@ def handle_cancel_abort(
         done_event: The event to call set() or set exception depending on result.
 
     """
+    #todo: hmmmmmmmmmm actually this wants to probably just be handle_begin with an extra bool at the end - delete this func and do that.
+    # when cancel aborting basically do everything else the same but:
+    # A) don't re-send vetoes, as there should be one within the last run anyway
+    # B) change job ID before sending - though we do this anyway on a run start. maybe not so bad?
     data.job_id = str(uuid.uuid4())
     blob = _create_run_start(config, data, data.most_recent_run_start_timestamp)
     logger.debug("Cancel abort: about to produce blob %s to %s", blob, config.runinfo_topic)
