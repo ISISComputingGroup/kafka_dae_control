@@ -68,7 +68,6 @@ veto_names = [
     "Unused",
     "Unused",
     "Unused",
-    "Unused",
 ]
 
 [kafka_producer]
