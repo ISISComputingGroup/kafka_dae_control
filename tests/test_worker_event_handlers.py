@@ -1,4 +1,6 @@
 import ipaddress
+import socket
+import threading
 from queue import PriorityQueue
 from threading import RLock
 from unittest.mock import MagicMock, Mock, patch
@@ -47,12 +49,25 @@ from tests.conftest import (
 )
 
 
+def pause_or_resume_side_effect_set(  # ruff: ignore[too-many-arguments, too-many-positional-arguments]
+    to_pause: bool,
+    config: ControlConfig,
+    data: Data,
+    sock: socket.SocketType,
+    sock_lock: threading.RLock,
+    done_event: EventWithError,
+    force: bool,
+):
+    done_event.set()
+
+
 def test_beginning_starts_hardware_sends_run_start_and_sets_running(
     data: Data, conf: ControlConfig
 ):
     conf.instrument_name = "TESTINST"
     data.run_number = 123
     data.running = False
+    data.period_mode_sp = PeriodMode.EXTERNAL
     data.num_periods_sp = 69
     producer = Mock()
     sock = Mock()
@@ -70,6 +85,10 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
             "kafka_dae_control.worker_event_handlers.generate_nexus_structure",
             return_value=nexus_structure,
         ),
+        patch(
+            "kafka_dae_control.worker_event_handlers.handle_pause_or_resume",
+            side_effect=pause_or_resume_side_effect_set,
+        ) as mock_handle_pause_or_resume,
     ):
         producer.flush.side_effect = done_event.set()
 
@@ -81,7 +100,10 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
             sock_lock=sock_lock,
             done_event=done_event,
             queue=PriorityQueue[QueueItem](),
+            to_pause=False,
         )
+
+        assert not mock_handle_pause_or_resume.call_args[0][0]
 
         write_verify.assert_called_once()
         assert write_verify.call_args.kwargs["data"] == (
@@ -159,13 +181,7 @@ def test_exception_during_begin_logs(
     sock_lock = MagicMock(spec=RLock())
     sock_lock.__enter__.side_effect = Exception
     handle_begin(
-        conf,
-        data,
-        Mock(),
-        Mock(),
-        sock_lock,
-        Mock(),
-        PriorityQueue[QueueItem](),
+        conf, data, Mock(), Mock(), sock_lock, Mock(), PriorityQueue[QueueItem](), to_pause=False
     )
     assert "Failed to start run:" in caplog.text
 
@@ -193,7 +209,9 @@ def test_exception_during_begin_if_already_running(
 ):
     data.running = True
     sock_lock = MagicMock(spec=RLock())
-    handle_begin(conf, data, Mock(), Mock(), sock_lock, Mock(), PriorityQueue[QueueItem]())
+    handle_begin(
+        conf, data, Mock(), Mock(), sock_lock, Mock(), PriorityQueue[QueueItem](), to_pause=False
+    )
     assert "The hardware is already running - doing nothing" in caplog.text
 
 
@@ -212,6 +230,150 @@ def test_exception_during_end_if_not_running(
         PriorityQueue[QueueItem](),
     )
     assert "The hardware is already not running - doing nothing" in caplog.text
+
+
+def test_begin_fails_to_pause_or_resume_errors(data: Data, conf: ControlConfig):
+    producer = Mock()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    done_event = Mock()
+
+    with (
+        patch("kafka_dae_control.worker_event_handlers.write_verify"),
+        patch(
+            "kafka_dae_control.worker_event_handlers.generate_nexus_structure",
+            return_value="",
+        ),
+        patch(
+            "kafka_dae_control.worker_event_handlers.handle_pause_or_resume",
+        ),
+    ):
+        handle_begin(
+            data=data,
+            config=conf,
+            producer=producer,
+            sock=sock,
+            sock_lock=sock_lock,
+            done_event=done_event,
+            queue=PriorityQueue[QueueItem](),
+            to_pause=False,
+        )
+        assert isinstance(done_event.err, OSError)
+
+
+def test_period_set_to_one_if_in_soft_period_mode(data: Data, conf: ControlConfig):
+    data.period_mode_sp = PeriodMode.COMPUTER
+    data.current_period_sp = 10
+    producer = Mock()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    done_event = Mock()
+
+    with (
+        patch("kafka_dae_control.worker_event_handlers.write_verify"),
+        patch(
+            "kafka_dae_control.worker_event_handlers.generate_nexus_structure",
+            return_value="",
+        ),
+        patch(
+            "kafka_dae_control.worker_event_handlers.handle_pause_or_resume",
+            side_effect=pause_or_resume_side_effect_set,
+        ),
+    ):
+        handle_begin(
+            data=data,
+            config=conf,
+            producer=producer,
+            sock=sock,
+            sock_lock=sock_lock,
+            done_event=done_event,
+            queue=PriorityQueue[QueueItem](),
+            to_pause=False,
+        )
+
+        assert data.current_period_sp == 1
+
+
+def test_period_cannot_be_set_back_to_one_when_beginning_and_errors_then_error_propagated(
+    data: Data, conf: ControlConfig
+):
+    data.period_mode_sp = PeriodMode.COMPUTER
+    data.current_period_sp = 10
+    producer = Mock()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    done_event = Mock()
+
+    def _set_error(  # ruff: ignore [too-many-arguments, too-many-positional-arguments]
+        value: int,
+        config: ControlConfig,
+        data: Data,
+        sock: socket.SocketType,
+        sock_lock: threading.RLock,
+        done_event: EventWithError,
+    ):
+        done_event.err = Exception("something happened")
+
+    with (
+        patch("kafka_dae_control.worker_event_handlers.write_verify"),
+        patch(
+            "kafka_dae_control.worker_event_handlers.generate_nexus_structure",
+            return_value="",
+        ),
+        patch(
+            "kafka_dae_control.worker_event_handlers.handle_pause_or_resume",
+            side_effect=pause_or_resume_side_effect_set,
+        ),
+        patch("kafka_dae_control.worker_event_handlers.set_current_period", side_effect=_set_error),
+    ):
+        handle_begin(
+            data=data,
+            config=conf,
+            producer=producer,
+            sock=sock,
+            sock_lock=sock_lock,
+            done_event=done_event,
+            queue=PriorityQueue[QueueItem](),
+            to_pause=False,
+        )
+
+        assert isinstance(done_event.err, OSError)
+
+
+def test_period_cannot_be_set_back_to_one_when_beginning_and_is_not_set_then_error_raised(
+    data: Data, conf: ControlConfig
+):
+    data.period_mode_sp = PeriodMode.COMPUTER
+    data.current_period_sp = 10
+    producer = Mock()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    done_event = Mock()
+
+    with (
+        patch("kafka_dae_control.worker_event_handlers.write_verify"),
+        patch(
+            "kafka_dae_control.worker_event_handlers.generate_nexus_structure",
+            return_value="",
+        ),
+        patch(
+            "kafka_dae_control.worker_event_handlers.handle_pause_or_resume",
+            side_effect=pause_or_resume_side_effect_set,
+        ),
+        patch("kafka_dae_control.worker_event_handlers.set_current_period"),
+    ):
+        handle_begin(
+            data=data,
+            config=conf,
+            producer=producer,
+            sock=sock,
+            sock_lock=sock_lock,
+            done_event=done_event,
+            queue=PriorityQueue[QueueItem](),
+            to_pause=False,
+        )
+
+        assert isinstance(done_event.err, OSError)
 
 
 def test_delivery_report_cb_sets_error_if_error():

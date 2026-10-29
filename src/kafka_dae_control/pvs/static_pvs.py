@@ -140,9 +140,10 @@ class StaticPVs:
 
         @self.begin.put  # pragma: no cover
         def begin_put(pv: SharedPV, op: ServerOperation) -> None:
-            logger.info("begin")
+            value = op.value()
+            logger.info("begin with value %s", value)
             ev = EventWithError()
-            queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(done_event=ev)))
+            queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(value=value, done_event=ev)))
             try:
                 ev.wait()
                 pv.post(0)

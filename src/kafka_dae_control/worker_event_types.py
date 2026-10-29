@@ -25,20 +25,23 @@ class DoneEvent:
 
 
 @dataclass
-class BeginEvent(DoneEvent):
-    """An event signalling a begin."""
+class WorkerEventWithValue[T](ABC):
+    """A worker event with a value field."""
+
+    value: T
+
+
+@dataclass
+class BeginEvent(WorkerEventWithValue[bool], DoneEvent):
+    """An event signalling a begin.
+
+    Also contains a value for whether to pause when beginning.
+    """
 
 
 @dataclass
 class EndEvent(DoneEvent):
     """An event signalling an end."""
-
-
-@dataclass
-class WorkerEventWithValue[T](ABC):
-    """A worker event with a value field."""
-
-    value: T
 
 
 @dataclass
