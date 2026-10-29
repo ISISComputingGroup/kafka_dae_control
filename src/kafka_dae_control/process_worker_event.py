@@ -13,6 +13,7 @@ from kafka_dae_control.data import Data
 from kafka_dae_control.queue_utils import QueueItem
 from kafka_dae_control.worker_event_handlers import (
     handle_begin,
+    handle_cancel_abort,
     handle_end,
     handle_frame_sync_delay_setpoint_change,
     handle_frame_sync_sp_change,
@@ -26,6 +27,7 @@ from kafka_dae_control.worker_event_handlers import (
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     BlocksUpdateEvent,
+    CancelAbortEvent,
     CurrentPeriodSetEvent,
     EndEvent,
     FrameSyncDelaySetpointEvent,
@@ -112,6 +114,8 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 handle_frame_sync_delay_setpoint_change(
                     value, config, data, sock, sock_lock, done_event
                 )
+            case CancelAbortEvent(done_event=done_event):
+                handle_cancel_abort(config, data, producer, done_event)
             case _:
                 logger.error("Unknown event type: %s", worker_event)
     except Exception:

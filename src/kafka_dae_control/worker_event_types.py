@@ -42,6 +42,11 @@ class EndEvent(WorkerEventWithValue[bool], DoneEvent):
 
 
 @dataclass
+class CancelAbortEvent(DoneEvent):
+    """An event signalling that the user has cancelled an abort."""
+
+
+@dataclass
 class FrameSyncSelectChangeEvent(WorkerEventWithValue[FrameSyncSelect], DoneEvent):
     """An event signalling a change in the frame sync select setpoint."""
 
@@ -121,4 +126,5 @@ WorkerEvent = (
     | PauseResumeEvent
     | RunControlUpdateEvent
     | FrameSyncDelaySetpointEvent
+    | CancelAbortEvent
 )

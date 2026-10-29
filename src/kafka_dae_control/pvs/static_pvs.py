@@ -13,6 +13,7 @@ from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
+    CancelAbortEvent,
     CurrentPeriodSetEvent,
     EndEvent,
     FrameSyncDelaySetpointEvent,
@@ -168,7 +169,6 @@ class StaticPVs:
         def abort_put(pv: SharedPV, op: ServerOperation) -> None:
             logger.info("abort")
             ev = EventWithError()
-            # todo change EndEvent to have abort field
             queue.put(QueueItem(QueuePriority.HIGH, EndEvent(value=True, done_event=ev)))
             try:
                 ev.wait()
@@ -180,7 +180,14 @@ class StaticPVs:
         @self.cancel_abort.put
         def cancel_abort_put(pv: SharedPV, op: ServerOperation) -> None:
             logger.info("cancel abort")
-            # todo send a new run start, without sending anything to hardware, with last timestamp.
+            ev = EventWithError()
+            queue.put(QueueItem(QueuePriority.HIGH, CancelAbortEvent(done_event=ev)))
+            try:
+                ev.wait()
+                pv.post(0)
+                op.done()
+            except Exception as e:  # ruff:ignore[blind-except]
+                op.done(error=f"Failed to cancel abort: {e}")
 
         @self.frame_sync_select_sp.put
         def frame_sync_select_sp_put(pv: SharedPV, op: ServerOperation) -> None:

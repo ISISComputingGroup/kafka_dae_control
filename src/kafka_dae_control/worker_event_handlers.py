@@ -72,7 +72,16 @@ def handle_cancel_abort(
     data: Data,
     producer: Producer,
     done_event: EventWithError,
-):
+) -> None:
+    """Re-send the last run start message with a new job ID.
+
+    Args:
+        config: the program's configuration.
+        data: the data class containing the state of the program.
+        producer: the Kafka producer.
+        done_event: The event to call set() or set exception depending on result.
+
+    """
     data.job_id = str(uuid.uuid4())
     blob = _create_run_start(config, data, data.most_recent_run_start_timestamp)
     logger.debug("Cancel abort: about to produce blob %s to %s", blob, config.runinfo_topic)
