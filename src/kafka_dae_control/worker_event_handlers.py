@@ -208,7 +208,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
         done_event.err = e
         return
     blob = serialise_6s4t(
-        job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London"), abort=abort)
+        job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London")), abort=abort
     )
     try:
         with sock_lock:

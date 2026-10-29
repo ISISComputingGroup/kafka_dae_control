@@ -3,6 +3,7 @@
 import logging
 from datetime import datetime
 from typing import TypeVar
+from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel, Field
 
@@ -77,6 +78,6 @@ class Data(BaseModel):
     frame_sync_delay_rbv: int = 0
     """The frame sync delay readback (us)."""
 
-    most_recent_run_start_timestamp: datetime = datetime.min
+    most_recent_run_start_timestamp: datetime = datetime.now(ZoneInfo("Europe/London"))
     """The timestamp for the most recent run-start.
      This is used when cancelling an abort to re-send the run start."""
