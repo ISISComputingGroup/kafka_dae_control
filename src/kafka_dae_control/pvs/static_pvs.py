@@ -383,6 +383,8 @@ def static_pv_provider(
     static_provider.add(f"{pv_prefix}ENDRUN", static_pvs.end)
     static_provider.add(f"{pv_prefix}PAUSERUN", static_pvs.pause)
     static_provider.add(f"{pv_prefix}RESUMERUN", static_pvs.resume)
+    static_provider.add(f"{pv_prefix}ABORTRUN", static_pvs.abort)
+    static_provider.add(f"{pv_prefix}RECOVERRUN", static_pvs.cancel_abort)
     static_provider.add(f"{pv_prefix}RUNNUMBER", static_pvs.run_number)
     static_provider.add(f"{pv_prefix}IRUNNUMBER", static_pvs.i_run_number)
     static_provider.add(f"{pv_prefix}DAETIMINGSOURCE", static_pvs.frame_sync_select_rbv)
