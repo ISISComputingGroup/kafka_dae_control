@@ -1,0 +1,24 @@
+
+
+``kafka_dae_control.udptalk``
+=============================
+        
+
+.. automodule:: kafka_dae_control.udptalk
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        main
+    
+    
