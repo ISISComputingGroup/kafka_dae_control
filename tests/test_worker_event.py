@@ -19,6 +19,7 @@ from kafka_dae_control.worker_event_types import (
     FrameSyncSelectChangeEvent,
     HardwareUpdate,
     HardwareUpdateEvent,
+    HardwareUpdateFailedEvent,
     NumberOfPeriodsSetEvent,
     PauseResumeEvent,
     PeriodModeSetEvent,
@@ -114,6 +115,8 @@ def test_exception_thrown_in_handler_logs(
 
 def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
     data.running = False
+    data.last_hardware_update_ok = False
+
     process_worker_event(
         PriorityQueue[QueueItem](),
         HardwareUpdateEvent(
@@ -140,6 +143,21 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
     assert data.current_period_rbv == 13
     assert data.num_periods_rbv == 13
     assert data.frame_sync_delay_rbv == 123456
+    assert data.last_hardware_update_ok
+
+
+def test_failed_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
+    data.last_hardware_update_ok = True
+    process_worker_event(
+        PriorityQueue[QueueItem](),
+        HardwareUpdateFailedEvent(),
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        Mock(),
+    )
+    assert not data.last_hardware_update_ok
 
 
 @patch("kafka_dae_control.process_worker_event.set_num_periods")

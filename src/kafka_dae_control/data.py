@@ -52,6 +52,7 @@ class Data(BaseModel):
 
     hard_vetoes_rbv: int = 0xFFFF
     """Hard vetoes readback bit mask"""
+
     num_periods_sp: int = 1
     """Number of periods (setpoint)."""
 
@@ -75,3 +76,6 @@ class Data(BaseModel):
 
     frame_sync_delay_rbv: int = 0
     """The frame sync delay readback (us)."""
+
+    last_hardware_update_ok: bool = False
+    """Whether the most recent hardware update successfully polled the hardware."""
