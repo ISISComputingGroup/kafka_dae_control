@@ -76,3 +76,6 @@ class Data(BaseModel):
 
     frame_sync_delay_rbv: int = 0
     """The frame sync delay readback (us)."""
+
+    last_hardware_update_ok: bool = False
+    """Whether the most recent hardware update successfully polled the hardware."""

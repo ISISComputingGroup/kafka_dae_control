@@ -324,16 +324,21 @@ class StaticPVs:
             data: the data class containing the state of the program.
 
         """
-        now = time.time()
-        self.run_number.post(str(data.run_number), timestamp=now)
-        self.i_run_number.post(data.run_number, timestamp=now)
-        self.hw_running.post(data.running, timestamp=now)
-        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.name, timestamp=now)
-        self.hard_vetoes_rbv.post(data.hard_vetoes_rbv, timestamp=now)
-        self.num_periods_rbv.post(data.num_periods_rbv, timestamp=now)
-        self.period_rbv.post(data.current_period_rbv, timestamp=now)
-        self.period_type_rbv.post(data.period_mode_rbv.name, timestamp=now)
-        self.frame_sync_delay_rbv.post(data.frame_sync_delay_rbv, timestamp=now)
+        kwargs = {
+            "timestamp": time.time(),
+            "severity": 0 if data.last_hardware_update_ok else 3,
+            "message": "NO_ALARM" if data.last_hardware_update_ok else "COMM_ALARM",
+        }
+
+        self.run_number.post(str(data.run_number), **kwargs)
+        self.i_run_number.post(data.run_number, **kwargs)
+        self.hw_running.post(data.running, **kwargs)
+        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.name, **kwargs)
+        self.hard_vetoes_rbv.post(data.hard_vetoes_rbv, **kwargs)
+        self.num_periods_rbv.post(data.num_periods_rbv, **kwargs)
+        self.period_rbv.post(data.current_period_rbv, **kwargs)
+        self.period_type_rbv.post(data.period_mode_rbv.name, **kwargs)
+        self.frame_sync_delay_rbv.post(data.frame_sync_delay_rbv, **kwargs)
 
 
 def static_pv_provider(
