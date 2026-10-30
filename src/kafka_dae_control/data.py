@@ -52,6 +52,7 @@ class Data(BaseModel):
 
     hard_vetoes_rbv: int = 0xFFFF
     """Hard vetoes readback bit mask"""
+
     num_periods_sp: int = 1
     """Number of periods (setpoint)."""
 

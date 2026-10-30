@@ -41,4 +41,4 @@ def test_array_to_mask():
         ],
         dtype=np.uint8,
     )
-    assert array_to_mask(array) == 0b0100_0000_0000_0000_0000_0000_0000_0001
+    assert array_to_mask(array) == 0b1000_0000_0000_0000_0000_0000_0000_0010

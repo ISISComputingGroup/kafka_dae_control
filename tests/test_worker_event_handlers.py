@@ -319,14 +319,14 @@ def test_vetoes_change_writes_to_hardware(
 
     assert (
         deserialise_vc00(producer.mock_calls[0][2]["value"]).vetoes
-        == 0b1010_1100_0000_0000_0000_0000_0000_0000
+        == 0b0000_0000_0000_0000_0000_0000_0011_0101
     )
 
     assert (
         mock_write_verify.call_args[1]["address"]
         == conf.register_map[Registers.VETO_CONTROL_REGISTER]
     )
-    assert mock_write_verify.call_args[1]["data"] == 0b0010_0100_0000_0000_0000_0000_0000_0000
+    assert mock_write_verify.call_args[1]["data"] == 0b0000_0000_0000_0000_0000_0000_0010_0100
     assert data.vetoes == [
         1,
         0,

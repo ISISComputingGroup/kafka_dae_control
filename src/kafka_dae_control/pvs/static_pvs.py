@@ -1,6 +1,7 @@
 """Static PVs for KDAECTRL."""
 
 import logging
+import time
 from queue import PriorityQueue
 
 from p4p.nt import NTEnum, NTScalar
@@ -145,7 +146,7 @@ class StaticPVs:
             queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(done_event=ev)))
             try:
                 ev.wait()
-                pv.post(0)
+                pv.post(0, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to begin: {e}")
@@ -157,7 +158,7 @@ class StaticPVs:
             queue.put(QueueItem(QueuePriority.HIGH, EndEvent(done_event=ev)))
             try:
                 ev.wait()
-                pv.post(0)
+                pv.post(0, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to end: {e}")
@@ -175,7 +176,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set frame_sync_select_sp: {e}")
@@ -188,7 +189,7 @@ class StaticPVs:
             queue.put(QueueItem(QueuePriority.HIGH, VetoesUpdateEvent(value=value, done_event=ev)))
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set soft_vetoes: {e}")
@@ -203,7 +204,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set num_periods_sp: {e}")
@@ -221,7 +222,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set period_sp: {e}")
@@ -239,7 +240,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set period_sp: {e}")
@@ -257,7 +258,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(0)
+                pv.post(0, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to pause: {e}")
@@ -275,7 +276,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(0)
+                pv.post(0, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to resume: {e}")
@@ -311,7 +312,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set frame sync delay: {e}")
@@ -323,15 +324,16 @@ class StaticPVs:
             data: the data class containing the state of the program.
 
         """
-        self.run_number.post(str(data.run_number))
-        self.i_run_number.post(data.run_number)
-        self.hw_running.post(data.running)
-        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.name)
-        self.hard_vetoes_rbv.post(data.hard_vetoes_rbv)
-        self.num_periods_rbv.post(data.num_periods_rbv)
-        self.period_rbv.post(data.current_period_rbv)
-        self.period_type_rbv.post(data.period_mode_rbv.name)
-        self.frame_sync_delay_rbv.post(data.frame_sync_delay_rbv)
+        now = time.time()
+        self.run_number.post(str(data.run_number), timestamp=now)
+        self.i_run_number.post(data.run_number, timestamp=now)
+        self.hw_running.post(data.running, timestamp=now)
+        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.name, timestamp=now)
+        self.hard_vetoes_rbv.post(data.hard_vetoes_rbv, timestamp=now)
+        self.num_periods_rbv.post(data.num_periods_rbv, timestamp=now)
+        self.period_rbv.post(data.current_period_rbv, timestamp=now)
+        self.period_type_rbv.post(data.period_mode_rbv.name, timestamp=now)
+        self.frame_sync_delay_rbv.post(data.frame_sync_delay_rbv, timestamp=now)
 
 
 def static_pv_provider(
