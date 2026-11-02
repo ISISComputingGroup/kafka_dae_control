@@ -1,9 +1,7 @@
 """Data class containing the state of the program."""
 
 import logging
-from datetime import datetime
-from typing import TypeVar
-from zoneinfo import ZoneInfo
+from typing import Any, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -79,8 +77,8 @@ class Data(BaseModel):
     frame_sync_delay_rbv: int = 0
     """The frame sync delay readback (us)."""
 
-    most_recent_run_start_timestamp: datetime = datetime.now(ZoneInfo("Europe/London"))
-    """The timestamp for the most recent run-start.
+    most_recent_run_start_args: dict[str, Any] = {}
+    """The arguments for constructing the most recent run-start blob.
      This is used when cancelling an abort to re-send the run start."""
 
     last_hardware_update_ok: bool = False

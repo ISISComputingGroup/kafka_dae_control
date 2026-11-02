@@ -98,13 +98,25 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         done_event.err = e
         return
     data.job_id = str(uuid.uuid4())
-    start_time = (
-        datetime.now(ZoneInfo("Europe/London"))
-        if not to_recover
-        else data.most_recent_run_start_timestamp
-    )
-    data.most_recent_run_start_timestamp = start_time
-    blob = _create_run_start(config, data, start_time)
+    run_name = f"{config.instrument_name}{data.run_number:08d}"
+
+    if to_recover:
+        args = dict(data.most_recent_run_start_args)
+        args["job_id"] = data.job_id
+    else:
+        args = {
+            "job_id": data.job_id,
+            "filename": f"{run_name}.nxs",
+            "start_time": datetime.now(ZoneInfo("Europe/London")),
+            "run_name": run_name,
+            "nexus_structure": generate_nexus_structure(config, data),
+            "instrument_name": config.instrument_name,
+            "control_topic": config.runinfo_topic,
+            "n_periods": data.num_periods_sp,
+        }
+        data.most_recent_run_start_args = args
+    blob = serialise_pl72(**args)
+
     try:
         pause_or_resume_done_event = EventWithError()
         handle_pause_or_resume(to_pause, config, data, sock, sock_lock, pause_or_resume_done_event)
@@ -164,21 +176,6 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         logger.exception("Failed to start run: ")
         done_event.err = e
         return
-
-
-def _create_run_start(config: ControlConfig, data: Data, start_time: datetime) -> bytes:
-    run_name = f"{config.instrument_name}{data.run_number:08d}"
-    blob = serialise_pl72(
-        job_id=data.job_id,
-        filename=f"{run_name}.nxs",
-        start_time=start_time,
-        run_name=run_name,
-        nexus_structure=generate_nexus_structure(config, data),
-        instrument_name=config.instrument_name,
-        control_topic=config.runinfo_topic,
-        n_periods=data.num_periods_sp,
-    )
-    return blob
 
 
 def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
