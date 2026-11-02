@@ -67,37 +67,6 @@ def delivery_report_set_error_or_done(
         done_event.set()
 
 
-def handle_cancel_abort(
-    config: ControlConfig,
-    data: Data,
-    producer: Producer,
-    done_event: EventWithError,
-) -> None:
-    """Re-send the last run start message with a new job ID.
-
-    Args:
-        config: the program's configuration.
-        data: the data class containing the state of the program.
-        producer: the Kafka producer.
-        done_event: The event to call set() or set exception depending on result.
-
-    """
-    # todo: hmmmmmmmmmm actually this wants to probably just be handle_begin with an extra bool at the end - delete this func and do that.
-    # when cancel aborting basically do everything else the same but:
-    # A) don't re-send vetoes, as there should be one within the last run anyway
-    # B) change job ID before sending - though we do this anyway on a run start. maybe not so bad?
-    data.job_id = str(uuid.uuid4())
-    blob = _create_run_start(config, data, data.most_recent_run_start_timestamp)
-    logger.debug("Cancel abort: about to produce blob %s to %s", blob, config.runinfo_topic)
-    producer.produce(
-        config.runinfo_topic,
-        blob,
-        callback=partial(delivery_report_set_error_or_done, done_event),
-    )
-    producer.flush(timeout=config.flush_timeout_s)
-    logger.info("Re-sent run start to %s", config.runinfo_topic)
-
-
 def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-arguments]
     config: ControlConfig,
     data: Data,
@@ -107,6 +76,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
     done_event: EventWithError,
     queue: PriorityQueue[QueueItem],
     to_pause: bool,
+    to_recover: bool = False,
 ) -> None:
     """Handle a begin command.
 
@@ -119,6 +89,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         done_event: The event to call set() on when complete
         queue: The queue to put hardware polling updates on after beginning
         to_pause: Whether to pause or resume just before beginning.
+        to_recover: Whether to re-send the last run start timestamp.
 
     """
     if data.running:
@@ -127,7 +98,11 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         done_event.err = e
         return
     data.job_id = str(uuid.uuid4())
-    start_time = datetime.now(ZoneInfo("Europe/London"))
+    start_time = (
+        datetime.now(ZoneInfo("Europe/London"))
+        if not to_recover
+        else data.most_recent_run_start_timestamp
+    )
     data.most_recent_run_start_timestamp = start_time
     blob = _create_run_start(config, data, start_time)
     try:
