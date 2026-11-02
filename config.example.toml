@@ -42,7 +42,6 @@ veto_names = [
     "Wrong Pulse",
     "ISIS slow",
     "Run control",
-    "Run control",
     "Pause",
     "Period overflow",
     "Dwell period",

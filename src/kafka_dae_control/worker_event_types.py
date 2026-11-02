@@ -25,15 +25,18 @@ class DoneEvent:
 
 
 @dataclass
-class BeginEvent(DoneEvent):
-    """An event signalling a begin."""
-
-
-@dataclass
 class WorkerEventWithValue[T](ABC):
     """A worker event with a value field."""
 
     value: T
+
+
+@dataclass
+class BeginEvent(WorkerEventWithValue[bool], DoneEvent):
+    """An event signalling a begin.
+
+    Also contains a value for whether to pause when beginning.
+    """
 
 
 @dataclass
@@ -67,6 +70,11 @@ class HardwareUpdate:
 @dataclass
 class HardwareUpdateEvent(WorkerEventWithValue[HardwareUpdate]):
     """An event signalling a hardware update."""
+
+
+@dataclass
+class HardwareUpdateFailedEvent:
+    """An event signalling a hardware update failed."""
 
 
 @dataclass
@@ -117,6 +125,7 @@ WorkerEvent = (
     | BeginEvent
     | EndEvent
     | HardwareUpdateEvent
+    | HardwareUpdateFailedEvent
     | BlocksUpdateEvent
     | FrameSyncSelectChangeEvent
     | VetoesUpdateEvent

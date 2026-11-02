@@ -1,6 +1,7 @@
 """Static PVs for KDAECTRL."""
 
 import logging
+import time
 from queue import PriorityQueue
 
 from p4p.nt import NTEnum, NTScalar
@@ -63,7 +64,8 @@ class StaticPVs:
                 "index": data.frame_sync_select_sp,
             },
         )
-        self.begin = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
+        self.begin_run_ex = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
+        self.begin_run = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.end = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.pause = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.resume = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
@@ -141,14 +143,27 @@ class StaticPVs:
             },
         )
 
-        @self.begin.put  # pragma: no cover
-        def begin_put(pv: SharedPV, op: ServerOperation) -> None:
-            logger.info("begin")
+        @self.begin_run_ex.put  # pragma: no cover
+        def begin_run_ex_put(pv: SharedPV, op: ServerOperation) -> None:
+            value = op.value()
+            logger.info("beginrunex with value %s", value)
             ev = EventWithError()
-            queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(done_event=ev)))
+            queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(value=value, done_event=ev)))
             try:
                 ev.wait()
-                pv.post(0)
+                pv.post(0, timestamp=time.time())
+                op.done()
+            except Exception as e:  # ruff:ignore[blind-except]
+                op.done(error=f"Failed to begin: {e}")
+
+        @self.begin_run.put  # pragma: no cover
+        def begin_run_put(pv: SharedPV, op: ServerOperation) -> None:
+            logger.info("beginrun")
+            ev = EventWithError()
+            queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(value=False, done_event=ev)))
+            try:
+                ev.wait()
+                pv.post(0, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to begin: {e}")
@@ -160,7 +175,7 @@ class StaticPVs:
             queue.put(QueueItem(QueuePriority.HIGH, EndEvent(value=False, done_event=ev)))
             try:
                 ev.wait()
-                pv.post(0)
+                pv.post(0, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to end: {e}")
@@ -202,7 +217,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set frame_sync_select_sp: {e}")
@@ -215,7 +230,7 @@ class StaticPVs:
             queue.put(QueueItem(QueuePriority.HIGH, VetoesUpdateEvent(value=value, done_event=ev)))
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set soft_vetoes: {e}")
@@ -230,7 +245,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set num_periods_sp: {e}")
@@ -248,7 +263,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set period_sp: {e}")
@@ -266,7 +281,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set period_sp: {e}")
@@ -284,7 +299,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(0)
+                pv.post(0, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to pause: {e}")
@@ -302,7 +317,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(0)
+                pv.post(0, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to resume: {e}")
@@ -338,7 +353,7 @@ class StaticPVs:
             )
             try:
                 ev.wait()
-                pv.post(value)
+                pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to set frame sync delay: {e}")
@@ -350,15 +365,21 @@ class StaticPVs:
             data: the data class containing the state of the program.
 
         """
-        self.run_number.post(str(data.run_number))
-        self.i_run_number.post(data.run_number)
-        self.hw_running.post(data.running)
-        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.name)
-        self.hard_vetoes_rbv.post(data.hard_vetoes_rbv)
-        self.num_periods_rbv.post(data.num_periods_rbv)
-        self.period_rbv.post(data.current_period_rbv)
-        self.period_type_rbv.post(data.period_mode_rbv.name)
-        self.frame_sync_delay_rbv.post(data.frame_sync_delay_rbv)
+        kwargs = {
+            "timestamp": time.time(),
+            "severity": 0 if data.last_hardware_update_ok else 3,
+            "message": "NO_ALARM" if data.last_hardware_update_ok else "COMM_ALARM",
+        }
+
+        self.run_number.post(str(data.run_number), **kwargs)
+        self.i_run_number.post(data.run_number, **kwargs)
+        self.hw_running.post(data.running, **kwargs)
+        self.frame_sync_select_rbv.post(data.frame_sync_select_rbv.name, **kwargs)
+        self.hard_vetoes_rbv.post(data.hard_vetoes_rbv, **kwargs)
+        self.num_periods_rbv.post(data.num_periods_rbv, **kwargs)
+        self.period_rbv.post(data.current_period_rbv, **kwargs)
+        self.period_type_rbv.post(data.period_mode_rbv.name, **kwargs)
+        self.frame_sync_delay_rbv.post(data.frame_sync_delay_rbv, **kwargs)
 
 
 def static_pv_provider(
@@ -379,7 +400,8 @@ def static_pv_provider(
     static_pvs = StaticPVs(data, queue)
     static_provider = StaticProvider()
     static_provider.add(f"{pv_prefix}HWRUNNING", static_pvs.hw_running)
-    static_provider.add(f"{pv_prefix}BEGINRUNEX", static_pvs.begin)
+    static_provider.add(f"{pv_prefix}BEGINRUNEX", static_pvs.begin_run_ex)
+    static_provider.add(f"{pv_prefix}BEGINRUN", static_pvs.begin_run)
     static_provider.add(f"{pv_prefix}ENDRUN", static_pvs.end)
     static_provider.add(f"{pv_prefix}PAUSERUN", static_pvs.pause)
     static_provider.add(f"{pv_prefix}RESUMERUN", static_pvs.resume)

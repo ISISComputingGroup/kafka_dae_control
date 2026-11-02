@@ -54,6 +54,7 @@ class Data(BaseModel):
 
     hard_vetoes_rbv: int = 0xFFFF
     """Hard vetoes readback bit mask"""
+
     num_periods_sp: int = 1
     """Number of periods (setpoint)."""
 
@@ -81,3 +82,6 @@ class Data(BaseModel):
     most_recent_run_start_timestamp: datetime = datetime.now(ZoneInfo("Europe/London"))
     """The timestamp for the most recent run-start.
      This is used when cancelling an abort to re-send the run start."""
+
+    last_hardware_update_ok: bool = False
+    """Whether the most recent hardware update successfully polled the hardware."""
