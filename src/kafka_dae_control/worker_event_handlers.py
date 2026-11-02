@@ -109,9 +109,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
     )
     try:
         pause_or_resume_done_event = EventWithError()
-        handle_pause_or_resume(
-            to_pause, config, data, sock, sock_lock, pause_or_resume_done_event, force=True
-        )
+        handle_pause_or_resume(to_pause, config, data, sock, sock_lock, pause_or_resume_done_event)
         if pause_or_resume_done_event.err is not None:
             raise OSError(
                 f"Could not pause or resume before beginning, not trying to begin."
@@ -456,7 +454,6 @@ def handle_pause_or_resume(  # ruff:ignore[too-many-arguments, too-many-position
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithError,
-    force: bool = False,
 ) -> None:
     """Handle a pause or resume.
 
@@ -467,20 +464,16 @@ def handle_pause_or_resume(  # ruff:ignore[too-many-arguments, too-many-position
         sock: the socket instance.
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete
-        force: Whether to set the hardware even if already in the desired state (paused/resumed)
-         instead of raising an error.
 
     """
     bit_to_change = 1 << PAUSE_VETO_TOGGLE_BIT
 
-    if not force and data.paused == value:
-        error_message = (
-            f"Cannot {'pause' if value else 'resume'} "
-            f"if already {'paused' if value else 'running'}."
+    if data.paused == value:
+        logger.warning(
+            "Current pause/resume (%s) and requested state (%s) are the same. Setting anyway.",
+            data.paused,
+            value,
         )
-        logger.error(error_message)
-        done_event.err = Exception(error_message)
-        return
 
     try:
         with sock_lock:

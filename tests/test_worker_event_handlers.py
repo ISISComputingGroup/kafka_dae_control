@@ -56,7 +56,6 @@ def pause_or_resume_side_effect_set(  # ruff: ignore[too-many-arguments, too-man
     sock: socket.SocketType,
     sock_lock: threading.RLock,
     done_event: EventWithError,
-    force: bool,
 ):
     done_event.set()
 
@@ -674,26 +673,6 @@ def test_resume_fails_to_write_errors(
     handle_pause_or_resume(False, conf, data, Mock(), MagicMock(spec=RLock()), done_event)
     assert done_event.err is not None
     assert "Failed to pause/resume" in caplog.text
-
-
-def test_cannot_pause_if_already_paused(
-    data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
-):
-    data.paused = True
-    done_event = EventWithError()
-    handle_pause_or_resume(True, conf, data, Mock(), MagicMock(spec=RLock()), done_event)
-    assert done_event.err is not None
-    assert "Cannot pause if already paused" in caplog.text
-
-
-def test_cannot_resume_if_already_running(
-    data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
-):
-    data.paused = False
-    done_event = EventWithError()
-    handle_pause_or_resume(False, conf, data, Mock(), MagicMock(spec=RLock()), done_event)
-    assert done_event.err is not None
-    assert "Cannot resume if already running" in caplog.text
 
 
 @patch("kafka_dae_control.worker_event_handlers.write_verify")
