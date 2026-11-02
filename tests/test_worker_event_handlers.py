@@ -120,7 +120,7 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
         assert run_start.job_id == data.job_id
         assert run_start.instrument_name == "TESTINST"
         assert run_start.control_topic == "run-info-topic"
-        assert run_start.run_name == "TESTINST123"
+        assert run_start.run_name == "TESTINST00000123"
         assert run_start.nexus_structure == nexus_structure
         assert run_start.n_periods == 69
 
@@ -481,14 +481,14 @@ def test_vetoes_change_writes_to_hardware(
 
     assert (
         deserialise_vc00(producer.mock_calls[0][2]["value"]).vetoes
-        == 0b1010_1100_0000_0000_0000_0000_0000_0000
+        == 0b0000_0000_0000_0000_0000_0000_0011_0101
     )
 
     assert (
         mock_write_verify.call_args[1]["address"]
         == conf.register_map[Registers.VETO_CONTROL_REGISTER]
     )
-    assert mock_write_verify.call_args[1]["data"] == 0b0010_0100_0000_0000_0000_0000_0000_0000
+    assert mock_write_verify.call_args[1]["data"] == 0b0000_0000_0000_0000_0000_0000_0010_0100
     assert data.vetoes == [
         1,
         0,

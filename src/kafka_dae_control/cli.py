@@ -2,7 +2,6 @@
 
 import argparse
 import logging
-import os
 
 from kafka_dae_control.config import load_config
 from kafka_dae_control.serve import serve
@@ -12,20 +11,12 @@ try:
     import epicscorelibs.path.pyepics  # ruff:ignore[unused-import]
 except ImportError:
     pass
-import sys
 
 logger = logging.getLogger(__name__)
 
 
 def main() -> None:
     """Run the IOC."""
-    if "EPICS_CA_ADDR_LIST" not in os.environ:
-        logger.error("EPICS_CA_ADDR_LIST not set")
-        sys.exit(1)
-    if "EPICS_PVAS_INTF_ADDR_LIST" not in os.environ:
-        logger.error("EPICS_PVAS_INTF_ADDR_LIST not set")
-        sys.exit(1)
-
     ap = argparse.ArgumentParser(
         description="KDAECTRL - Kafka-dae-control",
         epilog="This relies on EPICS environment variables. These are:"
