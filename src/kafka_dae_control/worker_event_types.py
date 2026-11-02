@@ -65,6 +65,11 @@ class HardwareUpdateEvent(WorkerEventWithValue[HardwareUpdate]):
 
 
 @dataclass
+class HardwareUpdateFailedEvent:
+    """An event signalling a hardware update failed."""
+
+
+@dataclass
 class BlocksUpdateEvent(WorkerEventWithValue[list[str]]):
     """An event signalling a blocks update."""
 
@@ -112,6 +117,7 @@ WorkerEvent = (
     | BeginEvent
     | EndEvent
     | HardwareUpdateEvent
+    | HardwareUpdateFailedEvent
     | BlocksUpdateEvent
     | FrameSyncSelectChangeEvent
     | VetoesUpdateEvent
