@@ -63,7 +63,8 @@ class StaticPVs:
                 "index": data.frame_sync_select_sp,
             },
         )
-        self.begin = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
+        self.begin_run_ex = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
+        self.begin_run = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.end = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.pause = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.resume = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
@@ -139,11 +140,24 @@ class StaticPVs:
             },
         )
 
-        @self.begin.put  # pragma: no cover
-        def begin_put(pv: SharedPV, op: ServerOperation) -> None:
-            logger.info("begin")
+        @self.begin_run_ex.put  # pragma: no cover
+        def begin_run_ex_put(pv: SharedPV, op: ServerOperation) -> None:
+            value = op.value()
+            logger.info("beginrunex with value %s", value)
             ev = EventWithError()
-            queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(done_event=ev)))
+            queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(value=value, done_event=ev)))
+            try:
+                ev.wait()
+                pv.post(0, timestamp=time.time())
+                op.done()
+            except Exception as e:  # ruff:ignore[blind-except]
+                op.done(error=f"Failed to begin: {e}")
+
+        @self.begin_run.put  # pragma: no cover
+        def begin_run_put(pv: SharedPV, op: ServerOperation) -> None:
+            logger.info("beginrun")
+            ev = EventWithError()
+            queue.put(QueueItem(QueuePriority.HIGH, BeginEvent(value=False, done_event=ev)))
             try:
                 ev.wait()
                 pv.post(0, timestamp=time.time())
@@ -359,7 +373,8 @@ def static_pv_provider(
     static_pvs = StaticPVs(data, queue)
     static_provider = StaticProvider()
     static_provider.add(f"{pv_prefix}HWRUNNING", static_pvs.hw_running)
-    static_provider.add(f"{pv_prefix}BEGINRUNEX", static_pvs.begin)
+    static_provider.add(f"{pv_prefix}BEGINRUNEX", static_pvs.begin_run_ex)
+    static_provider.add(f"{pv_prefix}BEGINRUN", static_pvs.begin_run)
     static_provider.add(f"{pv_prefix}ENDRUN", static_pvs.end)
     static_provider.add(f"{pv_prefix}PAUSERUN", static_pvs.pause)
     static_provider.add(f"{pv_prefix}RESUMERUN", static_pvs.resume)
