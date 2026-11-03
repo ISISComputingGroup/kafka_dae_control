@@ -75,6 +75,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
     sock_lock: threading.RLock,
     done_event: EventWithError,
     queue: PriorityQueue[QueueItem],
+    to_pause: bool,
 ) -> None:
     """Handle a begin command.
 
@@ -86,6 +87,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete
         queue: The queue to put hardware polling updates on after beginning
+        to_pause: Whether to pause or resume just before beginning.
 
     """
     if data.running:
@@ -107,6 +109,27 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         detector_spectrum_map=data.detector_spectrum_mapping.to_df12_blob(),
     )
     try:
+        pause_or_resume_done_event = EventWithError()
+        handle_pause_or_resume(to_pause, config, data, sock, sock_lock, pause_or_resume_done_event)
+        if pause_or_resume_done_event.err is not None:
+            raise OSError(
+                f"Could not pause or resume before beginning, not trying to begin."
+                f" Error: {pause_or_resume_done_event.err}"
+            )
+        if not pause_or_resume_done_event.is_set():
+            raise OSError("Could not pause or resume before beginning, not trying to begin")
+        if data.period_mode_sp == PeriodMode.COMPUTER:
+            set_period_num_done_event = EventWithError()
+            set_current_period(1, config, data, sock, sock_lock, set_period_num_done_event)
+            if set_period_num_done_event.err is not None:
+                raise OSError(
+                    f"Could not set current period back to 1 before beginning, not trying to begin."
+                    f" Error: {set_period_num_done_event.err}"
+                )
+            if not set_period_num_done_event.is_set():
+                raise OSError(
+                    "Could not set current period back to 1 before beginning, not trying to begin"
+                )
         with sock_lock:
             write_verify(
                 config,
@@ -447,13 +470,11 @@ def handle_pause_or_resume(  # ruff:ignore[too-many-arguments, too-many-position
     bit_to_change = 1 << PAUSE_VETO_TOGGLE_BIT
 
     if data.paused == value:
-        error_message = (
-            f"Cannot {'pause' if value else 'resume'} "
-            f"if already {'paused' if value else 'running'}."
+        logger.warning(
+            "Current pause/resume (%s) and requested state (%s) are the same. Setting anyway.",
+            data.paused,
+            value,
         )
-        logger.error(error_message)
-        done_event.err = Exception(error_message)
-        return
 
     try:
         with sock_lock:

@@ -33,6 +33,7 @@ from kafka_dae_control.worker_event_types import (
     FrameSyncDelaySetpointEvent,
     FrameSyncSelectChangeEvent,
     HardwareUpdateEvent,
+    HardwareUpdateFailedEvent,
     NumberOfPeriodsSetEvent,
     PauseResumeEvent,
     PeriodModeSetEvent,
@@ -80,10 +81,13 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 data.current_period_rbv = value.period_comp_current + 1
                 data.period_mode_rbv = value.period_mode
                 data.frame_sync_delay_rbv = value.frame_sync_delay
+                data.last_hardware_update_ok = True
+            case HardwareUpdateFailedEvent():
+                data.last_hardware_update_ok = False
             case BlocksUpdateEvent(value):
                 data.blocks = value
-            case BeginEvent(done_event=done_event):
-                handle_begin(config, data, producer, sock, sock_lock, done_event, queue)
+            case BeginEvent(value=value, done_event=done_event):
+                handle_begin(config, data, producer, sock, sock_lock, done_event, queue, value)
             case EndEvent(done_event=done_event):
                 handle_end(config, data, producer, sock, sock_lock, done_event, queue)
             case FrameSyncSelectChangeEvent(value=value, done_event=done_event):
