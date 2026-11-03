@@ -186,7 +186,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
     sock_lock: threading.RLock,
     done_event: EventWithError,
     queue: PriorityQueue[QueueItem],
-    abort: bool,
+    abort: bool = False,
 ) -> None:
     """Handle an end command.
 
