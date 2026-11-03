@@ -98,7 +98,7 @@ class Data(BaseModel):
     period_mode_rbv: PeriodMode = PeriodMode.UNKNOWN
     """The period mode readback."""
 
-    detector_spectrum_mapping: DetectorSpectraMapping = DetectorSpectraMapping()
+    detector_spectrum_mapping: DetectorSpectraMapping = DetectorSpectraMapping({})
 
     frame_sync_delay_sp: int = 0
     """The frame sync delay setpoint (us)."""

@@ -126,7 +126,7 @@ class StaticPVs:
             },
         )
         self.detectra_spectrum_mapping = SharedPV(
-            nt=NTScalar(display=True, form=True),
+            nt=NTScalar("s", display=True, form=True),
             initial={"value": data.detector_spectrum_mapping.model_dump_json()},
         )
         self.frame_sync_delay_rbv = SharedPV(
@@ -304,6 +304,7 @@ class StaticPVs:
         @self.detectra_spectrum_mapping.put
         def detectra_spectrum_mapping_put(pv: SharedPV, op: ServerOperation) -> None:
             value = op.value()
+            logger.info("detector spectrum mapping put with %s", op.value())
             try:
                 d = DetectorSpectraMapping.model_validate(value)
                 queue.put(
