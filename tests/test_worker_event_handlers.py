@@ -1,3 +1,4 @@
+import datetime
 import ipaddress
 import socket
 import threading
@@ -699,3 +700,87 @@ def test_change_frame_sync_delay_fails_to_write_to_hardware(
     assert "Failed to set frame_sync_delay" in caplog.text
     assert done_event.is_set()
     assert done_event.err is not None
+
+
+def test_abort_does_not_increment_run_number(
+    data: Data, conf: ControlConfig, caplog: pytest.LogCaptureFixture
+):
+    data.job_id = "job-id-123"
+    data.run_number = 7
+    data.running = True
+    producer = Mock()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    done_event = Mock()
+
+    with patch("kafka_dae_control.worker_event_handlers.write_AND_INV_then_verify"):
+        producer.flush.side_effect = done_event.set()
+        handle_end(
+            data=data,
+            config=conf,
+            producer=producer,
+            sock=sock,
+            sock_lock=sock_lock,
+            done_event=done_event,
+            queue=PriorityQueue[QueueItem](),
+            abort=True,
+        )
+        assert data.run_number == 7
+
+
+def test_recover_sends_same_run_start_blob_with_different_job_id(data: Data, conf: ControlConfig):
+    data.run_number = 123
+    data.running = False
+    data.job_id = "job-12345"
+
+    data.most_recent_run_start_args = {
+        "job_id": "job-12345",
+        "filename": "blah.nxs",
+        "start_time": datetime.MINYEAR,
+        "run_name": "blah1",
+        "nexus_structure": "{}",
+        "instrument_name": "aninstrument",
+        "control_topic": "run-info-topic",
+        "n_periods": 234,
+    }
+    producer = Mock()
+    sock = Mock()
+    sock_lock = MagicMock(spec=RLock())
+    done_event = Mock()
+
+    conf.board_ip = ipaddress.IPv4Address("127.0.0.1")
+    conf.runinfo_topic = "run-info-topic"
+
+    with (
+        patch("kafka_dae_control.worker_event_handlers.write_verify"),
+        patch(
+            "kafka_dae_control.worker_event_handlers.handle_pause_or_resume",
+            side_effect=pause_or_resume_side_effect_set,
+        ),
+    ):
+        producer.flush.side_effect = done_event.set()
+
+        handle_begin(
+            data=data,
+            config=conf,
+            producer=producer,
+            sock=sock,
+            sock_lock=sock_lock,
+            done_event=done_event,
+            queue=PriorityQueue[QueueItem](),
+            to_pause=False,
+            to_recover=True,
+        )
+
+        producer.produce.assert_called_once()
+        topic, blob = producer.produce.call_args.args
+        assert topic == "run-info-topic"
+
+        run_start = deserialise_pl72(blob)
+        assert run_start.job_id != "job-12345"
+        assert run_start.instrument_name == "aninstrument"
+        assert run_start.control_topic == "run-info-topic"
+        assert run_start.run_name == "blah1"
+        assert run_start.nexus_structure == "{}"
+        assert run_start.n_periods == 234
+        assert data.run_number == 123

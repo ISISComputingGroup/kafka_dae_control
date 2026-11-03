@@ -76,6 +76,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
     done_event: EventWithError,
     queue: PriorityQueue[QueueItem],
     to_pause: bool,
+    to_recover: bool = False,
 ) -> None:
     """Handle a begin command.
 
@@ -88,6 +89,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         done_event: The event to call set() on when complete
         queue: The queue to put hardware polling updates on after beginning
         to_pause: Whether to pause or resume just before beginning.
+        to_recover: Whether to re-send the last run start timestamp.
 
     """
     if data.running:
@@ -97,16 +99,24 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         return
     data.job_id = str(uuid.uuid4())
     run_name = f"{config.instrument_name}{data.run_number:08d}"
-    blob = serialise_pl72(
-        job_id=data.job_id,
-        filename=f"{run_name}.nxs",
-        start_time=datetime.now(ZoneInfo("Europe/London")),
-        run_name=run_name,
-        nexus_structure=generate_nexus_structure(config, data),
-        instrument_name=config.instrument_name,
-        control_topic=config.runinfo_topic,
-        n_periods=data.num_periods_sp,
-    )
+
+    if to_recover:
+        args = dict(data.most_recent_run_start_args)
+        args["job_id"] = data.job_id
+    else:
+        args = {
+            "job_id": data.job_id,
+            "filename": f"{run_name}.nxs",
+            "start_time": datetime.now(ZoneInfo("Europe/London")),
+            "run_name": run_name,
+            "nexus_structure": generate_nexus_structure(config, data),
+            "instrument_name": config.instrument_name,
+            "control_topic": config.runinfo_topic,
+            "n_periods": data.num_periods_sp,
+        }
+        data.most_recent_run_start_args = args
+    blob = serialise_pl72(**args)
+
     try:
         pause_or_resume_done_event = EventWithError()
         handle_pause_or_resume(to_pause, config, data, sock, sock_lock, pause_or_resume_done_event)
@@ -176,6 +186,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
     sock_lock: threading.RLock,
     done_event: EventWithError,
     queue: PriorityQueue[QueueItem],
+    abort: bool = False,
 ) -> None:
     """Handle an end command.
 
@@ -187,6 +198,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
         sock_lock: the lock to acquire when using the socket instance.
         done_event: The event to call set() on when complete
         queue: The queue to put hardware polling updates on after ending
+        abort: Whether to abort the current run.
 
     """
     if not data.running:
@@ -194,7 +206,9 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
         logger.error(e)
         done_event.err = e
         return
-    blob = serialise_6s4t(job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London")))
+    blob = serialise_6s4t(
+        job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London")), abort=abort
+    )
     try:
         with sock_lock:
             # clear the ethernet override bit.
@@ -213,7 +227,8 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
         )
         producer.flush(timeout=config.flush_timeout_s)
         logger.info("sent run stop to %s", config.runinfo_topic)
-        data.run_number += 1
+        if not abort:
+            data.run_number += 1
         save_file(data, state_file=config.state_file)
         # immediately poll hardware to avoid being able to end again before hardware is updated
         poll_hardware(

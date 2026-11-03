@@ -14,6 +14,7 @@ from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
+    CancelAbortEvent,
     CurrentPeriodSetEvent,
     EndEvent,
     FrameSyncDelaySetpointEvent,
@@ -68,6 +69,8 @@ class StaticPVs:
         self.end = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.pause = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.resume = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
+        self.abort = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
+        self.cancel_abort = SharedPV(nt=NTScalar(display=True, form=True), initial={"value": False})
         self.run_number = SharedPV(
             nt=NTScalar("s", display=True, form=True), initial={"value": str(data.run_number)}
         )
@@ -169,13 +172,37 @@ class StaticPVs:
         def end_put(pv: SharedPV, op: ServerOperation) -> None:
             logger.info("end")
             ev = EventWithError()
-            queue.put(QueueItem(QueuePriority.HIGH, EndEvent(done_event=ev)))
+            queue.put(QueueItem(QueuePriority.HIGH, EndEvent(value=False, done_event=ev)))
             try:
                 ev.wait()
                 pv.post(0, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to end: {e}")
+
+        @self.abort.put
+        def abort_put(pv: SharedPV, op: ServerOperation) -> None:
+            logger.info("abort")
+            ev = EventWithError()
+            queue.put(QueueItem(QueuePriority.HIGH, EndEvent(value=True, done_event=ev)))
+            try:
+                ev.wait()
+                pv.post(0)
+                op.done()
+            except Exception as e:  # ruff:ignore[blind-except]
+                op.done(error=f"Failed to abort: {e}")
+
+        @self.cancel_abort.put
+        def cancel_abort_put(pv: SharedPV, op: ServerOperation) -> None:
+            logger.info("cancel abort")
+            ev = EventWithError()
+            queue.put(QueueItem(QueuePriority.HIGH, CancelAbortEvent(done_event=ev)))
+            try:
+                ev.wait()
+                pv.post(0)
+                op.done()
+            except Exception as e:  # ruff:ignore[blind-except]
+                op.done(error=f"Failed to cancel abort: {e}")
 
         @self.frame_sync_select_sp.put
         def frame_sync_select_sp_put(pv: SharedPV, op: ServerOperation) -> None:
@@ -378,6 +405,8 @@ def static_pv_provider(
     static_provider.add(f"{pv_prefix}ENDRUN", static_pvs.end)
     static_provider.add(f"{pv_prefix}PAUSERUN", static_pvs.pause)
     static_provider.add(f"{pv_prefix}RESUMERUN", static_pvs.resume)
+    static_provider.add(f"{pv_prefix}ABORTRUN", static_pvs.abort)
+    static_provider.add(f"{pv_prefix}RECOVERRUN", static_pvs.cancel_abort)
     static_provider.add(f"{pv_prefix}RUNNUMBER", static_pvs.run_number)
     static_provider.add(f"{pv_prefix}IRUNNUMBER", static_pvs.i_run_number)
     static_provider.add(f"{pv_prefix}DAETIMINGSOURCE", static_pvs.frame_sync_select_rbv)

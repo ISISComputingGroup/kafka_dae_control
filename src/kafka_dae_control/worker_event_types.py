@@ -40,8 +40,13 @@ class BeginEvent(WorkerEventWithValue[bool], DoneEvent):
 
 
 @dataclass
-class EndEvent(DoneEvent):
-    """An event signalling an end."""
+class EndEvent(WorkerEventWithValue[bool], DoneEvent):
+    """An event signalling an end. Has a bool which is set to True for aborting."""
+
+
+@dataclass
+class CancelAbortEvent(DoneEvent):
+    """An event signalling that the user has cancelled an abort."""
 
 
 @dataclass
@@ -130,4 +135,5 @@ WorkerEvent = (
     | PauseResumeEvent
     | RunControlUpdateEvent
     | FrameSyncDelaySetpointEvent
+    | CancelAbortEvent
 )
