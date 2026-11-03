@@ -1,5 +1,5 @@
 """Static PVs for KDAECTRL."""
-
+import json
 import logging
 import time
 from queue import PriorityQueue
@@ -125,7 +125,7 @@ class StaticPVs:
                 "index": data.period_mode_sp,
             },
         )
-        self.detectra_spectrum_mapping = SharedPV(
+        self.detector_spectrum_mapping = SharedPV(
             nt=NTScalar("s", display=True, form=True),
             initial={"value": data.detector_spectrum_mapping.model_dump_json()},
         )
@@ -301,19 +301,27 @@ class StaticPVs:
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to resume: {e}")
 
-        @self.detectra_spectrum_mapping.put
-        def detectra_spectrum_mapping_put(pv: SharedPV, op: ServerOperation) -> None:
+        @self.detector_spectrum_mapping.put
+        def detector_spectrum_mapping_put(pv: SharedPV, op: ServerOperation) -> None:
+            logger.debug("before put????")
             value = op.value()
-            logger.info("detector spectrum mapping put with %s", op.value())
+            logger.info("detector spectrum mapping put with %r", op.value())
             try:
-                d = DetectorSpectraMapping.model_validate(value)
+                logger.info("before dict cast")
+                logger.info("RAW VALUE: %r", value)
+                logger.info("VALUE TYPE: %s", type(value))
+                logger.info("VALUE LENGTH: %s", len(str(value)))
+                as_dict = json.loads(str(value))
+                logger.info("hi %s", as_dict)
+                d = DetectorSpectraMapping.model_validate(as_dict)
                 queue.put(
                     QueueItem(
                         QueuePriority.HIGH,
                         DetSpecMapChangeEvent(value=d),
                     )
                 )
-                pv.post(value)
+                logger.debug("after put????")
+                pv.post(d.model_dump_json())
                 op.done()
 
             except ValidationError as e:
@@ -418,7 +426,7 @@ def static_pv_provider(
     static_provider.add(f"{pv_prefix}PERIOD:SP", static_pvs.period_sp)
     static_provider.add(f"{pv_prefix}PERIODTYPE", static_pvs.period_type_rbv)
     static_provider.add(f"{pv_prefix}PERIODTYPE:SP", static_pvs.period_type_sp)
-    static_provider.add(f"{pv_prefix}DETSPECMAP", static_pvs.detectra_spectrum_mapping)
+    static_provider.add(f"{pv_prefix}DETSPECMAP", static_pvs.detector_spectrum_mapping)
     static_provider.add(f"{pv_prefix}FRAME_SYNC_DELAY", static_pvs.frame_sync_delay_rbv)
     static_provider.add(f"{pv_prefix}FRAME_SYNC_DELAY:SP", static_pvs.frame_sync_delay_sp)
     return static_pvs, static_provider
