@@ -39,6 +39,9 @@ class ControlConfig(BaseModel):
     vetoes_topic: str
     """Veto configuration topic to push veto configuration updates to"""
 
+    metrics_port: int = 8400
+    """The TCP port on which to bind prometheus metrics"""
+
     local_ip: ipaddress.IPv4Address
     """Local IP to set the control board IP register to"""
 

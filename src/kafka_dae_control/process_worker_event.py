@@ -10,6 +10,9 @@ from confluent_kafka import Producer
 from kafka_dae_control.comms import set_board_response_ip
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
+from kafka_dae_control.metrics import (
+    UNHANDLED_WORKER_EVENT_FAILURES,
+)
 from kafka_dae_control.queue_utils import QueueItem
 from kafka_dae_control.worker_event_handlers import (
     handle_begin,
@@ -119,4 +122,5 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
             case _:
                 logger.error("Unknown event type: %s", worker_event)
     except Exception:
+        UNHANDLED_WORKER_EVENT_FAILURES.inc()
         logger.exception("Unhandled exception in handler thread: ")
