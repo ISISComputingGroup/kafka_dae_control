@@ -1,6 +1,10 @@
 """Prometheus-scrapable metrics exposed by `KDAECTRL`."""
 
+from typing import get_args
+
 from prometheus_client import Counter, Gauge, Summary
+
+from kafka_dae_control.worker_event_types import WorkerEvent
 
 _NAMESPACE = "kdaectrl"
 
@@ -73,8 +77,12 @@ UNHANDLED_WORKER_EVENT_FAILURES = Counter(
 WORKER_BUSY = Gauge(
     name="worker_busy",
     documentation="Whether the main-thread worker is currently busy",
+    labelnames=["event_type"],
     namespace=_NAMESPACE,
 )
+
+for worker_event_type in get_args(WorkerEvent):
+    WORKER_BUSY.labels(event_type=worker_event_type.__name__).set(0)
 
 WORKER_BUSY_DURATION = Summary(
     name="worker_busy_duration_seconds",

@@ -59,6 +59,7 @@ def serve(config: ControlConfig) -> None:
 
     logger.debug("Config mapping: %s", pprint.pformat(config.register_map))
     queue: PriorityQueue[QueueItem] = PriorityQueue(maxsize=0)
+    QUEUE_DEPTH.set_function(queue.qsize)
     queue.put(QueueItem(QueuePriority.HIGH, SetIPEvent()))
 
     data = load_data(config.state_file)
@@ -113,12 +114,13 @@ def serve(config: ControlConfig) -> None:
         f"{config.pv_prefix}CS:RC:INRANGE", callback=partial(run_control_update_callback, queue)
     )
 
-    QUEUE_DEPTH.set_function(queue.qsize)
-
     # Start the p4p thread pool.
     with server:
         while True:
             # This is the main worker thread.
             event = queue.get(block=True)
-            with WORKER_BUSY.track_inprogress(), WORKER_BUSY_DURATION.time():
+            with (
+                WORKER_BUSY.labels(event_type=event.item.__class__.__name__).track_inprogress(),
+                WORKER_BUSY_DURATION.time(),
+            ):
                 process_worker_event(queue, event.item, config, data, producer, sock, sock_lock)
