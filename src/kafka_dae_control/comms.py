@@ -20,6 +20,10 @@ from kafka_dae_control.defaults import (
     WRITE_PORT,
     Registers,
 )
+from kafka_dae_control.metrics import (
+    HARDWARE_COMMS_IP_RESETS_ATTEMPTED,
+    HARDWARE_COMMS_IP_RESETS_SUCCESS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -290,6 +294,7 @@ def set_board_response_ip(
         sock_lock: the lock to use when using the socket instance.
 
     """
+    HARDWARE_COMMS_IP_RESETS_ATTEMPTED.inc()
     ip = ip_address(config.local_ip)
     ip_int = int.from_bytes(ip.packed, byteorder="big")
     logger.debug("IP IS %s, int repr is %s", ip, ip_int)
@@ -301,3 +306,5 @@ def set_board_response_ip(
             data=ip_int,
             verify=lambda x: x == ip_int,
         )
+
+    HARDWARE_COMMS_IP_RESETS_SUCCESS.inc()
