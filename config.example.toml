@@ -32,6 +32,12 @@ state_file = "state.json"
 # Resend IP address to streaming control board after this many comms failures in a row
 resend_ip_after_connection_failures = 10
 
+# PV for the list of blocks to construct sample env placeholders for in the run start nexus_structure.
+blocks_pv = "IN:ALF:CS:BLOCKSERVER:BLOCKNAMES"
+
+# PV to monitor for setting the run control veto.
+run_control_in_range_pv = "IN:ALF:CS:RC:INRANGE"
+
 # Names of vetoes.
 # The first item in this list has bitmask (1 << 0), the last item has bitmask (1 << 31).
 # There must be exactly 32 entries in this list.

@@ -26,6 +26,8 @@ def conf() -> ControlConfig:
         events_topic="events-topic",
         vetoes_topic="vetoes-topic",
         veto_names=[f"veto_{n}" for n in range(NUM_VETOES)],
+        blocks_pv="IN:TEST:CS:BLOCKSERVER:BLOCKNAMES",
+        run_control_in_range_pv="IN:TEST:CS:RC:INRANGE",
     )
     cc.register_map = {
         Registers.RUNNING_REGISTER: RUNNING_REGISTER_ADDRESS,
