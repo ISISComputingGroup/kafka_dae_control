@@ -124,6 +124,10 @@ def poll_hardware(
             period_control_readback = _read(Registers.PERIOD_CONTROL)
 
             frame_sync_delay_readback = _read(Registers.FRAME_SYNC_DELAY_REGISTER)
+            run_start_gps_time_msb_readback = _read(Registers.RUN_START_GPS_TIME_MSB)
+            run_end_gps_time_msb_readback = _read(Registers.RUN_END_GPS_TIME_MSB)
+            run_start_gps_time_lsb_readback = _read(Registers.RUN_START_GPS_TIME_LSB)
+            run_end_gps_time_lsb_readback = _read(Registers.RUN_END_GPS_TIME_LSB)
 
             period_mode_isolated = period_control_readback & ~int(
                 PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE
@@ -144,7 +148,10 @@ def poll_hardware(
             period_number_limit=period_number_limit_readback,
             period_mode=period_mode,
             hard_vetoes=veto_control_raw_readback,
-            frame_sync_delay=frame_sync_delay_readback,
+            run_start_gps_time_msb=run_start_gps_time_msb_readback,
+            run_end_gps_time_msb=run_end_gps_time_msb_readback,
+            run_start_gps_time_lsb=run_start_gps_time_lsb_readback,
+            run_end_gps_time_lsb=run_end_gps_time_lsb_readback,
         )
         logger.debug("Hardware update: %s", h)
         queue.put(QueueItem(hardware_update_queue_priority, HardwareUpdateEvent(h)))

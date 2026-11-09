@@ -80,3 +80,10 @@ These PVs are in units of μs and must be set to a non-negative integer.
 
 See {external+ibex_developers_manual:doc}`specific_iocs/datastreaming/ADRs/009_frame_sync_delay` for further details
 about frame-sync delays.
+
+## `RUN_START_GPS_TIME` / `RUN_END_GPS_TIME`
+
+These PVs gather the GPS Time corresponding to the START/END of the run.
+
+These PVs are in units of ns and must be calculated fromt the most and least significant words returned by the hardware.
+

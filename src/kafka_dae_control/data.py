@@ -79,3 +79,10 @@ class Data(BaseModel):
 
     last_hardware_update_ok: bool = False
     """Whether the most recent hardware update successfully polled the hardware."""
+
+    run_start_gps_time_rbv: int = 0
+    """The GPS time at start of run"""
+
+    run_end_gps_time_rbv: int = 0
+    """The GPS time at end of run"""
+    

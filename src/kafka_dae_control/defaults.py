@@ -32,6 +32,10 @@ class Registers(StrEnum):
     VETO_TOGGLE = "vetoes_software"
 
     FRAME_SYNC_DELAY_REGISTER = "frame_sync_delay"
+    RUN_START_GPS_TIME_MSB = "run_start_gps_time_msb"
+    RUN_END_GPS_TIME_MSB = "run_end_gps_time_msb"
+    RUN_START_GPS_TIME_LSB = "run_start_gps_time_lsb"
+    RUN_END_GPS_TIME_LSB = "run_end_gps_time_lsb"
 
 
 class FrameSyncSelect(IntEnum):

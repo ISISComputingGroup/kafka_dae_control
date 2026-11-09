@@ -139,6 +139,14 @@ class StaticPVs:
                 "display.precision": 0,
             },
         )
+        
+        self.run_start_gps_time = SharedPV(
+            nt=NTScalar("L", display=True, form=True), initial={"value": data.run_start_gps_time_rbv}
+        )
+        self.run_end_gps_time = SharedPV(
+            nt=NTScalar("L", display=True, form=True), initial={"value": data.run_end_gps_time_rbv)}
+        )
+
 
         @self.begin_run_ex.put  # pragma: no cover
         def begin_run_ex_put(pv: SharedPV, op: ServerOperation) -> None:
@@ -353,7 +361,8 @@ class StaticPVs:
         self.period_rbv.post(data.current_period_rbv, **kwargs)
         self.period_type_rbv.post(data.period_mode_rbv.name, **kwargs)
         self.frame_sync_delay_rbv.post(data.frame_sync_delay_rbv, **kwargs)
-
+        self.run_start_gps_time.post(data.run_start_gps_time_rbv), **kwargs)
+        self.run_end_gps_time.post(data.run_end_gps_time_rbv), **kwargs)
 
 def static_pv_provider(
     pv_prefix: str, data: "Data", queue: PriorityQueue[QueueItem]
@@ -394,4 +403,6 @@ def static_pv_provider(
     static_provider.add(f"{pv_prefix}PERIODTYPE:SP", static_pvs.period_type_sp)
     static_provider.add(f"{pv_prefix}FRAME_SYNC_DELAY", static_pvs.frame_sync_delay_rbv)
     static_provider.add(f"{pv_prefix}FRAME_SYNC_DELAY:SP", static_pvs.frame_sync_delay_sp)
+    static_provider.add(f"{pv_prefix}RUN_START_GPS_TIME", static_pvs.run_start_gps_time)
+    static_provider.add(f"{pv_prefix}RUN_END_GPS_TIME", static_pvs.run_end_gps_time)
     return static_pvs, static_provider

@@ -60,6 +60,10 @@ class HardwareUpdate:
     period_number_limit: int
     period_mode: PeriodMode
     frame_sync_delay: int
+    run_start_gps_time_msb:int
+    run_end_gps_time_msb:int
+    run_start_gps_time_lsb:int
+    run_end_gps_time_lsb:int
 
 
 @dataclass
