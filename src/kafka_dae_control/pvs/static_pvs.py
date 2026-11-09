@@ -144,7 +144,7 @@ class StaticPVs:
             nt=NTScalar("L", display=True, form=True), initial={"value": data.run_start_gps_time_rbv}
         )
         self.run_end_gps_time = SharedPV(
-            nt=NTScalar("L", display=True, form=True), initial={"value": data.run_end_gps_time_rbv)}
+            nt=NTScalar("L", display=True, form=True), initial={"value": data.run_end_gps_time_rbv}
         )
 
 
