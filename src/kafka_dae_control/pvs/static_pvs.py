@@ -361,8 +361,8 @@ class StaticPVs:
         self.period_rbv.post(data.current_period_rbv, **kwargs)
         self.period_type_rbv.post(data.period_mode_rbv.name, **kwargs)
         self.frame_sync_delay_rbv.post(data.frame_sync_delay_rbv, **kwargs)
-        self.run_start_gps_time.post(data.run_start_gps_time_rbv), **kwargs)
-        self.run_end_gps_time.post(data.run_end_gps_time_rbv), **kwargs)
+        self.run_start_gps_time.post(data.run_start_gps_time_rbv, **kwargs)
+        self.run_end_gps_time.post(data.run_end_gps_time_rbv, **kwargs)
 
 def static_pv_provider(
     pv_prefix: str, data: "Data", queue: PriorityQueue[QueueItem]
