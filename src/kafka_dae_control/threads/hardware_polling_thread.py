@@ -148,6 +148,7 @@ def poll_hardware(
             period_number_limit=period_number_limit_readback,
             period_mode=period_mode,
             hard_vetoes=veto_control_raw_readback,
+            frame_sync_delay=frame_sync_delay_readback,
             run_start_gps_time_msb=run_start_gps_time_msb_readback,
             run_end_gps_time_msb=run_end_gps_time_msb_readback,
             run_start_gps_time_lsb=run_start_gps_time_lsb_readback,
