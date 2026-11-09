@@ -6,6 +6,7 @@ from typing import Never
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
+from kafka_dae_control.metrics import STATIC_PV_UPDATE_FAILURES, STATIC_PV_UPDATE_TIME
 from kafka_dae_control.pvs.static_pvs import StaticPVs
 
 logger = logging.getLogger(__name__)
@@ -22,7 +23,9 @@ def update_pvs_thread(static_pvs: StaticPVs, data: Data, config: ControlConfig) 
     """
     while True:
         try:
-            static_pvs.update_all(data)
+            with STATIC_PV_UPDATE_TIME.time():
+                static_pvs.update_all(data)
         except Exception:
+            STATIC_PV_UPDATE_FAILURES.inc()
             logger.exception("PV update failed: ")
         sleep(config.pv_update_interval_s)

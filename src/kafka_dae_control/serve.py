@@ -10,9 +10,22 @@ from queue import PriorityQueue
 import numpy as np
 from confluent_kafka import Producer
 from p4p.server import Server
+from prometheus_client import start_http_server
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.event_with_error import EventWithError
+from kafka_dae_control.metrics import (
+    HARDWARE_COMMS_OK,
+    HWSTATUS_CURRENT_PERIOD,
+    HWSTATUS_FRAME_SYNC_DELAY,
+    HWSTATUS_FRAME_SYNC_SOURCE,
+    HWSTATUS_NUM_PERIODS,
+    HWSTATUS_RUNNING,
+    QUEUE_DEPTH,
+    RUN_NUMBER,
+    WORKER_BUSY,
+    WORKER_BUSY_DURATION,
+)
 from kafka_dae_control.process_worker_event import process_worker_event
 from kafka_dae_control.pvs.camonitor_callbacks import run_control_update_callback, update_blocks
 from kafka_dae_control.pvs.static_pvs import static_pv_provider
@@ -42,11 +55,22 @@ def serve(config: ControlConfig) -> None:
     Returns: None
 
     """
+    start_http_server(config.metrics_port)
+
     logger.debug("Config mapping: %s", pprint.pformat(config.register_map))
     queue: PriorityQueue[QueueItem] = PriorityQueue(maxsize=0)
+    QUEUE_DEPTH.set_function(queue.qsize)
     queue.put(QueueItem(QueuePriority.HIGH, SetIPEvent()))
 
     data = load_data(config.state_file)
+
+    HWSTATUS_RUNNING.set_function(lambda: 1 if data.running else 0)
+    HWSTATUS_FRAME_SYNC_SOURCE.set_function(lambda: data.frame_sync_select_rbv)
+    HWSTATUS_NUM_PERIODS.set_function(lambda: data.num_periods_rbv)
+    HWSTATUS_CURRENT_PERIOD.set_function(lambda: data.current_period_rbv)
+    HWSTATUS_FRAME_SYNC_DELAY.set_function(lambda: data.frame_sync_delay_rbv)
+    HARDWARE_COMMS_OK.set_function(lambda: 1 if data.last_hardware_update_ok else 0)
+    RUN_NUMBER.set_function(lambda: data.run_number)
 
     # put veto update event on the queue immediately so that vc00 is emitted
     # for downstream consumers even if vetoes don't change
@@ -95,4 +119,8 @@ def serve(config: ControlConfig) -> None:
         while True:
             # This is the main worker thread.
             event = queue.get(block=True)
-            process_worker_event(queue, event.item, config, data, producer, sock, sock_lock)
+            with (
+                WORKER_BUSY.labels(event_type=event.item.__class__.__name__).track_inprogress(),
+                WORKER_BUSY_DURATION.time(),
+            ):
+                process_worker_event(queue, event.item, config, data, producer, sock, sock_lock)
