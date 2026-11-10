@@ -99,7 +99,7 @@ class Data(BaseModel):
     @property
     def run_end_gps_time_str_rbv(self) -> str:
         """The formatted GPS time of the most recent stop of the run."""
-        if self.stop_time > 0:
+        if self.run_end_gps_time_rbv > 0:
             return format_timestamp(run_end_gps_time_rbv)
         else:
             return "N/A"
