@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field
 
 from kafka_dae_control.defaults import NUM_VETOES, FrameSyncSelect, PeriodMode
 
+from kafka_dae_control.gps_time import format_timestamp
+
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
@@ -85,4 +87,20 @@ class Data(BaseModel):
 
     run_end_gps_time_rbv: int = 0
     """The GPS time at end of run"""
+
+    @property
+    def run_start_gps_time_str_rbv(self) -> str:
+        """The formatted GPS time of the most recent start of the run."""
+        if self.run_start_gps_time_rbv > 0:
+            return format_timestamp(run_start_gps_time_rbv)
+        else:
+            return "N/A"
+
+    @property
+    def run_end_gps_time_str_rbv(self) -> str:
+        """The formatted GPS time of the most recent stop of the run."""
+        if self.stop_time > 0:
+            return format_timestamp(run_end_gps_time_rbv)
+        else:
+            return "N/A"
     

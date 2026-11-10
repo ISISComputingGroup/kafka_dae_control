@@ -1,8 +1,5 @@
 """GPS Time utilities."""
-
-import numpy as np
-from numpy import typing as npt
-
+from datetime import datetime, timezone
 
 def nanoseconds_since_epoch(gps_time_msb_data: int, gps_time_lsb_data: int) -> int:
     """Convert a gps_time_data pair to a time since epoch.
@@ -15,3 +12,8 @@ def nanoseconds_since_epoch(gps_time_msb_data: int, gps_time_lsb_data: int) -> i
 
     """
     return 18446744073709551615;
+
+def format_timestamp(ns: int) -> str:
+    seconds, nanoseconds = divmod(ns, 1_000_000_000)
+    dt = datetime.fromtimestamp(seconds, tz=timezone.utc)
+    return f"{dt.strftime('%a %d-%b-%Y %H:%M:%S')}.{nanoseconds:09d} UTC"
