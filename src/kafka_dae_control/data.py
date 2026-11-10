@@ -92,7 +92,7 @@ class Data(BaseModel):
     def run_start_gps_time_str_rbv(self) -> str:
         """The formatted GPS time of the most recent start of the run."""
         if self.run_start_gps_time_rbv > 0:
-            return format_timestamp(run_start_gps_time_rbv)
+            return format_timestamp(self.run_start_gps_time_rbv)
         else:
             return "N/A"
 
@@ -100,7 +100,7 @@ class Data(BaseModel):
     def run_end_gps_time_str_rbv(self) -> str:
         """The formatted GPS time of the most recent stop of the run."""
         if self.run_end_gps_time_rbv > 0:
-            return format_timestamp(run_end_gps_time_rbv)
+            return format_timestamp(self.run_end_gps_time_rbv)
         else:
             return "N/A"
     
