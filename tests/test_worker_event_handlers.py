@@ -784,3 +784,20 @@ def test_recover_sends_same_run_start_blob_with_different_job_id(data: Data, con
         assert run_start.nexus_structure == "{}"
         assert run_start.n_periods == 234
         assert data.run_number == 123
+
+
+def test_recover_with_no_recent_run_start_raises(data: Data, conf: ControlConfig):
+    data.running = False
+    data.most_recent_run_start_args = {}
+    with pytest.raises(OSError, match=r"Cannot recover run - last run start does not exist."):
+        handle_begin(
+            config=conf,
+            data=data,
+            producer=Mock(),
+            sock=Mock(),
+            sock_lock=MagicMock(spec=RLock()),
+            done_event=Mock(),
+            queue=Mock(),
+            to_pause=False,
+            to_recover=True,
+        )

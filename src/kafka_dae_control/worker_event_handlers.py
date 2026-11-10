@@ -102,6 +102,8 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
 
     if to_recover:
         args = dict(data.most_recent_run_start_args)
+        if not args:
+            raise OSError("Cannot recover run - last run start does not exist.")
         args["job_id"] = data.job_id
     else:
         args = {
