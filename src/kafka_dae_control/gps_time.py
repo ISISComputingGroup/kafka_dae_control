@@ -71,4 +71,4 @@ def nanoseconds_since_epoch(gps_time_msb_word: int, gps_time_lsb_word: int) -> i
 def format_timestamp(ns: int) -> str:
     seconds, nanoseconds = divmod(ns, 1_000_000_000)
     dt = datetime.fromtimestamp(seconds, tz=timezone.utc)
-    return f"{dt.strftime('%a %d-%b-%Y %H:%M:%S')}.{nanoseconds:09d} UTC"
+    return f"{dt.strftime('%a %d-%b-%Y %H:%M:%S')}.{nanoseconds:09d}"
