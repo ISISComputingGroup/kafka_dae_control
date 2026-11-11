@@ -18,3 +18,4 @@ vetos
 readback
 readbacks
 μs
+scrapable

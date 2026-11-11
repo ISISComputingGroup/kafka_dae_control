@@ -38,6 +38,9 @@ blocks_pv = "IN:ALF:CS:BLOCKSERVER:BLOCKNAMES"
 # PV to monitor for setting the run control veto.
 run_control_in_range_pv = "IN:ALF:CS:RC:INRANGE"
 
+# Port on which to bind prometheus metrics server
+metrics_port = 8400
+
 # Names of vetoes.
 # The first item in this list has bitmask (1 << 0), the last item has bitmask (1 << 31).
 # There must be exactly 32 entries in this list.

@@ -33,6 +33,13 @@ from kafka_dae_control.defaults import (
     RunRegister,
 )
 from kafka_dae_control.event_with_error import EventWithError
+from kafka_dae_control.metrics import (
+    BEGIN_RUN_FAILURES,
+    END_RUN_FAILURES,
+    HARDWARE_SETPOINT_FAILURES,
+    KAFKA_DELIVERY_FAILURES,
+    KAFKA_DELIVERY_SUCCESS,
+)
 from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.run_start_nexus_structure import generate_nexus_structure
 from kafka_dae_control.save_restore import save_file
@@ -59,10 +66,12 @@ def delivery_report_set_error_or_done(
     """
     logger.debug("Got callback for kafka message. err: %s, msg: %s", err, msg)
     if err is not None:
+        KAFKA_DELIVERY_FAILURES.inc()
         error = f"Error with kafka delivery: {err.name()} ({err.str()})"
         logger.error(error)
         done_event.err = Exception(error)
     else:
+        KAFKA_DELIVERY_SUCCESS.inc()
         logger.debug("Setting the done event")
         done_event.set()
 
@@ -163,6 +172,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         )
 
     except Exception as e:
+        BEGIN_RUN_FAILURES.inc()
         logger.exception("Failed to start run: ")
         done_event.err = e
         return
@@ -220,6 +230,7 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
             config, queue, sock, sock_lock, hardware_update_queue_priority=QueuePriority.HIGH
         )
     except Exception as e:
+        END_RUN_FAILURES.inc()
         logger.exception("Failed to end run: ")
         done_event.err = e
         return
@@ -254,6 +265,7 @@ def handle_frame_sync_sp_change(  # ruff:ignore[too-many-arguments, too-many-pos
                 verify=lambda x: x == value.value,
             )
     except Exception as e:
+        HARDWARE_SETPOINT_FAILURES.inc()
         logger.exception("Failed to set frame sync select: ")
         done_event.err = e
         return
@@ -291,6 +303,7 @@ def set_num_periods(  # ruff:ignore[too-many-arguments, too-many-positional-argu
                 verify=lambda x: x == value,
             )
     except Exception as e:
+        HARDWARE_SETPOINT_FAILURES.inc()
         logger.exception("Failed to set num periods: ")
         done_event.err = e
         return
@@ -327,6 +340,7 @@ def set_current_period(  # ruff:ignore[too-many-arguments, too-many-positional-a
                 verify=lambda x: x == value - 1,
             )
     except Exception as e:
+        HARDWARE_SETPOINT_FAILURES.inc()
         logger.exception("Failed to set current period: ")
         done_event.err = e
         return
@@ -363,6 +377,7 @@ def set_period_mode(  # ruff:ignore[too-many-arguments, too-many-positional-argu
                 verify=lambda x: x == value,
             )
     except Exception as e:
+        HARDWARE_SETPOINT_FAILURES.inc()
         logger.exception("Failed to set period mode: ")
         done_event.err = e
         return
@@ -404,6 +419,7 @@ def handle_vetoes_change(  # ruff:ignore[too-many-arguments, too-many-positional
                 verify=lambda x: x == just_hard_vetoes_mask,
             )
     except Exception as e:
+        HARDWARE_SETPOINT_FAILURES.inc()
         logger.exception("Failed to set hard vetoes: ")
         done_event.err = e
         return
@@ -481,6 +497,7 @@ def handle_pause_or_resume(  # ruff:ignore[too-many-arguments, too-many-position
             data.paused = value
             done_event.set()
     except Exception as e:
+        HARDWARE_SETPOINT_FAILURES.inc()
         logger.exception("Failed to pause/resume: ")
         done_event.err = e
         return
@@ -507,6 +524,7 @@ def handle_run_control_update(
         with sock_lock:
             _update_software_veto_bit(bit_to_change, config, sock, value)
     except Exception:
+        HARDWARE_SETPOINT_FAILURES.inc()
         logger.exception("Failed to handle run control update: ")
         return
 
@@ -540,6 +558,7 @@ def handle_frame_sync_delay_setpoint_change(  # ruff:ignore[too-many-arguments, 
                 verify=lambda x: x == value,
             )
     except Exception as e:
+        HARDWARE_SETPOINT_FAILURES.inc()
         logger.exception("Failed to set frame_sync_delay: ")
         done_event.err = e
         return
