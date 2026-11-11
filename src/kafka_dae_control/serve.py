@@ -105,14 +105,12 @@ def serve(config: ControlConfig) -> None:
 
     # Start the camonitor thread. Note that the thread name is "Dummy-1"
     camonitor(
-        f"{config.pv_prefix}CS:BLOCKSERVER:BLOCKNAMES",
+        config.blocks_pv,
         callback=partial(update_blocks, queue, config.pv_prefix),
     )
 
     # Start camonitor thread for run control
-    camonitor(
-        f"{config.pv_prefix}CS:RC:INRANGE", callback=partial(run_control_update_callback, queue)
-    )
+    camonitor(config.run_control_in_range_pv, callback=partial(run_control_update_callback, queue))
 
     # Start the p4p thread pool.
     with server:
