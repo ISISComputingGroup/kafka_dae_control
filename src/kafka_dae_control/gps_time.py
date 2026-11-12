@@ -19,7 +19,7 @@ def nanoseconds_since_epoch(gps_time_msb_word: int, gps_time_lsb_word: int) -> i
     Returns: Nanoseconds since epoch.
 
     """
-    year = 2000 + (gps_time_msb_word >> 24) & 0xFF
+    year = 2000 + ((gps_time_msb_word >> 24) & 0xFF)
 
     day_of_year = (gps_time_msb_word >> 15) & 0x1FF
     hour = (gps_time_msb_word >> 10) & 0x1F
