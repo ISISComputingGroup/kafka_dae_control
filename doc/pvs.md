@@ -27,6 +27,15 @@ This is used for resuming a run.
 
 Setting this PV to `1` triggers an event which sets the {ref}`softwarevetoesregister` bit `5` to 0.
 
+## `ABORTRUN`
+
+Setting this to `1` aborts the current run which tells downstream consumers, for example a file writer, to stop writing.
+
+## `RECOVERRUN`
+
+(also known as a "cancel abort")
+Setting this to `1` sends the most recent run start, with a different job ID, and starts the hardware streaming.
+
 ## `DAETIMINGSOURCE` / `DAETIMINGSOURCE:SP`
 
 These PVs respectively display the status of and set the streaming control board's timing source (or `frame_sync_select` as named by its register)

@@ -29,6 +29,7 @@ from kafka_dae_control.worker_event_handlers import (
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     BlocksUpdateEvent,
+    CancelAbortEvent,
     CurrentPeriodSetEvent,
     EndEvent,
     FrameSyncDelaySetpointEvent,
@@ -89,8 +90,8 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 data.blocks = value
             case BeginEvent(value=value, done_event=done_event):
                 handle_begin(config, data, producer, sock, sock_lock, done_event, queue, value)
-            case EndEvent(done_event=done_event):
-                handle_end(config, data, producer, sock, sock_lock, done_event, queue)
+            case EndEvent(value=value, done_event=done_event):
+                handle_end(config, data, producer, sock, sock_lock, done_event, queue, abort=value)
             case FrameSyncSelectChangeEvent(value=value, done_event=done_event):
                 handle_frame_sync_sp_change(value, config, data, sock, sock_lock, done_event)
             case SetIPEvent():
@@ -118,6 +119,10 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
             case FrameSyncDelaySetpointEvent(value=value, done_event=done_event):
                 handle_frame_sync_delay_setpoint_change(
                     value, config, data, sock, sock_lock, done_event
+                )
+            case CancelAbortEvent(done_event=done_event):
+                handle_begin(
+                    config, data, producer, sock, sock_lock, done_event, queue, False, True
                 )
             case _:
                 logger.error("Unknown event type: %s", worker_event)
