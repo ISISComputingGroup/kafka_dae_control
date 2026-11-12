@@ -1,7 +1,10 @@
 """GPS Time utilities."""
 
 import calendar
+import unittest
 from datetime import datetime, timedelta, timezone
+
+import pytest
 
 MAX_HOURS_IN_A_DAY = 24
 MAX_MINUTES_IN_A_HOUR = 60
@@ -81,3 +84,73 @@ def format_timestamp(nanos_since_epoch: int) -> str:
     seconds, nanoseconds = divmod(nanos_since_epoch, 1_000_000_000)
     dt = datetime.fromtimestamp(seconds, tz=timezone.utc)
     return f"{dt.strftime('%a %d-%b-%Y %H:%M:%S')}.{nanoseconds:09d}"
+
+
+class TestCustomGPSTimestamp(unittest.TestCase):
+    """Unit test to test the nanosecond to epoch conversion of GPS time."""
+
+    def test_leap_year_day_60(self) -> None:
+        """Test Day 60 in a leap year (2024) resolves to Feb 29."""
+        # Year 2024 -> offset 24 (0x18). Day 60 -> 60 (0x03C).
+        # word1 format: [Years:24-31][Days:15-23][Hours:10-14][Minutes:4-9][SecMSB:0-3]
+        word1 = (24 << 24) | (60 << 15) | (0 << 10) | (0 << 4) | 0
+        word2 = 0
+
+        result_ns = nanoseconds_since_epoch(word1, word2)
+
+        # Expected datetime: 2024-02-29 00:00:00 UTC
+        expected_dt = datetime(2024, 2, 29, 0, 0, 0, tzinfo=timezone.utc)
+        expected_ns = int(
+            (expected_dt - datetime(1970, 1, 1, tzinfo=timezone.utc)).total_seconds()
+            * 1_000_000_000
+        )
+
+        assert result_ns == expected_ns
+
+    def test_non_leap_year_day_60(self) -> None:
+        """Test Day 60 in a non-leap year (2023) resolves to March 1."""
+        # Year 2023 -> offset 23 (0x17). Day 60 -> 60 (0x03C).
+        word1 = (23 << 24) | (60 << 15) | (0 << 10) | (0 << 4) | 0
+        word2 = 0
+
+        result_ns = nanoseconds_since_epoch(word1, word2)
+
+        # Expected datetime: 2023-03-01 00:00:00 UTC
+        expected_dt = datetime(2023, 3, 1, 0, 0, 0, tzinfo=timezone.utc)
+        expected_ns = int(
+            (expected_dt - datetime(1970, 1, 1, tzinfo=timezone.utc)).total_seconds()
+            * 1_000_000_000
+        )
+
+        assert result_ns == expected_ns
+
+    def test_max_bitfield_values(self) -> None:
+        """Test maximum allowable bitfield limits across all components."""
+        # Year offset 255 -> 2255
+        # Days 511 (max 9-bit)
+        # Hours 31 (max 5-bit)
+        # Minutes 63 (max 6-bit)
+        # Sec MSB 15 (max 4-bit)
+        # This should fail as max values are more than real life maximums.
+        word1 = (0xFF << 24) | (0x1FF << 15) | (0x1F << 10) | (0x3F << 4) | 0x0F
+
+        # Sec LSB 3 (max 2-bit -> total seconds = (15 << 2) | 3 = 63)
+        # Milliseconds 1023 (max 10-bit)
+        # Microseconds 1023 (max 10-bit)
+        # Nanoseconds 1023 (max 10-bit)
+        word2 = (0x3 << 30) | (0x3FF << 20) | (0x3FF << 10) | 0x3FF
+        # Use context manager to assert ValueError is raised
+        with pytest.raises(ValueError, match="Invalid day of year: 511 for 2255"):
+            nanoseconds_since_epoch(word1, word2)
+
+        word1 = (0xFF << 24) | (60 << 15) | (0x1F << 10) | (0x3F << 4) | 0x0F
+        with pytest.raises(ValueError, match="Invalid hour: 31"):
+            nanoseconds_since_epoch(word1, word2)
+
+        word1 = (0xFF << 24) | (60 << 15) | (52 << 10) | (0x3F << 4) | 0x0F
+        with pytest.raises(ValueError, match="Invalid minute: 63"):
+            nanoseconds_since_epoch(word1, word2)
+
+
+if __name__ == "__main__":
+    unittest.main()
