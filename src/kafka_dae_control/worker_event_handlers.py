@@ -106,16 +106,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
         return
     data.job_id = str(uuid.uuid4())
     run_name = f"{config.instrument_name}{data.run_number:08d}"
-    blob = serialise_pl72(
-        job_id=data.job_id,
-        filename=f"{run_name}.nxs",
-        start_time=datetime.now(ZoneInfo("Europe/London")),
-        run_name=run_name,
-        nexus_structure=generate_nexus_structure(config, data),
-        instrument_name=config.instrument_name,
-        control_topic=config.runinfo_topic,
-        n_periods=data.num_periods_sp,
-    )
+
     try:
         pause_or_resume_done_event = EventWithError()
         handle_pause_or_resume(to_pause, config, data, sock, sock_lock, pause_or_resume_done_event)
@@ -148,6 +139,19 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
                 | RunRegister.STREAM_EMPTY_FRAMES,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
             )
+
+        blob = serialise_pl72(
+            job_id=data.job_id,
+            filename=f"{run_name}.nxs",
+            start_time=datetime.now(ZoneInfo("Europe/London")),
+            run_name=run_name,
+            nexus_structure=generate_nexus_structure(config, data),
+            instrument_name=config.instrument_name,
+            control_topic=config.runinfo_topic,
+            n_periods=data.num_periods_sp,
+            gps_start_time=data.run_start_gps_time_rbv,
+        )
+
         logger.debug("About to produce blob %s to %s", blob, config.runinfo_topic)
         producer.produce(
             config.runinfo_topic,
@@ -204,7 +208,6 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
         logger.error(e)
         done_event.err = e
         return
-    blob = serialise_6s4t(job_id=data.job_id, stop_time=datetime.now(ZoneInfo("Europe/London")))
     try:
         with sock_lock:
             # clear the ethernet override bit.
@@ -215,6 +218,11 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
                 data=RunRegister.ETHERNET_OVERRIDE,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING == 0,
             )
+        blob = serialise_6s4t(
+            job_id=data.job_id,
+            stop_time=datetime.now(ZoneInfo("Europe/London")),
+            gps_stop_time=data.run_end_gps_time_rbv,
+        )
         logger.debug("About to produce blob %s to %s", blob, config.runinfo_topic)
         producer.produce(
             config.runinfo_topic,

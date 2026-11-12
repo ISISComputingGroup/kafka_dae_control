@@ -1,11 +1,11 @@
 """Utilities for reading Control IOC configuration from TOML."""
 
 import ipaddress
-import tomllib
 from functools import cached_property
 from pathlib import Path
 from typing import Annotated
 
+import tomllib
 from pydantic import BaseModel, Field, PositiveInt, ValidationError
 
 from kafka_dae_control.defaults import FLUSH_TIMEOUT_S, NUM_VETOES, READ_PORT, WRITE_PORT

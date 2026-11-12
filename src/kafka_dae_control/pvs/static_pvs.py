@@ -139,18 +139,21 @@ class StaticPVs:
                 "display.precision": 0,
             },
         )
-        
+
         self.run_start_gps_time = SharedPV(
-            nt=NTScalar("L", display=True, form=True), initial={"value": data.run_start_gps_time_rbv}
+            nt=NTScalar("L", display=True, form=True),
+            initial={"value": data.run_start_gps_time_rbv},
         )
         self.run_end_gps_time = SharedPV(
             nt=NTScalar("L", display=True, form=True), initial={"value": data.run_end_gps_time_rbv}
         )
         self.run_start_gps_time_str = SharedPV(
-            nt=NTScalar("s", display=True, form=True), initial={"value": data.run_start_gps_time_str_rbv}
+            nt=NTScalar("s", display=True, form=True),
+            initial={"value": data.run_start_gps_time_str_rbv},
         )
         self.run_end_gps_time_str = SharedPV(
-            nt=NTScalar("s", display=True, form=True), initial={"value": data.run_end_gps_time_str_rbv}
+            nt=NTScalar("s", display=True, form=True),
+            initial={"value": data.run_end_gps_time_str_rbv},
         )
 
         @self.begin_run_ex.put  # pragma: no cover
@@ -370,6 +373,7 @@ class StaticPVs:
         self.run_end_gps_time.post(data.run_end_gps_time_rbv, **kwargs)
         self.run_start_gps_time_str.post(data.run_start_gps_time_str_rbv, **kwargs)
         self.run_end_gps_time_str.post(data.run_end_gps_time_str_rbv, **kwargs)
+
 
 def static_pv_provider(
     pv_prefix: str, data: "Data", queue: PriorityQueue[QueueItem]

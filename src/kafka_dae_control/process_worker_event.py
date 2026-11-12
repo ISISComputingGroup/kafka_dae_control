@@ -10,6 +10,7 @@ from confluent_kafka import Producer
 from kafka_dae_control.comms import set_board_response_ip
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
+from kafka_dae_control.gps_time import nanoseconds_since_epoch
 from kafka_dae_control.metrics import (
     UNHANDLED_WORKER_EVENT_FAILURES,
 )
@@ -43,7 +44,6 @@ from kafka_dae_control.worker_event_types import (
     VetoesUpdateEvent,
     WorkerEvent,
 )
-from kafka_dae_control.gps_time import nanoseconds_since_epoch
 
 logger = logging.getLogger(__name__)
 
@@ -84,8 +84,12 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 data.period_mode_rbv = value.period_mode
                 data.frame_sync_delay_rbv = value.frame_sync_delay
                 data.last_hardware_update_ok = True
-                data.run_start_gps_time_rbv = nanoseconds_since_epoch(value.run_start_gps_time_msb, value.run_start_gps_time_lsb)
-                data.run_end_gps_time_rbv = nanoseconds_since_epoch(value.run_end_gps_time_msb, value.run_end_gps_time_lsb)
+                data.run_start_gps_time_rbv = nanoseconds_since_epoch(
+                    value.run_start_gps_time_msb, value.run_start_gps_time_lsb
+                )
+                data.run_end_gps_time_rbv = nanoseconds_since_epoch(
+                    value.run_end_gps_time_msb, value.run_end_gps_time_lsb
+                )
 
             case HardwareUpdateFailedEvent():
                 data.last_hardware_update_ok = False

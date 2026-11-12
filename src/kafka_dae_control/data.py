@@ -6,7 +6,6 @@ from typing import TypeVar
 from pydantic import BaseModel, Field
 
 from kafka_dae_control.defaults import NUM_VETOES, FrameSyncSelect, PeriodMode
-
 from kafka_dae_control.gps_time import format_timestamp
 
 logger = logging.getLogger(__name__)
@@ -103,4 +102,3 @@ class Data(BaseModel):
             return format_timestamp(self.run_end_gps_time_rbv)
         else:
             return "N/A"
-    
