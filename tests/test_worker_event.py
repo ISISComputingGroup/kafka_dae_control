@@ -135,8 +135,8 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
                 period_mode=PeriodMode.COMPUTER,
                 frame_sync_delay=123456,
                 run_start_gps_time_msb=(24 << 24) | (60 << 15) | (2 << 10) | (0 << 4) | 0,
-                run_end_gps_time_msb=0,
-                run_start_gps_time_lsb=(24 << 24) | (60 << 15) | (0 << 10) | (0 << 4) | 0,
+                run_end_gps_time_msb=(24 << 24) | (60 << 15) | (0 << 10) | (0 << 4) | 0,
+                run_start_gps_time_lsb=0,
                 run_end_gps_time_lsb=0,
             )
         ),
@@ -154,6 +154,10 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
     assert data.num_periods_rbv == 13
     assert data.frame_sync_delay_rbv == 123456
     assert data.last_hardware_update_ok
+    assert data.run_start_gps_time_rbv
+    assert data.run_end_gps_time_rbv
+    assert data.run_start_gps_time_str_rbv != "N/A"
+    assert data.run_end_gps_time_str_rbv != "N/A"
 
 
 def test_failed_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
