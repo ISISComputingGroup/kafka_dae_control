@@ -10,7 +10,7 @@ MAX_SUB_SECONDS = 999
 
 
 def nanoseconds_since_epoch(gps_time_msb_word: int, gps_time_lsb_word: int) -> int:
-    """Convert a gps_time_data pair to a time since epoch.
+    """Convert a GPS time word pair to a time since epoch.
 
     Args:
         gps_time_msb_word: int: The GPS Timestamp First word.

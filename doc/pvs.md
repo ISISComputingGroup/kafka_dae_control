@@ -85,5 +85,5 @@ about frame-sync delays.
 
 These PVs gather the GPS Time corresponding to the START/END of the run.
 
-These PVs are in units of ns and must be calculated fromt the most and least significant words returned by the hardware.
+These PVs are in units of nanoseconds and must be calculated from the most and least significant words returned by the hardware.
 
