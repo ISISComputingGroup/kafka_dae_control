@@ -134,6 +134,10 @@ def test_hardware_update_event_sets_data(conf: ControlConfig, data: Data):
                 period_number_limit=13,
                 period_mode=PeriodMode.COMPUTER,
                 frame_sync_delay=123456,
+                run_start_gps_time_msb=(24 << 24) | (60 << 15) | (2 << 10) | (0 << 4) | 0,
+                run_end_gps_time_msb=0,
+                run_start_gps_time_lsb=(24 << 24) | (60 << 15) | (0 << 10) | (0 << 4) | 0,
+                run_end_gps_time_lsb=0,
             )
         ),
         conf,
