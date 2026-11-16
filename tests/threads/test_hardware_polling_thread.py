@@ -21,6 +21,10 @@ from tests.conftest import (
     PERIOD_COMP_CURRENT_ADDRESS,
     PERIOD_CONTROL_ADDRESS,
     PERIOD_NUMBER_LIMIT_ADDRESS,
+    RUN_END_GPS_TIME_LSB,
+    RUN_END_GPS_TIME_MSB,
+    RUN_START_GPS_TIME_LSB,
+    RUN_START_GPS_TIME_MSB,
 )
 
 
@@ -35,6 +39,10 @@ from tests.conftest import (
         3,
         PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE | PeriodControlFlags.MODE_EXTERNAL,
         123456,
+        404621312,
+        0,
+        404619264,
+        0,
     ],
 )
 def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, conf: ControlConfig):
@@ -68,6 +76,10 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
             call(sock, conf.board_ip, address=PERIOD_NUMBER_LIMIT_ADDRESS, port=conf.read_port),
             call(sock, conf.board_ip, address=PERIOD_CONTROL_ADDRESS, port=conf.read_port),
             call(sock, conf.board_ip, address=FRAME_SYNC_DELAY_ADDRESS, port=conf.read_port),
+            call(sock, conf.board_ip, address=RUN_START_GPS_TIME_MSB, port=conf.read_port),
+            call(sock, conf.board_ip, address=RUN_END_GPS_TIME_MSB, port=conf.read_port),
+            call(sock, conf.board_ip, address=RUN_START_GPS_TIME_LSB, port=conf.read_port),
+            call(sock, conf.board_ip, address=RUN_END_GPS_TIME_LSB, port=conf.read_port),
         ]
     )
     assert sock_lock.__enter__.called
@@ -80,6 +92,10 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
         period_number_limit=3,
         period_mode=PeriodMode.EXTERNAL,
         frame_sync_delay=123456,
+        run_start_gps_time_msb=(24 << 24) | (60 << 15) | (2 << 10) | (0 << 4) | 0,
+        run_end_gps_time_msb=0,
+        run_start_gps_time_lsb=(24 << 24) | (60 << 15) | (0 << 10) | (0 << 4) | 0,
+        run_end_gps_time_lsb=0,
     )
 
 
@@ -93,6 +109,10 @@ def test_reads_work_and_put_event_on_queue(mock_read: Mock, mock_sleep: Mock, co
         0,
         0,
         0,
+        0,
+        404621312,
+        0,
+        404619264,
         0,
     ],
 )
@@ -115,13 +135,29 @@ def test_read_frame_sync_select_invalid_sets_invalid(
         period_mode=PeriodMode.COMPUTER,
         period_number_limit=0,
         frame_sync_delay=0,
+        run_start_gps_time_msb=(24 << 24) | (60 << 15) | (2 << 10) | (0 << 4) | 0,
+        run_end_gps_time_msb=0,
+        run_start_gps_time_lsb=(24 << 24) | (60 << 15) | (0 << 10) | (0 << 4) | 0,
+        run_end_gps_time_lsb=0,
     )
 
 
 @patch("kafka_dae_control.threads.hardware_polling_thread.sleep", side_effect=Exception)
 @patch(
     "kafka_dae_control.threads.hardware_polling_thread.read",
-    side_effect=[RunRegister.STATUS_RUNNING, FrameSyncSelect.UNKNOWN, 0, 0, 0, 9999999, 0],
+    side_effect=[
+        RunRegister.STATUS_RUNNING,
+        FrameSyncSelect.UNKNOWN,
+        0,
+        0,
+        0,
+        9999999,
+        0,
+        0,
+        0,
+        0,
+        0,
+    ],
 )
 def test_period_mode_invalid_sets_unknown(
     mock_read: Mock, mock_sleep: Mock, conf: ControlConfig, caplog: pytest.LogCaptureFixture
