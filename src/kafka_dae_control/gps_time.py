@@ -2,7 +2,7 @@
 
 import calendar
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -55,7 +55,7 @@ def nanoseconds_since_epoch(gps_time_msb_word: int, gps_time_lsb_word: int) -> i
         if not 0 <= value <= MAX_SUB_SECONDS:
             raise ValueError(f"Invalid {name}: {value}")
 
-    base_date = datetime(year, 1, 1, tzinfo=timezone.utc) + timedelta(
+    base_date = datetime(year, 1, 1, tzinfo=UTC) + timedelta(
         days=int(day_of_year) - 1,
         hours=int(hour),
         minutes=int(minute),
@@ -64,7 +64,7 @@ def nanoseconds_since_epoch(gps_time_msb_word: int, gps_time_lsb_word: int) -> i
         microseconds=int(microseconds),
     )
 
-    epoch = datetime(1970, 1, 1, tzinfo=timezone.utc)
+    epoch = datetime(1970, 1, 1, tzinfo=UTC)
     delta = base_date - epoch
     total_seconds = delta.days * 86400 + delta.seconds
     nanos = total_seconds * 1_000_000_000 + delta.microseconds * 1_000 + nanoseconds
@@ -82,7 +82,7 @@ def format_timestamp(nanos_since_epoch: int) -> str:
 
     """
     seconds, nanoseconds = divmod(nanos_since_epoch, 1_000_000_000)
-    dt = datetime.fromtimestamp(seconds, tz=timezone.utc)
+    dt = datetime.fromtimestamp(seconds, tz=UTC)
     return f"{dt.strftime('%a %d-%b-%Y %H:%M:%S')}.{nanoseconds:09d}"
 
 
@@ -99,9 +99,9 @@ class TestCustomGPSTimestamp(unittest.TestCase):
         result_ns = nanoseconds_since_epoch(word1, word2)
 
         # Expected datetime: 2024-02-29 00:00:00 UTC
-        expected_dt = datetime(2024, 2, 29, 0, 0, 0, tzinfo=timezone.utc)
+        expected_dt = datetime(2024, 2, 29, 0, 0, 0, tzinfo=UTC)
         expected_ns = int(
-            (expected_dt - datetime(1970, 1, 1, tzinfo=timezone.utc)).total_seconds()
+            (expected_dt - datetime(1970, 1, 1, tzinfo=UTC)).total_seconds()
             * 1_000_000_000
         )
 
@@ -116,9 +116,9 @@ class TestCustomGPSTimestamp(unittest.TestCase):
         result_ns = nanoseconds_since_epoch(word1, word2)
 
         # Expected datetime: 2023-03-01 00:00:00 UTC
-        expected_dt = datetime(2023, 3, 1, 0, 0, 0, tzinfo=timezone.utc)
+        expected_dt = datetime(2023, 3, 1, 0, 0, 0, tzinfo=UTC)
         expected_ns = int(
-            (expected_dt - datetime(1970, 1, 1, tzinfo=timezone.utc)).total_seconds()
+            (expected_dt - datetime(1970, 1, 1, tzinfo=UTC)).total_seconds()
             * 1_000_000_000
         )
 
