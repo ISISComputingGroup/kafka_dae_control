@@ -101,8 +101,7 @@ class TestCustomGPSTimestamp(unittest.TestCase):
         # Expected datetime: 2024-02-29 00:00:00 UTC
         expected_dt = datetime(2024, 2, 29, 0, 0, 0, tzinfo=UTC)
         expected_ns = int(
-            (expected_dt - datetime(1970, 1, 1, tzinfo=UTC)).total_seconds()
-            * 1_000_000_000
+            (expected_dt - datetime(1970, 1, 1, tzinfo=UTC)).total_seconds() * 1_000_000_000
         )
 
         assert result_ns == expected_ns
@@ -118,8 +117,7 @@ class TestCustomGPSTimestamp(unittest.TestCase):
         # Expected datetime: 2023-03-01 00:00:00 UTC
         expected_dt = datetime(2023, 3, 1, 0, 0, 0, tzinfo=UTC)
         expected_ns = int(
-            (expected_dt - datetime(1970, 1, 1, tzinfo=UTC)).total_seconds()
-            * 1_000_000_000
+            (expected_dt - datetime(1970, 1, 1, tzinfo=UTC)).total_seconds() * 1_000_000_000
         )
 
         assert result_ns == expected_ns
