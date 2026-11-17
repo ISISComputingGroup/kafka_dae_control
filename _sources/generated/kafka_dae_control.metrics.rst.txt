@@ -1,0 +1,16 @@
+
+
+``kafka_dae_control.metrics``
+=============================
+
+.. automodule:: kafka_dae_control.metrics
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    

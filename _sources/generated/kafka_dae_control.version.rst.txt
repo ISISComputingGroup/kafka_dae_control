@@ -1,0 +1,16 @@
+
+
+``kafka_dae_control.version``
+=============================
+
+.. automodule:: kafka_dae_control.version
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    
