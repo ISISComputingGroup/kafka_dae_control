@@ -2,11 +2,17 @@
 
 This page describes the data held by each PV served by this IOC.
 
+## `BEGINRUN`
+
+This is used for starting a run.
+
+Setting this PV to `1` triggers an event which firstly starts the hardware by setting the run status register's lowest bit to 1, then sends a [run start](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/pl72_run_start.fbs) to Kafka. If either of those two fail, the put will error.
+
 ## `BEGINRUNEX`
 
 This is used for starting a run.
 
-Setting this PV to `1` triggers an event which firstly starts the hardware by setting the run status register's lowest bit to 1, then sends a [run start](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/pl72_run_start.fbs) to Kafka. If either of those two fail, the put will error. 
+Setting this PV to `0` triggers a 'Normal Begin' and if set to `1`, a 'Paused Begin', that firstly starts the hardware by setting the run status register's lowest bit to 1, then sends a [run start](https://github.com/ISISComputingGroup/streaming-data-types/blob/master/schemas/pl72_run_start.fbs) to Kafka. If either of those two fail, the put will error.
 
 ## `ENDRUN`
 
@@ -26,6 +32,15 @@ Setting this PV to `1` triggers an event which sets the {ref}`softwarevetoesregi
 This is used for resuming a run. 
 
 Setting this PV to `1` triggers an event which sets the {ref}`softwarevetoesregister` bit `5` to 0.
+
+## `ABORTRUN`
+
+Setting this to `1` aborts the current run which tells downstream consumers, for example a file writer, to stop writing.
+
+## `RECOVERRUN`
+
+(also known as a "cancel abort")
+Setting this to `1` sends the most recent run start, with a different job ID, and starts the hardware streaming.
 
 ## `DAETIMINGSOURCE` / `DAETIMINGSOURCE:SP`
 

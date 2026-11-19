@@ -5,6 +5,7 @@ from queue import PriorityQueue
 
 from ibex_non_ca_helpers.compress_hex import dehex_decompress_and_dejson
 
+from kafka_dae_control.metrics import BLOCK_NAME_UPDATES, RUN_CONTROL_UPDATES
 from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.worker_event_types import BlocksUpdateEvent, RunControlUpdateEvent
 
@@ -15,6 +16,7 @@ def update_blocks(
     queue: PriorityQueue[QueueItem], prefix: str, *, char_value: str, **_: int
 ) -> None:
     """Update the list of blocks in the data class."""
+    BLOCK_NAME_UPDATES.inc()
     encoded_val = char_value.encode("utf-8")
     logger.debug("blocks_hexed: %s (char), %s (bytes)", char_value, encoded_val)
     blocks_unhexed = dehex_decompress_and_dejson(encoded_val)
@@ -36,6 +38,7 @@ def run_control_update_callback(queue: PriorityQueue[QueueItem], *, value: int, 
         **_: Everything else.
 
     """
+    RUN_CONTROL_UPDATES.inc()
     logger.debug("run_control_update_callback: %s", value)
     out_of_range = not bool(value)
     queue.put(QueueItem(QueuePriority.HIGH, RunControlUpdateEvent(value=out_of_range)))

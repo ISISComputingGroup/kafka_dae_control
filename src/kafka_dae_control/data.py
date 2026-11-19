@@ -1,7 +1,7 @@
 """Data class containing the state of the program."""
 
 import logging
-from typing import Annotated, TypeVar
+from typing import Annotated, Any, TypeVar
 
 from pydantic import BaseModel, Field, RootModel, StrictInt, StringConstraints
 from streaming_data_types.run_start_pl72 import DetectorSpectrumMap
@@ -105,6 +105,10 @@ class Data(BaseModel):
 
     frame_sync_delay_rbv: int = 0
     """The frame sync delay readback (us)."""
+
+    most_recent_run_start_args: dict[str, Any] = {}
+    """The arguments for constructing the most recent run-start blob.
+     This is used when cancelling an abort to re-send the run start."""
 
     last_hardware_update_ok: bool = False
     """Whether the most recent hardware update successfully polled the hardware."""

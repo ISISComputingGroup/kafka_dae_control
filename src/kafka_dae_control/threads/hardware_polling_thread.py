@@ -17,10 +17,12 @@ from kafka_dae_control.defaults import (
     Registers,
     RunRegister,
 )
+from kafka_dae_control.metrics import HARDWARE_POLL_FAILURES, HARDWARE_POLL_TIME
 from kafka_dae_control.queue_utils import QueueItem, QueuePriority
 from kafka_dae_control.worker_event_types import (
     HardwareUpdate,
     HardwareUpdateEvent,
+    HardwareUpdateFailedEvent,
     SetIPEvent,
 )
 
@@ -100,7 +102,7 @@ def poll_hardware(
         )
 
     try:
-        with sock_lock:
+        with sock_lock, HARDWARE_POLL_TIME.time():
             running_register_readback = _read(Registers.RUNNING_REGISTER)
 
             frame_sync_select_raw_readback = _read(Registers.FRAME_SYNC_SEL_REGISTER)
@@ -149,5 +151,7 @@ def poll_hardware(
         return True
 
     except Exception:
+        HARDWARE_POLL_FAILURES.inc()
         logger.exception("Error occurred when polling hardware: ")
+        queue.put(QueueItem(hardware_update_queue_priority, HardwareUpdateFailedEvent()))
         return False

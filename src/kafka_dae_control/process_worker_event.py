@@ -10,6 +10,9 @@ from confluent_kafka import Producer
 from kafka_dae_control.comms import set_board_response_ip
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
+from kafka_dae_control.metrics import (
+    UNHANDLED_WORKER_EVENT_FAILURES,
+)
 from kafka_dae_control.queue_utils import QueueItem
 from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.worker_event_handlers import (
@@ -27,6 +30,7 @@ from kafka_dae_control.worker_event_handlers import (
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     BlocksUpdateEvent,
+    CancelAbortEvent,
     CurrentPeriodSetEvent,
     DetSpecMapChangeEvent,
     EndEvent,
@@ -88,8 +92,8 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 data.blocks = value
             case BeginEvent(value=value, done_event=done_event):
                 handle_begin(config, data, producer, sock, sock_lock, done_event, queue, value)
-            case EndEvent(done_event=done_event):
-                handle_end(config, data, producer, sock, sock_lock, done_event, queue)
+            case EndEvent(value=value, done_event=done_event):
+                handle_end(config, data, producer, sock, sock_lock, done_event, queue, abort=value)
             case FrameSyncSelectChangeEvent(value=value, done_event=done_event):
                 handle_frame_sync_sp_change(value, config, data, sock, sock_lock, done_event)
             case SetIPEvent():
@@ -121,7 +125,12 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 handle_frame_sync_delay_setpoint_change(
                     value, config, data, sock, sock_lock, done_event
                 )
+            case CancelAbortEvent(done_event=done_event):
+                handle_begin(
+                    config, data, producer, sock, sock_lock, done_event, queue, False, True
+                )
             case _:
                 logger.error("Unknown event type: %s", worker_event)
     except Exception:
+        UNHANDLED_WORKER_EVENT_FAILURES.inc()
         logger.exception("Unhandled exception in handler thread: ")

@@ -39,8 +39,18 @@ class ControlConfig(BaseModel):
     vetoes_topic: str
     """Veto configuration topic to push veto configuration updates to"""
 
+    metrics_port: int = 8400
+    """The TCP port on which to bind prometheus metrics"""
+
     local_ip: ipaddress.IPv4Address
     """Local IP to set the control board IP register to"""
+
+    run_control_in_range_pv: str
+    """PV to monitor for setting the run control veto"""
+
+    blocks_pv: str
+    """PV for the list of blocks to construct `f144` placeholders
+     for in the run start nexus structure."""
 
     poll_interval_s: float = 1.0
     """How often to poll the streaming control board"""

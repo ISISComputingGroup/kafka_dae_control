@@ -13,6 +13,7 @@ from kafka_dae_control.queue_utils import QueueItem
 from kafka_dae_control.worker_event_types import (
     BeginEvent,
     BlocksUpdateEvent,
+    CancelAbortEvent,
     CurrentPeriodSetEvent,
     EndEvent,
     FrameSyncDelaySetpointEvent,
@@ -73,7 +74,41 @@ def test_process_begin_calls_handle_begin(mock_handle_begin: Mock, conf: Control
 @patch("kafka_dae_control.process_worker_event.handle_end")
 def test_process_end_calls_handle_end(mock_handle_end: Mock, conf: ControlConfig, data: Data):
     process_worker_event(
-        PriorityQueue[QueueItem](), EndEvent(Mock()), conf, data, Mock(), Mock(), Mock()
+        PriorityQueue[QueueItem](),
+        EndEvent(value=False, done_event=Mock()),
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        Mock(),
+    )
+    assert mock_handle_end.called
+
+
+@patch("kafka_dae_control.process_worker_event.handle_end")
+def test_process_abort_calls_handle_end(mock_handle_end: Mock, conf: ControlConfig, data: Data):
+    process_worker_event(
+        PriorityQueue[QueueItem](),
+        EndEvent(value=True, done_event=Mock()),
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        Mock(),
+    )
+    assert mock_handle_end.called
+
+
+@patch("kafka_dae_control.process_worker_event.handle_begin")
+def test_process_cancel_abort_calls_begin(mock_handle_end: Mock, conf: ControlConfig, data: Data):
+    process_worker_event(
+        PriorityQueue[QueueItem](),
+        CancelAbortEvent(done_event=Mock()),
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        Mock(),
     )
     assert mock_handle_end.called
 

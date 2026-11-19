@@ -20,7 +20,9 @@ board_ip = ipaddress.IPv4Address("192.168.1.102")
 @patch("kafka_dae_control.serve.camonitor")
 @patch("kafka_dae_control.serve.threading")
 @patch("kafka_dae_control.serve.PriorityQueue")
+@patch("kafka_dae_control.serve.start_http_server")
 def test_handshake_added_to_queue(
+    _mock_http_server,  # pyright: ignore reportMissingParameterType
     mock_queue,  # pyright: ignore reportMissingParameterType
     mock_thread,  # pyright: ignore reportMissingParameterType
     mock_camonitor,  # pyright: ignore reportMissingParameterType
@@ -84,7 +86,9 @@ def test_handshake_added_to_queue(
 @patch("kafka_dae_control.serve.camonitor")
 @patch("kafka_dae_control.serve.threading")
 @patch("kafka_dae_control.serve.PriorityQueue")
+@patch("kafka_dae_control.serve.start_http_server")
 def test_veto_names_defaulted_if_not_specified(
+    _mock_http_server,  # pyright: ignore reportMissingParameterType
     _mock_queue,  # pyright: ignore reportMissingParameterType
     _mock_thread,  # pyright: ignore reportMissingParameterType
     _mock_camonitor,  # pyright: ignore reportMissingParameterType

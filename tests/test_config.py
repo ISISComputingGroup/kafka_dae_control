@@ -26,6 +26,10 @@ sample_env_topic = "sample-env-topic"
 events_topic = "events-topic"
 vetoes_topic = "vetoes-topic"
 
+blocks_pv = "IN:TEST:BLOCKS"
+
+run_control_in_range_pv = "IN:TEST:RC:INRANGE"
+
 veto_names = [
     "FIFO",
     "SMP",
@@ -113,6 +117,8 @@ veto_names = [
         "Unused",
         "Unused",
     ]
+    assert config.blocks_pv == "IN:TEST:BLOCKS"
+    assert config.run_control_in_range_pv == "IN:TEST:RC:INRANGE"
 
 
 def test_invalid_config_loading():
@@ -148,6 +154,8 @@ def test_register_map_calls_parse_register_map(mock_register_map):  # pyright: i
         events_topic="events-topic",
         vetoes_topic="vetoes-topic",
         veto_names=["test"] * 32,
+        blocks_pv="",
+        run_control_in_range_pv="",
     )
     assert cfg.register_map == mock_register_map.return_value
     mock_register_map.assert_called_once_with(Path("test1.xml"))
