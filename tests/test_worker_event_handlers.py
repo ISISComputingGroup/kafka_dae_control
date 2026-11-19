@@ -16,7 +16,7 @@ from streaming_data_types import (
 )
 
 from kafka_dae_control.config import ControlConfig
-from kafka_dae_control.data import Data
+from kafka_dae_control.data import Data, DetectorSpectraMapping
 from kafka_dae_control.defaults import (
     PAUSE_VETO_TOGGLE_BIT,
     RC_VETO_TOGGLE_BIT,
@@ -69,6 +69,12 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
     data.running = False
     data.period_mode_sp = PeriodMode.EXTERNAL
     data.num_periods_sp = 69
+    data.detector_spectrum_mapping = DetectorSpectraMapping.model_validate(
+        [
+            {"det": 101, "spec": 1},
+            {"det": 102, "spec": 2},
+        ]
+    )
     producer = Mock()
     sock = Mock()
     sock_lock = MagicMock(spec=RLock())
@@ -123,6 +129,10 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
         assert run_start.run_name == "TESTINST00000123"
         assert run_start.nexus_structure == nexus_structure
         assert run_start.n_periods == 69
+        assert run_start.detector_spectrum_map is not None
+        assert run_start.detector_spectrum_map[0].tolist() == [1, 2]
+        assert run_start.detector_spectrum_map[1].tolist() == [101, 102]
+        assert run_start.detector_spectrum_map[2] == 3
 
         producer.flush.assert_called_once()
         assert sock_lock.__enter__.called

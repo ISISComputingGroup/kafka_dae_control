@@ -10,6 +10,7 @@ RUN_NUMBER_KEY = "run_number"
 JOB_ID_KEY = "job_id"
 RUNNING_KEY = "running"
 VETOES_KEY = "vetoes"
+DETSPECMAP_KEY = "detector_spectrum_mapping"
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,12 @@ def save_file(data: "Data", *_: int | str, state_file: Path) -> None:
     """
     with state_file.open("w", encoding="utf-8") as file:
         json.dump(
-            {RUN_NUMBER_KEY: data.run_number, JOB_ID_KEY: data.job_id, VETOES_KEY: data.vetoes},
+            {
+                RUN_NUMBER_KEY: data.run_number,
+                JOB_ID_KEY: data.job_id,
+                VETOES_KEY: data.vetoes,
+                DETSPECMAP_KEY: data.detector_spectrum_mapping.model_dump(),
+            },
             file,
             indent=2,
         )

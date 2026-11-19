@@ -95,3 +95,9 @@ These PVs are in units of μs and must be set to a non-negative integer.
 
 See {external+ibex_developers_manual:doc}`specific_iocs/datastreaming/ADRs/009_frame_sync_delay` for further details
 about frame-sync delays.
+
+## `DETSPECMAP`
+
+This is an `NTTable` PV which holds an array of detector(`det`)-spectrum(`spec`) mapping pairs. It is designed to be used by clients, such as `genie`, to set the detector-spectrum mapping for an instrument. 
+
+An example of how to set this via `pvput` would be `pvput <prefix>:KDAECTRL:DETSPECMAP '{"value":{"det":[101,201,301],"spec":[1,2,3]}}'`

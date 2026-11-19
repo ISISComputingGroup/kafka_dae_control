@@ -1,11 +1,10 @@
 """Static PVs for KDAECTRL."""
 
-import json
 import logging
 import time
 from queue import PriorityQueue
 
-from p4p.nt import NTEnum, NTScalar
+from p4p.nt import NTEnum, NTScalar, NTTable
 from p4p.server import ServerOperation, StaticProvider
 from p4p.server.thread import SharedPV
 from pydantic import ValidationError
@@ -130,8 +129,8 @@ class StaticPVs:
             },
         )
         self.detector_spectrum_mapping = SharedPV(
-            nt=NTScalar("s", display=True, form=True),
-            initial={"value": data.detector_spectrum_mapping.model_dump_json()},
+            nt=NTTable([("det", "i"), ("spec", "i")]),
+            initial=data.detector_spectrum_mapping.model_dump(),
         )
         self.frame_sync_delay_rbv = SharedPV(
             nt=NTScalar(display=True, form=True),
@@ -331,25 +330,17 @@ class StaticPVs:
 
         @self.detector_spectrum_mapping.put
         def detector_spectrum_mapping_put(pv: SharedPV, op: ServerOperation) -> None:
-            logger.debug("before put????")
-            value = op.value()
-            logger.info("detector spectrum mapping put with %r", op.value())
+            rows = op.value()
+            logger.info("detector spectrum mapping put with %s", rows)
             try:
-                logger.info("before dict cast")
-                logger.info("RAW VALUE: %r", value)
-                logger.info("VALUE TYPE: %s", type(value))
-                logger.info("VALUE LENGTH: %s", len(str(value)))
-                as_dict = json.loads(str(value))
-                logger.info("hi %s", as_dict)
-                d = DetectorSpectraMapping.model_validate(as_dict)
+                d = DetectorSpectraMapping.model_validate(rows)
                 queue.put(
                     QueueItem(
                         QueuePriority.HIGH,
                         DetSpecMapChangeEvent(value=d),
                     )
                 )
-                logger.debug("after put????")
-                pv.post(d.model_dump_json())
+                pv.post(d.model_dump())
                 op.done()
 
             except ValidationError as e:

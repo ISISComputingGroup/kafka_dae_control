@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from kafka_dae_control.config import ControlConfig
-from kafka_dae_control.data import Data
+from kafka_dae_control.data import Data, DetectorSpectraMapping
 from kafka_dae_control.defaults import NUM_VETOES, FrameSyncSelect, PeriodMode
 from kafka_dae_control.process_worker_event import process_worker_event
 from kafka_dae_control.queue_utils import QueueItem
@@ -15,6 +15,7 @@ from kafka_dae_control.worker_event_types import (
     BlocksUpdateEvent,
     CancelAbortEvent,
     CurrentPeriodSetEvent,
+    DetSpecMapChangeEvent,
     EndEvent,
     FrameSyncDelaySetpointEvent,
     FrameSyncSelectChangeEvent,
@@ -321,3 +322,24 @@ def test_pause_resume_calls_handle_pause_or_resume(
         Mock(),
     )
     assert mock_handle_pause_or_resume.called
+
+
+@patch("kafka_dae_control.process_worker_event.save_file")
+def test_handle_det_spec_mapping_change_sets_data_then_saves_file(
+    mock_save_file: Mock, conf: ControlConfig, data: Data
+):
+    expected = [
+        {"det": 101, "spec": 1},
+        {"det": 102, "spec": 2},
+    ]
+    process_worker_event(
+        PriorityQueue[QueueItem](),
+        DetSpecMapChangeEvent(value=DetectorSpectraMapping.model_validate(expected)),
+        conf,
+        data,
+        Mock(),
+        Mock(),
+        Mock(),
+    )
+    assert mock_save_file.called
+    assert data.detector_spectrum_mapping.model_dump() == expected

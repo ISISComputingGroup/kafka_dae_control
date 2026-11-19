@@ -1,9 +1,9 @@
 """Data class containing the state of the program."""
 
 import logging
-from typing import Annotated, Any, TypeVar
+from typing import Any, TypeVar
 
-from pydantic import BaseModel, Field, RootModel, StrictInt, StringConstraints
+from pydantic import BaseModel, Field, RootModel
 from streaming_data_types.run_start_pl72 import DetectorSpectrumMap
 
 from kafka_dae_control.defaults import NUM_VETOES, FrameSyncSelect, PeriodMode
@@ -13,14 +13,14 @@ logger = logging.getLogger(__name__)
 T = TypeVar("T")
 
 
-class DetectorSpectraMapping(
-    RootModel[
-        dict[
-            Annotated[str, StringConstraints(pattern=r"^[0-9]*$")],
-            Annotated[StrictInt, Field(ge=0)],
-        ]
-    ]
-):
+class SingleDetSpecMapping(BaseModel):
+    """A single detector spectrum mapping."""
+
+    det: int = Field(ge=0)
+    spec: int = Field(ge=0)
+
+
+class DetectorSpectraMapping(RootModel[list[SingleDetSpecMapping]]):
     """Pydantic model for validating detector-spectra mapping."""
 
     def to_df12_blob(self) -> DetectorSpectrumMap:
@@ -30,11 +30,11 @@ class DetectorSpectraMapping(
 
         Returns: A mapping object which can be used when serialising a run-start.
         """
-        detector_ids = [int(det) for det in self.root]
-        spectra = list(self.root.values())
+        detector_ids = [x.det for x in self.root]
+        spectra = [x.spec for x in self.root]
         return DetectorSpectrumMap(
-            detector_ids,
             spectra,
+            detector_ids,
             max(spectra) + 1 if spectra else 0,
         )
 
@@ -98,7 +98,8 @@ class Data(BaseModel):
     period_mode_rbv: PeriodMode = PeriodMode.UNKNOWN
     """The period mode readback."""
 
-    detector_spectrum_mapping: DetectorSpectraMapping = DetectorSpectraMapping({})
+    detector_spectrum_mapping: DetectorSpectraMapping = DetectorSpectraMapping.model_validate([])
+    """The detector spectrum mapping"""
 
     frame_sync_delay_sp: int = 0
     """The frame sync delay setpoint (us)."""
