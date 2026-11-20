@@ -4,11 +4,12 @@ import logging
 import time
 from queue import PriorityQueue
 
-from p4p.nt import NTEnum, NTScalar
+from p4p.nt import NTEnum, NTScalar, NTTable
 from p4p.server import ServerOperation, StaticProvider
 from p4p.server.thread import SharedPV
+from pydantic import ValidationError
 
-from kafka_dae_control.data import Data
+from kafka_dae_control.data import Data, DetectorSpectraMapping
 from kafka_dae_control.defaults import NOT_SETTABLE_PERIOD_MODES, FrameSyncSelect, PeriodMode
 from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.queue_utils import QueueItem, QueuePriority
@@ -16,6 +17,7 @@ from kafka_dae_control.worker_event_types import (
     BeginEvent,
     CancelAbortEvent,
     CurrentPeriodSetEvent,
+    DetSpecMapChangeEvent,
     EndEvent,
     FrameSyncDelaySetpointEvent,
     FrameSyncSelectChangeEvent,
@@ -125,6 +127,10 @@ class StaticPVs:
                 "choices": [x.name for x in PeriodMode if x not in NOT_SETTABLE_PERIOD_MODES],
                 "index": data.period_mode_sp,
             },
+        )
+        self.detector_spectrum_mapping = SharedPV(
+            nt=NTTable([("det", "i"), ("spec", "i")]),
+            initial=data.detector_spectrum_mapping.model_dump(),
         )
         self.frame_sync_delay_rbv = SharedPV(
             nt=NTScalar(display=True, form=True),
@@ -322,6 +328,26 @@ class StaticPVs:
             except Exception as e:  # ruff:ignore[blind-except]
                 op.done(error=f"Failed to resume: {e}")
 
+        @self.detector_spectrum_mapping.put
+        def detector_spectrum_mapping_put(pv: SharedPV, op: ServerOperation) -> None:
+            rows = op.value()
+            logger.info("detector spectrum mapping put with %s", rows)
+            try:
+                d = DetectorSpectraMapping.model_validate(rows)
+                queue.put(
+                    QueueItem(
+                        QueuePriority.HIGH,
+                        DetSpecMapChangeEvent(value=d),
+                    )
+                )
+                pv.post(d.model_dump())
+                op.done()
+
+            except ValidationError as e:
+                op.done(error=f"Failed to validate new detector spectrum mapping: {e}")
+            except Exception as e:  # ruff:ignore[blind-except]
+                op.done(error=f"Failed to set detector spectrum mapping: {e}")
+
         @self.frame_sync_delay_sp.put
         def frame_sync_delay_sp_put(pv: SharedPV, op: ServerOperation) -> None:
             value = int(op.value())
@@ -421,6 +447,7 @@ def static_pv_provider(
     static_provider.add(f"{pv_prefix}PERIOD:SP", static_pvs.period_sp)
     static_provider.add(f"{pv_prefix}PERIODTYPE", static_pvs.period_type_rbv)
     static_provider.add(f"{pv_prefix}PERIODTYPE:SP", static_pvs.period_type_sp)
+    static_provider.add(f"{pv_prefix}DETSPECMAP", static_pvs.detector_spectrum_mapping)
     static_provider.add(f"{pv_prefix}FRAME_SYNC_DELAY", static_pvs.frame_sync_delay_rbv)
     static_provider.add(f"{pv_prefix}FRAME_SYNC_DELAY:SP", static_pvs.frame_sync_delay_sp)
     return static_pvs, static_provider

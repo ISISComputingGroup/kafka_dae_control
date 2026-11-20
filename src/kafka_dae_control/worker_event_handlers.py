@@ -124,6 +124,7 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
             "instrument_name": config.instrument_name,
             "control_topic": config.runinfo_topic,
             "n_periods": data.num_periods_sp,
+            "detector_spectrum_map": data.detector_spectrum_mapping.to_df12_blob(),
         }
         data.most_recent_run_start_args = args
     blob = serialise_pl72(**args)

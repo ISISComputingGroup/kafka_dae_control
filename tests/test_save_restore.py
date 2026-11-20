@@ -6,12 +6,20 @@ from unittest.mock import MagicMock
 import pytest
 from pydantic import ValidationError
 
-from kafka_dae_control.data import Data
+from kafka_dae_control.data import Data, DetectorSpectraMapping
 from kafka_dae_control.save_restore import load_data, save_file
 
 
 def test_save_restore_takes_data_and_saves_relevant_fields():
-    d = Data(job_id="1234", run_number=2345, running=False, vetoes=[0, 1, 2, 1] * 8)
+    d = Data(
+        job_id="1234",
+        run_number=2345,
+        running=False,
+        vetoes=[0, 1, 2, 1] * 8,
+        detector_spectrum_mapping=DetectorSpectraMapping.model_validate(
+            [{"det": 101, "spec": 1}, {"det": 102, "spec": 2}]
+        ),
+    )
 
     m = MagicMock(spec=Path)
     m.exists.return_value = True
@@ -61,6 +69,7 @@ def test_save_restore_takes_data_and_saves_relevant_fields():
             2,
             1,
         ],
+        "detector_spectrum_mapping": [{"det": 101, "spec": 1}, {"det": 102, "spec": 2}],
     }
 
 
@@ -73,7 +82,8 @@ def test_save_restore_loads_data_then_can_be_used_for_constructing_dataclass():
           "job_id": "e1bf4e61-9e3d-418b-988d-b50c63056ef8",
           "run_number": 1,
           "running": false,
-          "vetoes": [0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1]
+          "vetoes": [0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1,0,1,2,1],
+          "detector_spectrum_mapping": [{"det": 101, "spec": 1}, {"det": 102, "spec": 2}]
         }"""
 
     m.open.return_value.__enter__.return_value = mock_file
@@ -117,6 +127,10 @@ def test_save_restore_loads_data_then_can_be_used_for_constructing_dataclass():
         1,
     ]
     assert not d.running
+    assert d.detector_spectrum_mapping.model_dump() == [
+        {"det": 101, "spec": 1},
+        {"det": 102, "spec": 2},
+    ]
 
 
 def test_save_restore_file_not_found_defaults_correct():
