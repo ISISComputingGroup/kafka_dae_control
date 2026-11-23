@@ -95,3 +95,7 @@ These PVs are in units of μs and must be set to a non-negative integer.
 
 See {external+ibex_developers_manual:doc}`specific_iocs/datastreaming/ADRs/009_frame_sync_delay` for further details
 about frame-sync delays.
+
+## `LATEST_BOOT_TIME`
+
+This PV stores the last boot time in nanoseconds since epoch of the streaming control board.

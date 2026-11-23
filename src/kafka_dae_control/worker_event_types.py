@@ -65,6 +65,8 @@ class HardwareUpdate:
     period_number_limit: int
     period_mode: PeriodMode
     frame_sync_delay: int
+    latest_boot_time_msb: int
+    latest_boot_time_lsb: int
 
 
 @dataclass

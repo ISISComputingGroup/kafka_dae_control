@@ -83,3 +83,6 @@ class Data(BaseModel):
 
     last_hardware_update_ok: bool = False
     """Whether the most recent hardware update successfully polled the hardware."""
+
+    latest_boot_time: int = 0
+    """The most recent hardware reboot GPS time in nanoseconds since epoch."""

@@ -125,6 +125,11 @@ def poll_hardware(
 
             frame_sync_delay_readback = _read(Registers.FRAME_SYNC_DELAY_REGISTER)
 
+            latest_boot_time_msb_rbv = _read(Registers.LATEST_BOOT_TIME_MSB_REGISTER)
+
+            latest_boot_time_lsb_rbv = _read(Registers.LATEST_BOOT_TIME_LSB_REGISTER)
+
+
             period_mode_isolated = period_control_readback & ~int(
                 PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE
                 | PeriodControlFlags.END_RUN_AFTER_LAST_PERIOD_SEQUENCE
@@ -145,6 +150,8 @@ def poll_hardware(
             period_mode=period_mode,
             hard_vetoes=veto_control_raw_readback,
             frame_sync_delay=frame_sync_delay_readback,
+            latest_boot_time_msb=latest_boot_time_msb_rbv,
+            latest_boot_time_lsb=latest_boot_time_lsb_rbv,
         )
         logger.debug("Hardware update: %s", h)
         queue.put(QueueItem(hardware_update_queue_priority, HardwareUpdateEvent(h)))

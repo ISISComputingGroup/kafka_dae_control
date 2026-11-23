@@ -84,6 +84,10 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 data.period_mode_rbv = value.period_mode
                 data.frame_sync_delay_rbv = value.frame_sync_delay
                 data.last_hardware_update_ok = True
+                data.latest_boot_time = nanoseconds_since_epoch(
+                    value.latest_boot_time_msb, value.latest_boot_time_lsb
+                )
+
             case HardwareUpdateFailedEvent():
                 data.last_hardware_update_ok = False
             case BlocksUpdateEvent(value):

@@ -32,6 +32,8 @@ class Registers(StrEnum):
     VETO_TOGGLE = "vetoes_software"
 
     FRAME_SYNC_DELAY_REGISTER = "frame_sync_delay"
+    LATEST_BOOT_TIME_MSB_REGISTER = "boot_time_msb"
+    LATEST_BOOT_TIME_LSB_REGISTER = "boot_time_lsb"
 
 
 class FrameSyncSelect(IntEnum):
