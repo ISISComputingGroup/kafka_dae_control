@@ -344,9 +344,13 @@ class StaticPVs:
                 op.done()
 
             except ValidationError as e:
-                op.done(error=f"Failed to validate new detector spectrum mapping: {e}")
+                msg = f"Failed to validate new detector spectrum mapping: {e}"
+                logger.error(msg)
+                op.done(error=msg)
             except Exception as e:  # ruff:ignore[blind-except]
-                op.done(error=f"Failed to set detector spectrum mapping: {e}")
+                msg = f"Failed to set detector spectrum mapping: {e}"
+                logger.error(msg)
+                op.done(error=msg)
 
         @self.frame_sync_delay_sp.put
         def frame_sync_delay_sp_put(pv: SharedPV, op: ServerOperation) -> None:
