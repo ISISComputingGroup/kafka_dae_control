@@ -245,7 +245,9 @@ class StaticPVs:
 
             if value < self.period_rbv.current():
                 logger.warning(
-                    "num_periods_sp: %s, is less than period: %s, so setting current period to 1", value, self.period_rbv.current()
+                    "num_periods_sp: %s, is less than period: %s, so setting current period to 1",
+                    value,
+                    self.period_rbv.current(),
                 )
                 evp = EventWithError()
                 queue.put(
