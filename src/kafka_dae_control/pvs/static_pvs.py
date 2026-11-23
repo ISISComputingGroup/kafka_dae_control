@@ -239,10 +239,32 @@ class StaticPVs:
         def num_periods_sp_put(pv: SharedPV, op: ServerOperation) -> None:
             value = int(op.value())
             logger.info("put with %s to num_periods_sp", value)
+            if value < 1:
+                op.done(error="Max Number of Period must be greater than 0")
+                return
+
+            if value < self.period_rbv.current():
+                logger.warning(
+                    "num_periods_sp: %s, is less than period: %s, so setting current period to 1",
+                    value,
+                    self.period_rbv.current(),
+                )
+                evp = EventWithError()
+                queue.put(
+                    QueueItem(QueuePriority.HIGH, CurrentPeriodSetEvent(value=1, done_event=evp))
+                )
+                try:
+                    evp.wait()
+                    self.period_sp.post(value, timestamp=time.time())
+                    op.done()
+                except Exception as e:  # ruff:ignore[blind-except]
+                    op.done(error=f"Failed to set period_sp: {e}")
+
             ev = EventWithError()
             queue.put(
                 QueueItem(QueuePriority.HIGH, NumberOfPeriodsSetEvent(value=value, done_event=ev))
             )
+
             try:
                 ev.wait()
                 pv.post(value, timestamp=time.time())
@@ -256,6 +278,12 @@ class StaticPVs:
             logger.info("put with %s to period_sp", value)
             if value < 1:
                 op.done(error="Period must be greater than 0")
+                return
+            num_of_period = int(self.num_periods_rbv.current())
+            if value > num_of_period:
+                op.done(
+                    error=f"Period must not be greater than Max Number of Period: {num_of_period}"
+                )
                 return
             ev = EventWithError()
             queue.put(
@@ -271,7 +299,26 @@ class StaticPVs:
         @self.period_type_sp.put
         def period_type_sp_put(pv: SharedPV, op: ServerOperation) -> None:
             value = op.value()
-            logger.info("put with %s to period_sp", value)
+            logger.info("put with %s to period_type_sp", value)
+            period_type = self.period_type_rbv.current()
+
+            if PeriodMode[str(value)] == PeriodMode.COMPUTER and PeriodMode[str(period_type)] in {
+                PeriodMode.EXTERNAL,
+                PeriodMode.LOOK_UP_TABLE,
+            }:
+                logger.info("Old Period Mode: %s, New Period Mode: %s", period_type, value)
+                logger.info("Resetting Period to: 1")
+                evp = EventWithError()
+                queue.put(
+                    QueueItem(QueuePriority.HIGH, CurrentPeriodSetEvent(value=1, done_event=evp))
+                )
+                try:
+                    evp.wait()
+                    self.period_sp.post(value, timestamp=time.time())
+                    op.done()
+                except Exception as e:  # ruff:ignore[blind-except]
+                    op.done(error=f"Failed to set period_sp: {e}")
+
             ev = EventWithError()
             queue.put(
                 QueueItem(
@@ -284,7 +331,7 @@ class StaticPVs:
                 pv.post(value, timestamp=time.time())
                 op.done()
             except Exception as e:  # ruff:ignore[blind-except]
-                op.done(error=f"Failed to set period_sp: {e}")
+                op.done(error=f"Failed to set period_type_sp: {e}")
 
         @self.pause.put
         def pause_put(pv: SharedPV, op: ServerOperation) -> None:
