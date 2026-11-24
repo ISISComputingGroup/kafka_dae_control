@@ -61,12 +61,11 @@ class PeriodMode(IntEnum):
 
     COMPUTER = PeriodControlFlags.MODE_COMPUTER
     LOOK_UP_TABLE = PeriodControlFlags.MODE_LOOK_UP_TABLE
-    NOT_USED = PeriodControlFlags.MODE_NOT_USED
     EXTERNAL = PeriodControlFlags.MODE_EXTERNAL
     UNKNOWN = -1
 
 
-NOT_SETTABLE_PERIOD_MODES = [PeriodMode.UNKNOWN, PeriodMode.NOT_USED]
+NOT_SETTABLE_PERIOD_MODES = [PeriodMode.UNKNOWN]
 
 
 class RunRegister(IntFlag):
