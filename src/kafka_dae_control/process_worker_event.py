@@ -14,6 +14,7 @@ from kafka_dae_control.metrics import (
     UNHANDLED_WORKER_EVENT_FAILURES,
 )
 from kafka_dae_control.queue_utils import QueueItem
+from kafka_dae_control.save_restore import save_file
 from kafka_dae_control.worker_event_handlers import (
     handle_begin,
     handle_end,
@@ -31,6 +32,7 @@ from kafka_dae_control.worker_event_types import (
     BlocksUpdateEvent,
     CancelAbortEvent,
     CurrentPeriodSetEvent,
+    DetSpecMapChangeEvent,
     EndEvent,
     FrameSyncDelaySetpointEvent,
     FrameSyncSelectChangeEvent,
@@ -116,6 +118,9 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 handle_pause_or_resume(value, config, data, sock, sock_lock, done_event)
             case RunControlUpdateEvent(value=value):
                 handle_run_control_update(value, config, sock, sock_lock)
+            case DetSpecMapChangeEvent(value=value):
+                data.detector_spectrum_mapping = value
+                save_file(data, state_file=config.state_file)
             case FrameSyncDelaySetpointEvent(value=value, done_event=done_event):
                 handle_frame_sync_delay_setpoint_change(
                     value, config, data, sock, sock_lock, done_event

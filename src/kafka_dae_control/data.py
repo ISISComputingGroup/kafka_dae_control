@@ -1,15 +1,65 @@
 """Data class containing the state of the program."""
 
 import logging
-from typing import Any, TypeVar
+from typing import Any, Self, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel, model_validator
+from streaming_data_types.run_start_pl72 import DetectorSpectrumMap
 
 from kafka_dae_control.defaults import NUM_VETOES, FrameSyncSelect, PeriodMode
 
 logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
+
+
+class SingleDetSpecMapping(BaseModel):
+    """A single detector spectrum mapping."""
+
+    det: int = Field(ge=0, le=2**31 - 1)
+    spec: int = Field(ge=0, le=2**31 - 1)
+
+
+class DetectorSpectraMapping(RootModel[list[SingleDetSpecMapping]]):
+    """Pydantic model for validating detector-spectra mapping."""
+
+    @model_validator(mode="after")
+    def check_detector_ids_are_unique(self) -> Self:
+        """Check that the detector IDs are unique.
+
+        Detector IDs cannot be repeated in a detector spectrum mapping.
+        """
+        dets = set()
+        for det, _ in self.root:
+            if det not in dets:
+                dets.add(det)
+            else:
+                raise ValueError(f"Detector ID must be unique. Offending ID: {det[1]}")
+        return self
+
+    def to_df12_blob(self) -> DetectorSpectrumMap:
+        """Construct a DetectorSpectrumMap object from this pydantic model.
+
+        This works out the n_spectra field by finding the maximum spectrum number and adding 1.
+
+        Returns: A mapping object which can be used when serialising a run-start.
+        """
+        return DetectorSpectrumMap(self.spectra, self.detector_ids, self.n_spectra)
+
+    @property
+    def spectra(self) -> list[int]:
+        """A list of spectra."""
+        return [x.spec for x in self.root]
+
+    @property
+    def detector_ids(self) -> list[int]:
+        """A list of detector IDs."""
+        return [x.det for x in self.root]
+
+    @property
+    def n_spectra(self) -> int:
+        """Maximum number of spectra, plus 1. If spectra is empty, this returns 1."""
+        return max(self.spectra) + 1 if self.spectra else 1
 
 
 class Data(BaseModel):
@@ -70,6 +120,9 @@ class Data(BaseModel):
 
     period_mode_rbv: PeriodMode = PeriodMode.UNKNOWN
     """The period mode readback."""
+
+    detector_spectrum_mapping: DetectorSpectraMapping = DetectorSpectraMapping.model_validate([])
+    """The detector spectrum mapping"""
 
     frame_sync_delay_sp: int = 0
     """The frame sync delay setpoint (us)."""

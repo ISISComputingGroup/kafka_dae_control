@@ -15,6 +15,8 @@ from prometheus_client import start_http_server
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.metrics import (
+    DETSPECMAP_MAX_SPECTRA,
+    DETSPECMAP_NUM_ENTRIES,
     HARDWARE_COMMS_OK,
     HWSTATUS_CURRENT_PERIOD,
     HWSTATUS_FRAME_SYNC_DELAY,
@@ -71,6 +73,8 @@ def serve(config: ControlConfig) -> None:
     HWSTATUS_FRAME_SYNC_DELAY.set_function(lambda: data.frame_sync_delay_rbv)
     HARDWARE_COMMS_OK.set_function(lambda: 1 if data.last_hardware_update_ok else 0)
     RUN_NUMBER.set_function(lambda: data.run_number)
+    DETSPECMAP_MAX_SPECTRA.set_function(lambda: data.detector_spectrum_mapping.n_spectra)
+    DETSPECMAP_NUM_ENTRIES.set_function(lambda: len(data.detector_spectrum_mapping.detector_ids))
 
     # put veto update event on the queue immediately so that vc00 is emitted
     # for downstream consumers even if vetoes don't change

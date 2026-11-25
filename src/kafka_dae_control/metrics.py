@@ -163,3 +163,17 @@ KAFKA_DELIVERY_SUCCESS = Counter(
     namespace=_NAMESPACE,
     subsystem="kafka",
 )
+
+DETSPECMAP_NUM_ENTRIES = Gauge(
+    name="detspecmap_num_entries",
+    documentation="Number of entries in the det-spec map",
+    namespace=_NAMESPACE,
+    subsystem="detspec",
+)
+
+DETSPECMAP_MAX_SPECTRA = Gauge(
+    name="detspecmap_max_spectra",
+    documentation="Maximum spectra number in the det-spec map",
+    namespace=_NAMESPACE,
+    subsystem="detspec",
+)
