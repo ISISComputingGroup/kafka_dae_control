@@ -1,0 +1,30 @@
+
+
+``kafka_dae_control.data``
+==========================
+        
+        
+        
+        
+
+.. automodule:: kafka_dae_control.data
+    :members:
+    :show-inheritance:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        Data
+        DetectorSpectraMapping
+        RootModel[list[SingleDetSpecMapping]]
+        SingleDetSpecMapping
+    
+    
