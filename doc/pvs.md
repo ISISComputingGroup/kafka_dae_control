@@ -83,7 +83,7 @@ about frame-sync delays.
 
 ## `RUN_START_GPS_TIME` / `RUN_END_GPS_TIME`
 
-These PVs gather the GPS Time corresponding to the START/END of the run.
+These PVs gather the GPS Time corresponding to the START/END of the run, in nanoseconds since the UNIX epoch.
 
 These PVs are in units of nanoseconds and must be calculated from the most and least significant words returned by the hardware.
 
