@@ -129,7 +129,6 @@ def poll_hardware(
 
             latest_boot_time_lsb_rbv = _read(Registers.LATEST_BOOT_TIME_LSB_REGISTER)
 
-
             period_mode_isolated = period_control_readback & ~int(
                 PeriodControlFlags.END_RUN_AT_END_OF_PERIOD_SEQUENCE
                 | PeriodControlFlags.END_RUN_AFTER_LAST_PERIOD_SEQUENCE

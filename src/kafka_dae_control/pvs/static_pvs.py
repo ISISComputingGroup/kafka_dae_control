@@ -143,8 +143,11 @@ class StaticPVs:
             },
         )
 
-        self.latest_boot_time = SharedPV(
-            nt=NTScalar("L", display=True, form=True), initial={"value": data.latest_boot_time}
+        self.latest_boot_time_msb = SharedPV(
+            nt=NTScalar("L", display=True, form=True), initial={"value": data.latest_boot_time_msb}
+        )
+        self.latest_boot_time_lsb = SharedPV(
+            nt=NTScalar("L", display=True, form=True), initial={"value": data.latest_boot_time_lsb}
         )
 
         @self.begin_run_ex.put  # pragma: no cover
@@ -431,7 +434,8 @@ class StaticPVs:
         self.period_rbv.post(data.current_period_rbv, **kwargs)
         self.period_type_rbv.post(data.period_mode_rbv.name, **kwargs)
         self.frame_sync_delay_rbv.post(data.frame_sync_delay_rbv, **kwargs)
-        self.latest_boot_time.post(data.latest_boot_time, **kwargs)
+        self.latest_boot_time_msb.post(data.latest_boot_time_msb, **kwargs)
+        self.latest_boot_time_lsb.post(data.latest_boot_time_lsb, **kwargs)
 
 
 def static_pv_provider(
@@ -475,6 +479,7 @@ def static_pv_provider(
     static_provider.add(f"{pv_prefix}PERIODTYPE:SP", static_pvs.period_type_sp)
     static_provider.add(f"{pv_prefix}FRAME_SYNC_DELAY", static_pvs.frame_sync_delay_rbv)
     static_provider.add(f"{pv_prefix}FRAME_SYNC_DELAY:SP", static_pvs.frame_sync_delay_sp)
-    static_provider.add(f"{pv_prefix}LATEST_BOOT_TIME", static_pvs.latest_boot_time)
+    static_provider.add(f"{pv_prefix}LATEST_BOOT_TIME_MSB", static_pvs.latest_boot_time_msb)
+    static_provider.add(f"{pv_prefix}LATEST_BOOT_TIME_LSB", static_pvs.latest_boot_time_lsb)
 
     return static_pvs, static_provider

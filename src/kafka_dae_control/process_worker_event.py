@@ -3,13 +3,17 @@
 import logging
 import socket
 import threading
+from _socket import socket
+from _thread import RLock
 from queue import PriorityQueue
 
+import numpy as np
 from confluent_kafka import Producer
 
 from kafka_dae_control.comms import set_board_response_ip
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.data import Data
+from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.metrics import (
     UNHANDLED_WORKER_EVENT_FAILURES,
 )
@@ -42,7 +46,7 @@ from kafka_dae_control.worker_event_types import (
     RunControlUpdateEvent,
     SetIPEvent,
     VetoesUpdateEvent,
-    WorkerEvent,
+    WorkerEvent, WorkerEventWithValue,
 )
 
 logger = logging.getLogger(__name__)
@@ -76,6 +80,9 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
     try:
         match worker_event:
             case HardwareUpdateEvent(value=value):
+                # Check if there is a reboot of the hardware and if needed reset h/w with the values stored in the save file
+                check_reboot_resend_settings(config, data, sock, sock_lock, value)
+
                 data.running = value.hw_running
                 data.frame_sync_select_rbv = value.frame_sync_select
                 data.hard_vetoes_rbv = value.hard_vetoes
@@ -84,9 +91,8 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
                 data.period_mode_rbv = value.period_mode
                 data.frame_sync_delay_rbv = value.frame_sync_delay
                 data.last_hardware_update_ok = True
-                data.latest_boot_time = nanoseconds_since_epoch(
-                    value.latest_boot_time_msb, value.latest_boot_time_lsb
-                )
+                data.latest_boot_time_msb = value.latest_boot_time_msb
+                data.latest_boot_time_lsb = value.latest_boot_time_lsb
 
             case HardwareUpdateFailedEvent():
                 data.last_hardware_update_ok = False
@@ -133,3 +139,79 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
     except Exception:
         UNHANDLED_WORKER_EVENT_FAILURES.inc()
         logger.exception("Unhandled exception in handler thread: ")
+
+
+def check_reboot_resend_settings(config: ControlConfig, data: Data, sock: socket, sock_lock: RLock, value: T) -> None:
+    """Process a worker event.
+
+    This is the only part of the program which can mutate the data class.
+    It is responsible for filtering the type of worker event and acting on it accordingly.
+
+    Args:
+        queue: the worker event queue which may be added to
+        worker_event: the worker event to process
+        config: the program's configuration options
+        data: the data class containing the program's state
+        producer: the Kafka producer
+        sock: the socket instance
+        sock_lock: the lock to use when using the socket instance
+
+    """
+    if (
+            data.latest_boot_time_msb is not None
+            and data.latest_boot_time_lsb is not None
+            and value.latest_boot_time_msb is not None
+            and value.latest_boot_time_lsb is not None
+            and (
+            data.latest_boot_time_msb != value.latest_boot_time_msb
+            or data.latest_boot_time_lsb != value.latest_boot_time_lsb
+    )
+    ):
+        set_period_mode(
+            data.period_mode_rbv,
+            config,
+            data,
+            sock,
+            sock_lock,
+            done_event=EventWithError(),
+        )
+        set_num_periods(
+            data.num_periods_rbv,
+            config,
+            data,
+            sock,
+            sock_lock,
+            done_event=EventWithError(),
+        )
+        set_current_period(
+            data.current_period_rbv,
+            config,
+            data,
+            sock,
+            sock_lock,
+            done_event=EventWithError(),
+        )
+        handle_frame_sync_sp_change(
+            data.frame_sync_select_rbv,
+            config,
+            data,
+            sock,
+            sock_lock,
+            done_event=EventWithError(),
+        )
+        handle_frame_sync_delay_setpoint_change(
+            data.frame_sync_delay_rbv,
+            config,
+            data,
+            sock,
+            sock_lock,
+            done_event=EventWithError(),
+        )
+        handle_vetoes_change(
+            np.asarray(data.vetoes, dtype=np.uint8),
+            config,
+            data,
+            sock,
+            sock_lock,
+            done_event=EventWithError(),
+        )
