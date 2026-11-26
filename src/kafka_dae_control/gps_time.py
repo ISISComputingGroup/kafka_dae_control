@@ -19,7 +19,7 @@ def nanoseconds_since_epoch(gps_time_msb_word: int | None, gps_time_lsb_word: in
     Returns: Nanoseconds since epoch.
 
     """
-    if (gps_time_msb_word is None) and (gps_time_lsb_word is None):
+    if (gps_time_msb_word is None) or (gps_time_lsb_word is None):
         return 0
     if (gps_time_msb_word == 0) and (gps_time_lsb_word == 0):
         return 0
