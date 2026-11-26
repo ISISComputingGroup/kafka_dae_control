@@ -1,0 +1,88 @@
+# The streaming control board's IP address
+board_ip = "127.0.0.1"
+
+# The instrument name
+instrument_name = "TESTMACHINE"
+
+# The firmware-generated xml file containing addresses of registers etc.
+board_xml = "./example_xml/vxiscb_SP_streaming_ic_memory_map_output.xml"
+
+# PV prefix of all PVs in this IOC
+pv_prefix = "TE:TESTMACHINE:KDAECTRL:"
+
+# Kafka topic on which to produce runInfo messages
+# (usually <instrument>_runInfo)
+runinfo_topic = "TESTMACHINE_runInfo"
+
+# Kafka topic to use when putting sample environment placeholders in the run start message nexus_structure
+sample_env_topic = "TESTMACHINE_sampleEnv"
+
+# Kafka topic to use when putting event placeholders in the run start message's nexus_structure
+events_topic = "TESTMACHINE_events"
+
+# Kafka topic to use when pushing veto configuration updates to
+vetoes_topic = "TESTMACHINE_vetoConfig"
+
+# Local IP to send to the streaming board so it responds thereafter
+local_ip = "192.168.1.1"
+
+# file to save state to
+state_file = "state.sim.json"
+
+# Resend IP address to streaming control board after this many comms failures in a row
+resend_ip_after_connection_failures = 10
+
+# PV for the list of blocks to construct sample env placeholders for in the run start nexus_structure.
+blocks_pv = "IN:ALF:CS:BLOCKSERVER:BLOCKNAMES"
+
+# PV to monitor for setting the run control veto.
+run_control_in_range_pv = "IN:ALF:CS:RC:INRANGE"
+
+# Port on which to bind prometheus metrics server
+metrics_port = 8400
+
+# Names of vetoes.
+# The first item in this list has bitmask (1 << 0), the last item has bitmask (1 << 31).
+# There must be exactly 32 entries in this list.
+veto_names = [
+    "Data Overflow",
+    "SMP",
+    "TS2 Pulse",
+    "Wrong Pulse",
+    "ISIS slow",
+    "Run control",
+    "Pause",
+    "Period overflow",
+    "Dwell period",
+    "Status Packet CRC fault",
+    "Overcount",
+    "External run signal",
+    "Reserved 0",
+    "Reserved 1",
+    "Reserved 2",
+    "Reserved 3",
+    "Ext 0",
+    "Ext 1",
+    "Ext 2",
+    "Ext 3",
+    "Fermi 0",
+    "Fermi 1",
+    "Fermi 2",
+    "Fermi 3",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+    "Unused",
+]
+
+write_port = 9999
+read_port = 9999
+simulation = true
+
+[kafka_producer]
+"bootstrap.servers" = "livedata.isis.cclrc.ac.uk:31092"
+"enable.idempotence" = "true"

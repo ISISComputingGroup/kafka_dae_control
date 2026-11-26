@@ -94,6 +94,9 @@ class ControlConfig(BaseModel):
     communication after the streaming control board is restarted.
     """
 
+    simulation: bool = False
+    """Whether to simulate a streaming control board by starting an emulator"""
+
     @cached_property
     def register_map(self) -> dict[str, int]:
         """Parse the register XML file to get a mapping of register names to addresses."""

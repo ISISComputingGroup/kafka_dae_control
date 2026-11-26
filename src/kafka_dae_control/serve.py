@@ -13,6 +13,7 @@ from p4p.server import Server
 from prometheus_client import start_http_server
 
 from kafka_dae_control.config import ControlConfig
+from kafka_dae_control.emulator import start_emulator
 from kafka_dae_control.event_with_error import EventWithError
 from kafka_dae_control.metrics import (
     DETSPECMAP_MAX_SPECTRA,
@@ -57,6 +58,16 @@ def serve(config: ControlConfig) -> None:
     Returns: None
 
     """
+
+    if config.simulation:
+        assert config.read_port == config.write_port, (
+            "Read and write ports mismatch - they should be the same in simulation mode"
+        )
+        threading.Thread(
+            target=start_emulator, args=(config,), daemon=True, name="Emulator"
+        ).start()
+        # todo sleep here maybe so it has a chance?
+
     start_http_server(config.metrics_port)
 
     logger.debug("Config mapping: %s", pprint.pformat(config.register_map))
