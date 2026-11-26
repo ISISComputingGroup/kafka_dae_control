@@ -142,21 +142,21 @@ def process_worker_event(  # ruff:ignore[too-many-positional-arguments, too-many
 
 
 def check_reboot_resend_settings(config: ControlConfig, data: Data, sock: socket, sock_lock: RLock, value: T) -> None:
-    """Process a worker event.
+    """Pre-processing in case of hardware update event.
 
-    This is the only part of the program which can mutate the data class.
-    It is responsible for filtering the type of worker event and acting on it accordingly.
+    This checks whether the h/w boot .
 
     Args:
-        queue: the worker event queue which may be added to
-        worker_event: the worker event to process
         config: the program's configuration options
         data: the data class containing the program's state
-        producer: the Kafka producer
         sock: the socket instance
         sock_lock: the lock to use when using the socket instance
+        value: the hardware update event
 
     """
+    saved_is_null = data.latest_boot_time_msb is None or data.latest_boot_time_lsb is None
+    saved_is_not_null = not saved_is_null
+
     if (
             data.latest_boot_time_msb is not None
             and data.latest_boot_time_lsb is not None
