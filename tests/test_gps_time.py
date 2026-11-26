@@ -5,11 +5,13 @@ import pytest
 from kafka_dae_control.gps_time import format_timestamp, nanoseconds_since_epoch
 
 
-def test_when_msb_and_lsb_are_zero() -> None:
-    """Test both words being 0 resolves to 0."""
+def test_when_msb_and_lsb_are_zero_or_null() -> None:
+    """Test both words being 0 or null resolves to 0."""
+    result_ns = nanoseconds_since_epoch(None, None)
+    assert result_ns == 0
+
     word1 = 0
     word2 = 0
-
     result_ns = nanoseconds_since_epoch(word1, word2)
     assert result_ns == 0
 

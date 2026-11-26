@@ -9,7 +9,7 @@ MAX_SECONDS_IN_A_MINUTE = 60
 MAX_SUB_SECONDS = 999
 
 
-def nanoseconds_since_epoch(gps_time_msb_word: int, gps_time_lsb_word: int) -> int:
+def nanoseconds_since_epoch(gps_time_msb_word: int | None, gps_time_lsb_word: int | None) -> int:
     """Convert a GPS time word pair to a time since epoch.
 
     Args:
@@ -19,6 +19,8 @@ def nanoseconds_since_epoch(gps_time_msb_word: int, gps_time_lsb_word: int) -> i
     Returns: Nanoseconds since epoch.
 
     """
+    if (gps_time_msb_word is None) and (gps_time_lsb_word is None):
+        return 0
     if (gps_time_msb_word == 0) and (gps_time_lsb_word == 0):
         return 0
     year = 2000 + ((gps_time_msb_word >> 24) & 0xFF)
