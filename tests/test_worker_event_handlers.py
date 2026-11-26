@@ -88,6 +88,10 @@ def test_beginning_starts_hardware_sends_run_start_and_sets_running(
             "kafka_dae_control.worker_event_handlers.handle_pause_or_resume",
             side_effect=pause_or_resume_side_effect_set,
         ) as mock_handle_pause_or_resume,
+        patch(
+            "kafka_dae_control.worker_event_handlers.read",
+            return_value=1001001,
+        ),
     ):
         producer.flush.side_effect = done_event.set()
 
@@ -142,9 +146,15 @@ def test_ending_stops_hardware_sends_run_stop_sets_setup_and_increments_run_numb
     conf.board_ip = ipaddress.IPv4Address("127.0.0.1")
     conf.runinfo_topic = "run-info-topic"
 
-    with patch(
-        "kafka_dae_control.worker_event_handlers.write_AND_INV_then_verify"
-    ) as write_and_inv_then_verify:
+    with (
+        patch(
+            "kafka_dae_control.worker_event_handlers.write_AND_INV_then_verify"
+        ) as write_and_inv_then_verify,
+        patch(
+            "kafka_dae_control.worker_event_handlers.read",
+            return_value=1001001,
+        ),
+    ):
         producer.flush.side_effect = done_event.set()
         handle_end(
             data=data,

@@ -16,6 +16,7 @@ from numpy import typing as npt
 from streaming_data_types import serialise_6s4t, serialise_pl72, serialise_vc00
 
 from kafka_dae_control.comms import (
+    read,
     write_AND_INV_then_verify,
     write_OR_then_verify,
     write_verify,
@@ -33,6 +34,7 @@ from kafka_dae_control.defaults import (
     RunRegister,
 )
 from kafka_dae_control.event_with_error import EventWithError
+from kafka_dae_control.gps_time import nanoseconds_since_epoch
 from kafka_dae_control.metrics import (
     BEGIN_RUN_FAILURES,
     END_RUN_FAILURES,
@@ -139,7 +141,21 @@ def handle_begin(  # ruff:ignore[too-many-arguments, too-many-positional-argumen
                 | RunRegister.STREAM_EMPTY_FRAMES,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING != 0,
             )
-
+        run_start_gps_time_msb_readback = read(
+            sock,
+            config.board_ip,
+            address=config.register_map[Registers.RUN_START_GPS_TIME_MSB],
+            port=config.read_port,
+        )
+        run_start_gps_time_lsb_readback = read(
+            sock,
+            config.board_ip,
+            address=config.register_map[Registers.RUN_START_GPS_TIME_LSB],
+            port=config.read_port,
+        )
+        data.run_start_gps_time_rbv = nanoseconds_since_epoch(
+            run_start_gps_time_msb_readback, run_start_gps_time_lsb_readback
+        )
         blob = serialise_pl72(
             job_id=data.job_id,
             filename=f"{run_name}.nxs",
@@ -218,6 +234,21 @@ def handle_end(  # ruff:ignore[too-many-arguments, too-many-positional-arguments
                 data=RunRegister.ETHERNET_OVERRIDE,
                 verify=lambda x: x & RunRegister.STATUS_RUNNING == 0,
             )
+        run_end_gps_time_msb_readback = read(
+            sock,
+            config.board_ip,
+            address=config.register_map[Registers.RUN_END_GPS_TIME_MSB],
+            port=config.read_port,
+        )
+        run_end_gps_time_lsb_readback = read(
+            sock,
+            config.board_ip,
+            address=config.register_map[Registers.RUN_END_GPS_TIME_LSB],
+            port=config.read_port,
+        )
+        data.run_end_gps_time_rbv = nanoseconds_since_epoch(
+            run_end_gps_time_msb_readback, run_end_gps_time_lsb_readback
+        )
         blob = serialise_6s4t(
             job_id=data.job_id,
             stop_time=datetime.now(ZoneInfo("Europe/London")),
