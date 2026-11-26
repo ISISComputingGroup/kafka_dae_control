@@ -5,6 +5,15 @@ import pytest
 from kafka_dae_control.gps_time import format_timestamp, nanoseconds_since_epoch
 
 
+def test_when_msb_and_lsb_are_zero() -> None:
+    """Test both words being 0 resolves to 0."""
+    word1 = 0
+    word2 = 0
+
+    result_ns = nanoseconds_since_epoch(word1, word2)
+    assert result_ns == 0
+
+
 def test_leap_year_day_60() -> None:
     """Test Day 60 in a leap year (2024) resolves to Feb 29."""
     # Year 2024 -> offset 24 (0x18). Day 60 -> 60 (0x03C).
