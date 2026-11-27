@@ -1,10 +1,8 @@
 """An SCB emulator for simulation mode."""
 
 import logging
-import threading
 from collections.abc import Callable
 from dataclasses import dataclass
-from time import sleep
 
 from lewis.adapters.stream import Cmd
 from lewis.adapters.udp import UDPInterface
@@ -122,12 +120,11 @@ class SCBInterface(UDPInterface):
             return
 
 
-def start_emulator(config: ControlConfig, event: threading.Event) -> None:
+def start_emulator(config: ControlConfig) -> None:
     """Start the streaming control board lewis emulator.
 
     Args:
         config: The main program configuration.
-        event: Event to set when simulation has started
 
     """
     interface = SCBInterface()
@@ -151,19 +148,4 @@ def start_emulator(config: ControlConfig, event: threading.Event) -> None:
     )
     adapter.interface = interface
     s = Simulation(device=device, adapters=[adapter])
-
-    def _wait_for_device_to_start(sim: Simulation, e: threading.Event) -> None:
-        while not sim.is_started:
-            logger.info("waiting for simulation to start")
-            sleep(0.01)
-        logger.info("simulation started")
-        e.set()
-
-    threading.Thread(
-        target=_wait_for_device_to_start,
-        args=(
-            s,
-            event,
-        ),name="Emulator waiter"
-    ).start()
     s.start()

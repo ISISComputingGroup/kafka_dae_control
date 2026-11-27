@@ -63,12 +63,9 @@ def serve(config: ControlConfig) -> None:
         assert config.read_port == config.write_port, (
             "Read and write ports mismatch - they should be the same in simulation mode"
         )
-        event = threading.Event()
         threading.Thread(
-            target=start_emulator, args=(config, event), daemon=True, name="Emulator"
+            target=start_emulator, args=(config,), daemon=True, name="Emulator"
         ).start()
-        # wait for emulator to start
-        event.wait()
 
     start_http_server(config.metrics_port)
 
