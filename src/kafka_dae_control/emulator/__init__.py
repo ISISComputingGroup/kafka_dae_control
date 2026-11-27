@@ -25,9 +25,9 @@ class SCBDevice(Device):
 
 @has_log
 class SCBInterface(UDPInterface):
-    commands = {Cmd("command", pattern="(.*)")}
+    commands = {Cmd("command", pattern="(.*)", return_mapping=None)}
 
-    def command(self, data: bytes) -> bytes | None:
+    def command(self, data: bytes) -> int | None:
         """Main command for the streaming control board.
         This follows the same protocol as the real device, which is
         documented here: https://isiscomputinggroup.github.io/kafka_dae_control/local_development.html#sending-reading-data-to-from-the-hardware
@@ -48,7 +48,7 @@ class SCBInterface(UDPInterface):
             if len(data[6:]) > 0
             else None
         )
-        self.log.info(
+        self.log.debug(
             f"command received:{data} - addr:{addr} block size:{block_size} is write:{written_data is not None} {f' written data:{written_data}' if written_data is not None else ''} "
         )
 
@@ -56,7 +56,7 @@ class SCBInterface(UDPInterface):
         if written_data is not None:
             # write - dont return anything in response
             if self.device.registers.get(addr) is not None:
-                self.log.info(f"setting {addr} to {written_data}")
+                self.log.debug(f"setting {addr} to {written_data}")
                 self.device.registers[addr].value = written_data
                 return None
             else:
@@ -64,19 +64,22 @@ class SCBInterface(UDPInterface):
                 return None
         else:
             # read - return the address, block size and read data
-            if reg := self.device.registers.get(addr) is not None:
-                val = reg.value
-                self.log.info(f"read {val} from {addr}")
-                return (
+            if addr in self.device.registers:
+                val = self.device.registers[addr].value
+                self.log.debug(f"read {val} from {addr}")
+                to_return =  (
                     addr.to_bytes(4, byteorder="big")
                     + block_size.to_bytes(2, byteorder="big")
                     + val.to_bytes(block_size * 4, byteorder="big")
                 )
+                self.log.debug(f"Returning {to_return}")
+                return to_return
             else:
                 self.log.error(f"invalid read address {addr}")
                 return None
 
     def handle_error(self, request, error):
+        self.log.info(f"error: {error}")
         return "An error occurred: " + repr(error)
 
 
