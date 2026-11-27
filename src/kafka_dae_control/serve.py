@@ -58,13 +58,15 @@ def serve(config: ControlConfig) -> None:
     Returns: None
 
     """
-
     if config.simulation:
         assert config.read_port == config.write_port, (
             "Read and write ports mismatch - they should be the same in simulation mode"
         )
         threading.Thread(
-            target=start_emulator, args=(config,), daemon=True, name="Emulator"
+            target=start_emulator,
+            args=(config,),
+            daemon=True,
+            name="Emulator",
         ).start()
         # todo sleep here maybe so it has a chance?
 
