@@ -9,13 +9,17 @@ from lewis.core.simulation import Simulation
 from lewis.devices import Device
 
 from kafka_dae_control.config import ControlConfig
+from kafka_dae_control.defaults import Registers, RunRegister
 
 
 @dataclass
 class Register:
     name: str
+    """The register `id` from the firmware xml"""
     value: int
-    # side_effect: Callable[[int], int]
+    """The current register value"""
+    side_effect: Callable[[int], int] | None = None
+    """A side effect to call on the current value when set. input argument is the new value, output is the new value with whatever side effect has been applied to it"""
 
 
 class SCBDevice(Device):
@@ -56,8 +60,14 @@ class SCBInterface(UDPInterface):
         if written_data is not None:
             # write - dont return anything in response
             if self.device.registers.get(addr) is not None:
-                self.log.debug(f"setting {addr} to {written_data}")
-                self.device.registers[addr].value = written_data
+                reg = self.device.registers.get(addr)
+                if reg.side_effect is not None:
+                    value_after_side_effect = reg.side_effect(written_data)
+                    self.log.debug(f"setting {addr} to {value_after_side_effect} after side effect from original value {written_data}")
+                    reg.value = reg.side_effect(value_after_side_effect)
+                else:
+                    self.log.debug(f"setting {addr} to {written_data}")
+                    reg.value = written_data
                 return None
             else:
                 self.log.error(f"invalid write address {addr}")
@@ -89,9 +99,14 @@ def start_emulator(config: ControlConfig) -> None:
     device = SCBDevice()
     interface.device = device
     for reg_id, reg_addr in config.register_map.items():
+        match reg_id:
+            case Registers.RUNNING_REGISTER:
+                side_effect = lambda x: x | RunRegister.STATUS_RUNNING if x & RunRegister.ETHERNET_OVERRIDE else x &~ RunRegister.STATUS_RUNNING
+            case _:
+                side_effect = None
         device.registers[reg_addr] = Register(
-            reg_id, 0
-        )  # todo is setting everything to 0 really what we want?
+            reg_id, 0, side_effect
+        )
     adapter = interface.adapter(
         options={"bind_address": str(config.board_ip), "port": config.read_port}
     )
