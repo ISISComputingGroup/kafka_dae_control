@@ -59,16 +59,16 @@ def serve(config: ControlConfig) -> None:
 
     """
     if config.simulation:
+        logger.warning("Running in simulation mode. This will not talk to hardware.")
         assert config.read_port == config.write_port, (
             "Read and write ports mismatch - they should be the same in simulation mode"
         )
+        event = threading.Event()
         threading.Thread(
-            target=start_emulator,
-            args=(config,),
-            daemon=True,
-            name="Emulator",
+            target=start_emulator, args=(config, event), daemon=True, name="Emulator"
         ).start()
-        # todo sleep here maybe so it has a chance?
+        # wait for emulator to start
+        event.wait()
 
     start_http_server(config.metrics_port)
 
