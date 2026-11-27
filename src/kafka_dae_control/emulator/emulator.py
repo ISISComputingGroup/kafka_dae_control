@@ -12,9 +12,16 @@ from lewis.devices import Device
 
 from kafka_dae_control.config import ControlConfig
 from kafka_dae_control.defaults import Registers, RunRegister
-from kafka_dae_control.emulator.utils import _be_int, _be_words
 
 logger = logging.getLogger(__name__)
+
+
+def _be_int(b: bytes) -> int:
+    return int.from_bytes(b, byteorder="big")
+
+
+def _be_words(b: bytes) -> list[int]:
+    return [int.from_bytes(b[i : i + 4], byteorder="big") for i in range(0, len(b), 4)]
 
 
 @dataclass

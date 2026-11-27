@@ -1,6 +1,6 @@
 # ruff: file-ignore [pytest-fixture-param-without-value, pytest-raises-too-broad, assert-raises-exception ]
 import ipaddress
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -136,3 +136,22 @@ def test_veto_names_defaulted_if_not_specified(
         "veto_30",
         "veto_31",
     ]
+
+
+@patch("kafka_dae_control.serve.threading.Thread")
+def test_serve_in_simulation_mode_starts_emulator(mock_thread: Mock, conf: ControlConfig):
+    mock_thread.return_value.start.side_effect = Exception
+    conf.simulation = True
+    conf.read_port = 1
+    conf.write_port = 1
+    with pytest.raises(Exception):
+        serve(conf)
+    assert mock_thread.called
+
+
+def test_serve_in_simulation_mode_with_mismatched_ports_raises(conf: ControlConfig):
+    conf.simulation = True
+    conf.read_port = 1
+    conf.write_port = 2
+    with pytest.raises(AssertionError):
+        serve(conf)
